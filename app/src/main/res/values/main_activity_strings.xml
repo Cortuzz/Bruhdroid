@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="start_button">Let\'s code</string>
+    <string name="settings_button">Settings</string>
+    <string name="exit_button">Exit =(</string>
+</resources>
