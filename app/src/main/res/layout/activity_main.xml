@@ -39,7 +39,6 @@
 
     <Button
         android:id="@+id/exitButton"
-        android:onClick="exit"
         android:layout_width="188dp"
         android:layout_height="87dp"
         android:layout_marginTop="41dp"
