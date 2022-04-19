@@ -2,4 +2,5 @@
 <resources>
     <string name="start_code">Launch</string>
     <string name="choose_block">Blocks</string>
+    <string name="block">Test block</string>
 </resources>
