@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="start_code">Launch</string>
+    <string name="choose_block">Blocks</string>
+    <string name="block">Test block</string>
+</resources>

@@ -1,16 +1,14 @@
 package com.example.bruhdroid
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import com.example.bruhdroid.model.blocks.Assign
-import com.example.bruhdroid.model.blocks.Block
-import com.example.bruhdroid.model.blocks.Init
-import com.example.bruhdroid.model.blocks.Valuable
-import com.example.bruhdroid.model.Instruction
-import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.Type
+import android.widget.Button
+import com.example.bruhdroid.variables.Integer
+import com.example.bruhdroid.variables.Str
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,9 +35,23 @@ class MainActivity : AppCompatActivity() {
 
         val interpreter = Interpreter(blocks)
         interpreter.run()
+        startButton()
+        exitButton()
     }
 
-    fun exit(view: View) {
-        finishAffinity()
+    private fun startButton() {
+        val startButton: Button = findViewById(R.id.startButton)
+        startButton.setOnClickListener {
+            val intent = Intent(this, CodingActivity::class.java)
+            startActivity(intent)
+        }
     }
+
+    private fun exitButton() {
+        val exitButton: Button = findViewById(R.id.exitButton)
+        exitButton.setOnClickListener {
+            exitProcess(0)
+        }
+    }
+
 }
