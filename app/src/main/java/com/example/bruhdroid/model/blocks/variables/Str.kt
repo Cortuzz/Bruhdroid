@@ -1,8 +1,4 @@
-package com.example.bruhdroid.blocks.variables
-
-import com.example.bruhdroid.blocks.Block
-import com.example.bruhdroid.Instruction
-import com.example.bruhdroid.blocks.Variable
+package com.example.bruhdroid.model.blocks.variables
 
 data class Str(var value: String) {
      operator fun plus(operand: Str): Str {

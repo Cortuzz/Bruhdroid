@@ -1,6 +1,6 @@
-package com.example.bruhdroid
+package com.example.bruhdroid.model
 
-import com.example.bruhdroid.blocks.Block
+import com.example.bruhdroid.model.blocks.Block
 
 class Memory(val prevMemory: Memory?) {
     val stack: MutableMap<String, Block> = mutableMapOf()

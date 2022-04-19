@@ -1,23 +1,23 @@
-package com.example.bruhdroid
+package com.example.bruhdroid.variables.string
 
-import com.example.bruhdroid.blocks.variables.Integer
-import com.example.bruhdroid.blocks.variables.Str
+import com.example.bruhdroid.model.Type
+import com.example.bruhdroid.model.blocks.Valuable
 import org.junit.Assert
 import org.junit.Test
 
-class StringUnitTest {
-    private val a = Str("a", "234")
-    private val b = Str("b", "abdm,mk45")
+class OperationsUnitTest {
+    private val value1 = "234"
+    private val value2 = "abdm,mk45"
 
-    private val value1 = a.value
-    private val value2 = b.value
+    private val a = Valuable(value1, Type.STRING)
+    private val b = Valuable(value2, Type.STRING)
 
-    private val integer = Integer("c", 3)
+    private val integer = Valuable(3, Type.INT)
 
     @Test
     fun valueIsCorrect() {
         val value = "Fsf24f124%$@#"
-        Assert.assertEquals(value, Str("a", value).value)
+        Assert.assertEquals(value, Valuable(value, Type.STRING).value)
     }
 
     @Test
