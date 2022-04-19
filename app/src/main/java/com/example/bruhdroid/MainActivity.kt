@@ -37,8 +37,6 @@ class MainActivity : AppCompatActivity() {
 
         val interpreter = Interpreter(blocks)
         interpreter.run()
-
-        Log.e("e", interpreter.memory.stack.toString())
     }
 
     fun exit(view: View) {

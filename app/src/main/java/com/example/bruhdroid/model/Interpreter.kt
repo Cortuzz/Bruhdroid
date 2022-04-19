@@ -3,15 +3,60 @@ package com.example.bruhdroid.model
 import com.example.bruhdroid.model.blocks.*
 
 class Interpreter(val blocks: List<Block>) {
-    val memory = Memory(null)
+    var memory = Memory(null)
 
-    fun run() {
-        for (block in blocks) {
-            parseBlock(block)
+    fun run(blockchain: List<Block>? = null) {
+        var statementApplied = false
+
+        var currentBlockchain = blocks
+        if (blockchain != null) {
+            memory = Memory(memory)
+            currentBlockchain = blockchain
+        }
+
+        for (block in currentBlockchain) {
+            when (block.instruction) {
+                Instruction.IF -> {
+                    statementApplied = if (checkStatement(block)) {
+                        block.rightBody as Container
+                        run(block.rightBody.instructions)
+                        true
+                    } else {
+                        false
+                    }
+                }
+                Instruction.ELIF -> {
+                    if (!statementApplied && checkStatement(block)) {
+                        block.rightBody as Container
+                        run(block.rightBody.instructions)
+                        statementApplied = true
+                    }
+                }
+                Instruction.ELSE -> {
+                    if (!statementApplied) {
+                        block.rightBody as Container
+                        run(block.rightBody.instructions)
+                    }
+                }
+                else -> parseBlock(block)
+            }
+
+        }
+
+        if (memory.prevMemory != null) {
+            memory = memory.prevMemory!!
         }
     }
 
-    fun parseBlock(block: Block) : Block {
+    private fun checkStatement(block: Block) : Boolean {
+        val booleanBlock = parseBlock(block.leftBody!!) as Valuable
+        if (booleanBlock.value != "") {
+            return true
+        }
+        return false
+    }
+
+    private fun parseBlock(block: Block) : Block {
         lateinit var leftBlock: Block
         lateinit var rightBlock: Block
 
@@ -30,16 +75,15 @@ class Interpreter(val blocks: List<Block>) {
             Instruction.MUL -> leftBlock as Valuable * rightBlock as Valuable
             Instruction.DIV -> leftBlock as Valuable / rightBlock as Valuable
             Instruction.MOD -> leftBlock as Valuable % rightBlock as Valuable
-
             Instruction.SET -> {
                 tryPushToAnyMemory(memory, block, Type.INT, leftBlock)
                 block
             }
-
             Instruction.INIT -> {
                 pushToLocalMemory(block, Type.INT, leftBlock)
                 block
             }
+            else -> throw Exception("Bad Instruction")
         }
     }
 
@@ -65,7 +109,6 @@ class Interpreter(val blocks: List<Block>) {
 
         return tryPushToAnyMemory(memory.prevMemory, block, type, valueBlock)
     }
-
 
     private fun tryFindInMemory(memory: Memory, block: Block): Block {
         block as Variable
