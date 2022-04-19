@@ -1,23 +1,55 @@
 package com.example.bruhdroid.blocks
 
 import com.example.bruhdroid.Instruction
+import com.example.bruhdroid.Type
 import com.example.bruhdroid.blocks.variables.Str
 import com.example.bruhdroid.blocks.variables.Integer
 
-abstract class Variable(open val name: String = "") :
+class Variable(var varValue: Any, private val type: Type) :
     Block(Instruction.VAR,null, null) {
+    var value: String = varValue.toString()
 
-    abstract operator fun plus(operand: Integer): Variable
+    operator fun plus(operand: Variable): Variable {
+        if (type == Type.STRING && operand.type == Type.STRING) {
+            return Variable(value + operand.value, type)
+        }
+        if (type == Type.INT && operand.type == Type.INT) {
+            return Variable(value.toInt() + operand.value.toInt(), type)
+        }
+        throw Exception()
+    }
 
-    abstract operator fun minus(operand: Integer): Variable
+    operator fun minus(operand: Variable): Variable {
+        if (type == Type.INT && operand.type == Type.INT) {
+            return Variable(value.toInt() - operand.value.toInt(), type)
+        }
+        throw Exception()
+    }
 
-    abstract operator fun times(operand: Integer): Variable
+    operator fun times(operand: Variable): Variable {
+        if (type == Type.INT && operand.type == Type.INT) {
+            return Variable(value.toInt() * operand.value.toInt(), type)
+        }
+        if (type == Type.INT && operand.type == Type.STRING) {
+            return Variable(operand.value.repeat(value.toInt()), type)
+        }
+        if (type == Type.STRING && operand.type == Type.INT) {
+            return Variable(value.repeat(operand.value.toInt()), type)
+        }
+        throw Exception()
+    }
 
-    abstract operator fun times(operand: Str): Variable
+    operator fun div(operand: Variable): Variable {
+        if (type == Type.INT && operand.type == Type.INT) {
+            return Variable(value.toInt() / operand.value.toInt(), type)
+        }
+        throw Exception()
+    }
 
-    abstract operator fun div(operand: Integer): Variable
-
-    abstract operator fun rem(operand: Integer): Variable
-
-    abstract operator fun plus(operand: Str): Variable
+    operator fun rem(operand: Variable): Variable {
+        if (type == Type.INT && operand.type == Type.INT) {
+            return Variable(value.toInt() % operand.value.toInt(), type)
+        }
+        throw Exception()
+    }
 }

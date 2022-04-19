@@ -27,27 +27,19 @@ class Interpreter {
 
         return when (block.instruction) {
             Instruction.VAR -> block
-            Instruction.ADD -> leftBlock as Integer + rightBlock as Integer
+            Instruction.PLUS -> leftBlock as Variable + rightBlock as Variable
+            Instruction.MINUS -> leftBlock as Variable - rightBlock as Variable
+            Instruction.MUL -> leftBlock as Variable * rightBlock as Variable
+            Instruction.DIV -> leftBlock as Variable / rightBlock as Variable
+            Instruction.MOD -> leftBlock as Variable % rightBlock as Variable
+
             Instruction.INIT -> {
-                leftBlock as Integer
+                leftBlock as Variable
                 block as Init
 
                 memory.push(block.name, leftBlock)
                 block
             }
         }
-    }
-
-    fun parseTypes(leftBlock: Block, rightBlock: Block): Block {
-        if (leftBlock is Integer && rightBlock is Integer) {
-            return leftBlock + rightBlock
-        } else if (leftBlock is Integer && rightBlock is Str) {
-            return leftBlock + rightBlock
-        } else if (leftBlock is Str && rightBlock is Integer) {
-            return leftBlock + rightBlock
-        } else if ((leftBlock is Str && rightBlock is Str)) {
-            return leftBlock + rightBlock
-        }
-        throw Exception()
     }
 }

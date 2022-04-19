@@ -1,5 +1,5 @@
 package com.example.bruhdroid
 
 enum class Instruction {
-    VAR, ADD, INIT
+    VAR, PLUS, MINUS, MUL, DIV, MOD, INIT
 }
