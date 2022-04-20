@@ -1,5 +1,6 @@
 package com.example.bruhdroid.model
 
+import android.util.Log
 import com.example.bruhdroid.model.blocks.*
 
 class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
@@ -70,11 +71,14 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         return when (block.instruction) {
             Instruction.VAL -> block
             Instruction.VAR -> tryFindInMemory(memory, block)
+            Instruction.RAW -> parseRawBlock(block)
+
             Instruction.PLUS -> leftBlock as Valuable + rightBlock as Valuable
             Instruction.MINUS -> leftBlock as Valuable - rightBlock as Valuable
             Instruction.MUL -> leftBlock as Valuable * rightBlock as Valuable
             Instruction.DIV -> leftBlock as Valuable / rightBlock as Valuable
             Instruction.MOD -> leftBlock as Valuable % rightBlock as Valuable
+
             Instruction.SET -> {
                 tryPushToAnyMemory(memory, block, Type.INT, leftBlock)
                 block
@@ -126,26 +130,48 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         return tryFindInMemory(memory.prevMemory, block)
     }
 
-    private fun parseRawBlock(block: Block): Valuable {
+    fun parseRawBlock(block: Block): Valuable {
         block as RawInput
         val data = Notation.convertToRpn(Notation.normalizeString(block.input))
 
-        /*
-        val stack = mutableListOf<Char>()
-        val lst = infixNotation.toMutableList()
+        var count = 0
+        val stack = mutableListOf<Valuable>()
+        var tempStr = ""
 
-        for (symbol in infixNotation) {
-            if (symbol.isDigit()) {
-                stack.add(symbol)
-                lst.remove(symbol)
+        while (count < data.length) {
+            if (data[count].isDigit() || data[count].isLetter()) {
+                while (data[count].isDigit() || data[count].isLetter()) {
+                    tempStr += data[count]
+                    count++
+                }
+                if (tempStr.last().isLetter()) {
+                    val variable = Variable(tempStr)
+                    val value = tryFindInMemory(memory, variable)
+                    stack.add(value as Valuable)
+                } else {
+                    stack.add(Valuable(tempStr, Type.INT))
+                }
+
+                tempStr = ""
+                count--
+            } else if (data[count] == ' ') {
             } else {
-                val operand1 = stack.removeLast()
                 val operand2 = stack.removeLast()
+                val operand1 = stack.removeLast()
+
+                var result: Valuable? = when (data[count]) {
+                    '+' -> operand1 + operand2
+                    '-' -> operand1 - operand2
+                    '*' -> operand1 * operand2
+                    else -> null
+                }
+
+                stack.add(result!!)
+                count++
             }
+            count++
         }
-        */
 
-
-        return Valuable("fgd", Type.INT)
+        return stack.removeLast()
     }
 }

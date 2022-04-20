@@ -11,7 +11,7 @@ class Memory(val prevMemory: Memory?) {
         stack[address] = value
     }
 
-    fun pop(address: String) {
-        stack.remove(address)
+    fun pop(address: String): Valuable {
+        return stack.remove(address)!!
     }
 }

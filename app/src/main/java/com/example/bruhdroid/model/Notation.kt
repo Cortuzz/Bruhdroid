@@ -1,5 +1,9 @@
 package com.example.bruhdroid.model
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+
 class Notation {
     companion object {
         private enum class Operator(val operator: Char, val priority: Int) {
@@ -30,26 +34,29 @@ class Notation {
                     postfixNotation += " "
                     count--
                 } else {
-                    if (operators[infixNotation[count]] == Operator.OPEN_BRACKET) {
-                        opStack.add(infixNotation[count])
-                    } else if (operators[infixNotation[count]] == Operator.CLOSE_BRACKET) {
-                        var s = opStack.removeLast()
-                        while (operators[s] != Operator.OPEN_BRACKET)
-                        {
-                            postfixNotation += "$s "
-                            s = opStack.removeLast()
+                    when (operators[infixNotation[count]]) {
+                        Operator.OPEN_BRACKET -> {
+                            opStack.add(infixNotation[count])
                         }
-                    } else {
-                        if (opStack.size > 0)
-                            if (operators[infixNotation[count]]!!.priority <=
-                                operators[opStack.last()]!!.priority)
+                        Operator.CLOSE_BRACKET -> {
+                            var s = opStack.removeLast()
+                            while (operators[s] != Operator.OPEN_BRACKET) {
+                                postfixNotation += "$s "
+                                s = opStack.removeLast()
+                            }
+                        }
+                        else -> {
+                            if (opStack.size > 0)
+                                if (operators[infixNotation[count]]!!.priority <=
+                                    operators[opStack.last()]!!.priority
+                                )
 
-                                postfixNotation += opStack.removeLast() + " "
+                                    postfixNotation += opStack.removeLast() + " "
 
-                        opStack.add(infixNotation[count])
+                            opStack.add(infixNotation[count])
+                        }
                     }
                 }
-
                 count++
             }
 
