@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import com.example.bruhdroid.variables.Integer
-import com.example.bruhdroid.variables.Str
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
