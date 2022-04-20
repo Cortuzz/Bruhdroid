@@ -13,6 +13,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val a = Valuable(5, Type.INT)
+        val b = Valuable(3, Type.INT)
+        val c = Valuable(17, Type.INT)
+        val d = Valuable(9, Type.INT)
+
+        val initA = Init("a", a)
+        val initB = Init("b", b)
+        val initC = Init("c", c)
+        val assignC = Assign("a", d)
+
+        val sum1 = Block(Instruction.PLUS, a, b)
+        val sum2 = Block(Instruction.MINUS, sum1, c)
+        val sum3 = Block(Instruction.MUL, sum2, d)
+
+        // -81
+        val initRes = Init("res", sum3)
+        val blocks = listOf(initA, initB, initC, assignC, initRes)
+
+        val interpreter = Interpreter(blocks)
+        interpreter.run()
         startButton()
         exitButton()
     }
