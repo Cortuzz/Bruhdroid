@@ -2,7 +2,7 @@ package com.example.bruhdroid.model
 
 import com.example.bruhdroid.model.blocks.*
 
-class Interpreter(val blocks: List<Block>) {
+class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
     var memory = Memory(null)
 
     fun run(blockchain: List<Block>? = null) {
@@ -48,7 +48,7 @@ class Interpreter(val blocks: List<Block>) {
         }
     }
 
-    private fun checkStatement(block: Block) : Boolean {
+    private fun checkStatement(block: Block): Boolean {
         val booleanBlock = parseBlock(block.leftBody!!) as Valuable
         if (booleanBlock.value != "") {
             return true
@@ -56,7 +56,7 @@ class Interpreter(val blocks: List<Block>) {
         return false
     }
 
-    private fun parseBlock(block: Block) : Block {
+    private fun parseBlock(block: Block): Block {
         lateinit var leftBlock: Block
         lateinit var rightBlock: Block
 
@@ -124,5 +124,28 @@ class Interpreter(val blocks: List<Block>) {
         }
 
         return tryFindInMemory(memory.prevMemory, block)
+    }
+
+    private fun parseRawBlock(block: Block): Valuable {
+        block as RawInput
+        val data = Notation.convertToRpn(Notation.normalizeString(block.input))
+
+        /*
+        val stack = mutableListOf<Char>()
+        val lst = infixNotation.toMutableList()
+
+        for (symbol in infixNotation) {
+            if (symbol.isDigit()) {
+                stack.add(symbol)
+                lst.remove(symbol)
+            } else {
+                val operand1 = stack.removeLast()
+                val operand2 = stack.removeLast()
+            }
+        }
+        */
+
+
+        return Valuable("fgd", Type.INT)
     }
 }
