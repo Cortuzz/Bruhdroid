@@ -9,11 +9,13 @@ class Notation {
         private enum class Operator(val operator: Char, val priority: Int) {
             MULTIPLY('*', 4), DIVIDE('/', 4),
             SUBTRACT('-', 3), ADD('+', 3),
-            OPEN_BRACKET(')', 2), CLOSE_BRACKET(')', 2)
+            OPEN_BRACKET(')', 2), CLOSE_BRACKET(')', 2),
+            DEFINE('=', 1)
         }
         private val operators = mapOf(
             '-' to Operator.SUBTRACT, '+' to Operator.ADD, '*' to Operator.MULTIPLY,
-            '/' to Operator.DIVIDE, '(' to Operator.OPEN_BRACKET, ')' to Operator.CLOSE_BRACKET)
+            '/' to Operator.DIVIDE, '(' to Operator.OPEN_BRACKET, ')' to Operator.CLOSE_BRACKET,
+            '=' to Operator.DEFINE)
 
         fun convertToRpn(infixNotation: String): String {
             var postfixNotation = ""
@@ -62,10 +64,6 @@ class Notation {
 
             for (i in opStack.reversed()) {
                 postfixNotation += "$i "
-            }
-
-            if (postfixNotation.length != 1) {
-                return postfixNotation.dropLast(1)
             }
 
             return postfixNotation

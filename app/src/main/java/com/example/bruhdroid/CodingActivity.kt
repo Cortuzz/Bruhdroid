@@ -16,7 +16,6 @@ import com.example.bruhdroid.model.blocks.RawInput
 import kotlin.math.exp
 
 class CodingActivity : AppCompatActivity() {
-
     var viewBlocks: MutableList<View> = mutableListOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,13 +44,11 @@ class CodingActivity : AppCompatActivity() {
         for (view in viewBlocks) {
             val variable = view.findViewById<EditText>(R.id.variable).getText().toString()
             val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-            blocks.add(Init(variable, RawInput(expression)))
+            blocks.add(Init(RawInput(expression)))
         }
-        val interpreter: Interpreter = Interpreter(blocks)
+        val interpreter = Interpreter(blocks)
         interpreter.run()
         println(interpreter.memory.pop("a").value)
         println(interpreter.memory.pop("b").value)
-
     }
-
 }

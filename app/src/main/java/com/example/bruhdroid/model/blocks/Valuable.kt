@@ -3,7 +3,7 @@ package com.example.bruhdroid.model.blocks
 import com.example.bruhdroid.model.Instruction
 import com.example.bruhdroid.model.Type
 
-class Valuable(varValue: Any, val type: Type) :
+class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL,null, null) {
     var value: String = varValue.toString()
 

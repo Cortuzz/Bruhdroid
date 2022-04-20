@@ -16,6 +16,14 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
 
         for (block in currentBlockchain) {
             when (block.instruction) {
+                Instruction.INIT -> {
+                    block as Init
+                    val raw = block.body as RawInput
+                    val name = parseVarName(raw.input)
+
+                    pushToLocalMemory(name, valueBlock=Valuable("", Type.UNDEFINED))
+                    parseBlock(block.body)
+                }
                 Instruction.IF -> {
                     statementApplied = if (checkStatement(block)) {
                         block.rightBody as Container
@@ -48,6 +56,18 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         }
     }
 
+    private fun parseVarName(str: String): String {
+        var parsedStr = ""
+
+        for (symbol in str) {
+            if (symbol == '=') {
+                break
+            }
+            parsedStr += symbol
+        }
+        return parsedStr
+    }
+
     private fun checkStatement(block: Block): Boolean {
         val booleanBlock = parseBlock(block.leftBody!!) as Valuable
         if (booleanBlock.value != "") {
@@ -77,32 +97,22 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             Instruction.MUL -> leftBlock as Valuable * rightBlock as Valuable
             Instruction.DIV -> leftBlock as Valuable / rightBlock as Valuable
             Instruction.MOD -> leftBlock as Valuable % rightBlock as Valuable
-
-            Instruction.SET -> {
-                tryPushToAnyMemory(memory, block, Type.INT, leftBlock)
-                block
-            }
-            Instruction.INIT -> {
-                pushToLocalMemory(block, Type.INT, leftBlock)
-                block
-            }
             else -> throw Exception("Bad Instruction")
         }
     }
 
-    private fun pushToLocalMemory(block: Block, type: Type, valueBlock: Block) {
+    private fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Block) {
         valueBlock as Valuable
-        block as Init
+        valueBlock.type = type
 
-        memory.push(block.name, valueBlock)
+        memory.push(name, valueBlock)
     }
 
-    private fun tryPushToAnyMemory(memory: Memory, block: Block, type: Type, valueBlock: Block): Boolean {
+    private fun tryPushToAnyMemory(memory: Memory, name: String, type: Type, valueBlock: Block): Boolean {
         valueBlock as Valuable
-        block as Assign
 
-        if (memory.stack[block.name] != null) {
-            memory.push(block.name, valueBlock)
+        if (memory.stack[name] != null) {
+            memory.push(name, valueBlock)
             return true
         }
 
@@ -110,7 +120,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             return false
         }
 
-        return tryPushToAnyMemory(memory.prevMemory, block, type, valueBlock)
+        return tryPushToAnyMemory(memory.prevMemory, name, type, valueBlock)
     }
 
     private fun tryFindInMemory(memory: Memory, block: Block): Block {
@@ -134,7 +144,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         val data = Notation.convertToRpn(Notation.normalizeString(block.input))
 
         var count = 0
-        val stack = mutableListOf<Valuable>()
+        val stack = mutableListOf<Block>()
         var tempStr = ""
 
         while (count < data.length) {
@@ -144,9 +154,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                     count++
                 }
                 if (tempStr.last().isLetter()) {
-                    val variable = Variable(tempStr)
-                    val value = tryFindInMemory(memory, variable)
-                    stack.add(value as Valuable)
+                    stack.add(Variable(tempStr))
                 } else {
                     stack.add(Valuable(tempStr, Type.INT))
                 }
@@ -155,13 +163,35 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                 count--
             } else if (data[count] == ' ') {
             } else {
-                val operand2 = stack.removeLast()
-                val operand1 = stack.removeLast()
+                var operand2 = stack.removeLast()
+                var operand1 = stack.removeLast()
+
+                if (operand2 is Variable) {
+                    operand2 = tryFindInMemory(memory, operand2)
+                }
+                operand2 as Valuable
+
+                if (data[count] == '=') {
+                    operand1 as Variable
+                    tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
+
+                     return operand2
+                }
+
+                if (operand1 is Variable) {
+                    operand1 = tryFindInMemory(memory, operand1)
+                }
+                operand1 as Valuable
 
                 var result: Valuable? = when (data[count]) {
                     '+' -> operand1 + operand2
                     '-' -> operand1 - operand2
                     '*' -> operand1 * operand2
+                    '/' -> operand1 / operand2
+                    '=' -> {
+                        pushToLocalMemory(operand1.value, Type.INT, operand2)
+                        operand2
+                    }
                     else -> null
                 }
 
@@ -171,6 +201,6 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             count++
         }
 
-        return stack.removeLast()
+        return stack.removeLast() as Valuable
     }
 }
