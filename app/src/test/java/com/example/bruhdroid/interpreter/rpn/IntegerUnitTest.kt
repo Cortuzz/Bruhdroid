@@ -54,8 +54,13 @@ class IntegerUnitTest {
     @Test
     fun basicOperators() {
         val value = "56 + 23 / 2 - 74 / 2 * 3 + 54 / 3 - 2 * 7"
+        val value2 = "(23 + 3) * 9 - 3 * 15 * (2 - 3)"
+
         val actual = Notation.convertToRpn(Notation.normalizeString(value))
+        val actual2 = Notation.convertToRpn(Notation.normalizeString(value2))
+
         assertEquals("56 23 2 / 74 2 / 3 * 54 3 / 2 7 * - + - +", actual)
+        assertEquals("23 3 + 9 * 3 15 * 2 3 - * -", actual2)
     }
 
     @Test

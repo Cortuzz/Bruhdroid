@@ -13,6 +13,7 @@ class BasicUnitTest {
 
     @Test
     fun oneNumber() {
-
+        val string = "3"
+        assertEquals("3", Notation.convertToRpn(Notation.normalizeString(string)))
     }
 }
