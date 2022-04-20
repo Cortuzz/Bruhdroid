@@ -1,6 +1,5 @@
 package com.example.bruhdroid.model
 
-import android.util.Log
 import com.example.bruhdroid.model.blocks.*
 
 class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
