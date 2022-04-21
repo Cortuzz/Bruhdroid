@@ -6,7 +6,7 @@ open class Block(val instruction: Instruction, val leftBody: Block?, val rightBo
 
 data class Container(val instructions: MutableList<Block>) : Block(Instruction.SCOPE, null, null)
 
-data class Init(val name: String, val body: Block) : Block(Instruction.INIT, body, null)
+data class Init(val body: Block) : Block(Instruction.INIT, body, null)
 
 data class Assign(val name: String, val body: Block) : Block(Instruction.SET, body, null)
 
