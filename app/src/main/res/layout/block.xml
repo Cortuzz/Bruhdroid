@@ -7,12 +7,27 @@
     android:background="@color/teal_200"
     >
 
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="100dp"
+        android:layout_height="37dp"
+        android:text="INIT"
+        android:textAlignment="center"
+        android:textColor="#546E7A"
+        android:textSize="34sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/expression"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.511" />
+
     <EditText
         android:id="@+id/expression"
-        android:layout_width="160dp"
+        android:layout_width="260dp"
         android:layout_height="48dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
         android:autofillHints=""
         android:background="@color/white"
@@ -27,37 +42,4 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <EditText
-        android:id="@+id/variable"
-        android:layout_width="122dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:autofillHints=""
-        android:background="@color/white"
-        android:ems="10"
-        android:hint="@string/varName"
-        android:inputType="textPersonName"
-        android:textColorHint="#757575"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.036"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="59dp"
-        android:layout_height="37dp"
-        android:text="="
-        android:textAlignment="center"
-        android:textColor="#546E7A"
-        android:textSize="34sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/expression"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/variable"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.511" />
 </androidx.constraintlayout.widget.ConstraintLayout>

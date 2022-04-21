@@ -63,6 +63,9 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             if (symbol == '=') {
                 break
             }
+            if (symbol == ' ') {
+                continue
+            }
             parsedStr += symbol
         }
         return parsedStr
@@ -110,13 +113,15 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
 
     private fun tryPushToAnyMemory(memory: Memory, name: String, type: Type, valueBlock: Block): Boolean {
         valueBlock as Valuable
+        valueBlock.type = type
 
-        if (memory.stack[name] != null) {
+        if (memory.get(name) != null) {
             memory.push(name, valueBlock)
             return true
         }
 
         if (memory.prevMemory == null) {
+            memory.throwStackError(name)
             return false
         }
 
@@ -126,13 +131,14 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
     private fun tryFindInMemory(memory: Memory, block: Block): Block {
         block as Variable
         val address = block.name
-        val value = memory.stack[address]
+        val value = memory.get(address)
 
         if (value != null) {
             return value
         }
 
         if (memory.prevMemory == null) {
+            memory.throwStackError(address)
             throw Exception()
         }
 
