@@ -9,10 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import com.example.bruhdroid.model.*
-import com.example.bruhdroid.model.blocks.Block
-import com.example.bruhdroid.model.blocks.Init
-import com.example.bruhdroid.model.blocks.RawInput
-import com.example.bruhdroid.model.blocks.Valuable
+import com.example.bruhdroid.model.blocks.*
 import kotlin.math.exp
 
 class CodingActivity : AppCompatActivity() {
@@ -43,7 +40,7 @@ class CodingActivity : AppCompatActivity() {
         var blocks: MutableList<Block> = mutableListOf()
         for (view in viewBlocks) {
             val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-            blocks.add(Init(RawInput(expression)))
+            blocks.add(Block(Instruction.IF, RawInput("1"), Container(mutableListOf(Init(RawInput(expression))))))
         }
         val interpreter = Interpreter(blocks)
         interpreter.run()

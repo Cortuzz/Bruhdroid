@@ -4,56 +4,68 @@ import com.example.bruhdroid.model.blocks.*
 
 class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
     var memory = Memory(null)
+    var totalLines = 0
 
     fun run(blockchain: List<Block>? = null) {
-        var statementApplied = false
-
         var currentBlockchain = blocks
         if (blockchain != null) {
             memory = Memory(memory)
             currentBlockchain = blockchain
         }
 
+        var statementApplied = false
         for (block in currentBlockchain) {
-            when (block.instruction) {
-                Instruction.INIT -> {
-                    block as Init
-                    val raw = block.body as RawInput
-                    val name = parseVarName(raw.input)
-
-                    pushToLocalMemory(name, valueBlock=Valuable("", Type.UNDEFINED))
-                    parseBlock(block.body)
-                }
-                Instruction.IF -> {
-                    statementApplied = if (checkStatement(block)) {
-                        block.rightBody as Container
-                        run(block.rightBody.instructions)
-                        true
-                    } else {
-                        false
-                    }
-                }
-                Instruction.ELIF -> {
-                    if (!statementApplied && checkStatement(block)) {
-                        block.rightBody as Container
-                        run(block.rightBody.instructions)
-                        statementApplied = true
-                    }
-                }
-                Instruction.ELSE -> {
-                    if (!statementApplied) {
-                        block.rightBody as Container
-                        run(block.rightBody.instructions)
-                    }
-                }
-                else -> parseBlock(block)
+            try {
+                parse(block, statementApplied)
+            } catch (e: RuntimeError) {
+                throw RuntimeError("${e.message}\nAt line ${block.line}, " +
+                        "At instruction: ${block.instruction}")
             }
-
         }
 
         if (memory.prevMemory != null) {
             memory = memory.prevMemory!!
         }
+    }
+
+    private fun parse(block: Block, statementApplied: Boolean): Boolean {
+        totalLines++
+        block.line = totalLines
+        when (block.instruction) {
+            Instruction.INIT -> {
+                block as Init
+                val raw = block.body as RawInput
+                val name = parseVarName(raw.input)
+
+                pushToLocalMemory(name, valueBlock=Valuable("", Type.UNDEFINED))
+                parseRawBlock(block.body)
+            }
+            Instruction.IF -> {
+                return if (checkStatement(block)) {
+                    block.rightBody as Container
+                    run(block.rightBody.instructions)
+                    true
+                } else {
+                    false
+                }
+            }
+            Instruction.ELIF -> {
+                if (!statementApplied && checkStatement(block)) {
+                    block.rightBody as Container
+                    run(block.rightBody.instructions)
+                    return true
+                }
+            }
+            Instruction.ELSE -> {
+                if (!statementApplied) {
+                    block.rightBody as Container
+                    run(block.rightBody.instructions)
+                }
+            }
+            else -> parseRawBlock(block)
+        }
+
+        return false
     }
 
     private fun parseVarName(str: String): String {
@@ -72,36 +84,11 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
     }
 
     private fun checkStatement(block: Block): Boolean {
-        val booleanBlock = parseBlock(block.leftBody!!) as Valuable
+        val booleanBlock = parseRawBlock(block.leftBody!!)
         if (booleanBlock.value != "") {
             return true
         }
         return false
-    }
-
-    private fun parseBlock(block: Block): Block {
-        lateinit var leftBlock: Block
-        lateinit var rightBlock: Block
-
-        if (block.leftBody != null) {
-            leftBlock = parseBlock(block.leftBody)
-        }
-        if (block.rightBody != null) {
-            rightBlock = parseBlock(block.rightBody)
-        }
-
-        return when (block.instruction) {
-            Instruction.VAL -> block
-            Instruction.VAR -> tryFindInMemory(memory, block)
-            Instruction.RAW -> parseRawBlock(block)
-
-            Instruction.PLUS -> leftBlock as Valuable + rightBlock as Valuable
-            Instruction.MINUS -> leftBlock as Valuable - rightBlock as Valuable
-            Instruction.MUL -> leftBlock as Valuable * rightBlock as Valuable
-            Instruction.DIV -> leftBlock as Valuable / rightBlock as Valuable
-            Instruction.MOD -> leftBlock as Valuable % rightBlock as Valuable
-            else -> throw Exception("Bad Instruction")
-        }
     }
 
     private fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Block) {
@@ -145,7 +132,8 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         return tryFindInMemory(memory.prevMemory, block)
     }
 
-    fun parseRawBlock(block: Block): Valuable {
+    private fun parseRawBlock(block: Block): Valuable {
+        block.line = totalLines
         block as RawInput
         val data = Notation.convertToRpn(Notation.normalizeString(block.input))
 
@@ -173,7 +161,12 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                 var operand1 = stack.removeLast()
 
                 if (operand2 is Variable) {
-                    operand2 = tryFindInMemory(memory, operand2)
+                    try {
+                        operand2 = tryFindInMemory(memory, operand2)
+                    } catch (e: StackCorruptionError) {
+                        throw RuntimeError("${e.message}\nAt line ${block.line}, " +
+                                "At instruction: ${block.instruction}")
+                    }
                 }
                 operand2 as Valuable
 
