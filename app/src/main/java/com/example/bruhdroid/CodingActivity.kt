@@ -40,11 +40,20 @@ class CodingActivity : AppCompatActivity() {
         var blocks: MutableList<Block> = mutableListOf()
         for (view in viewBlocks) {
             val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-            blocks.add(Block(Instruction.IF, RawInput("1"), Container(mutableListOf(Init(RawInput(expression))))))
+            blocks.add(Init(RawInput(expression)))
         }
         val interpreter = Interpreter(blocks)
-        interpreter.run()
-        println(interpreter.memory.pop("a")?.value)
-        println(interpreter.memory.pop("b")?.value)
+        try {
+            Lexer.checkBlocks(blocks)
+            interpreter.run()
+        } catch(e: RuntimeError) {
+            print(e.message)
+        } catch(e: LexerError) {
+            print(e.message)
+        }
+
+        println("a: " + interpreter.memory.pop("a")?.value)
+        println("b: " + interpreter.memory.pop("b")?.value)
+        println("c: " + interpreter.memory.pop("c")?.value)
     }
 }

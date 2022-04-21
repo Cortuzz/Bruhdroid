@@ -31,5 +31,4 @@ class MainActivity : AppCompatActivity() {
             exitProcess(0)
         }
     }
-
 }

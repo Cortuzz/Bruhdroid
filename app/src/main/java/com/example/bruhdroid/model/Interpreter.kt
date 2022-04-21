@@ -35,10 +35,9 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             Instruction.INIT -> {
                 block as Init
                 val raw = block.body as RawInput
-                val name = parseVarName(raw.input)
-
-                pushToLocalMemory(name, valueBlock=Valuable("", Type.UNDEFINED))
-                parseRawBlock(block.body)
+                if (pushVariablesToMemory(raw.input)) {
+                    parseRawBlock(block.body)
+                }
             }
             Instruction.IF -> {
                 return if (checkStatement(block)) {
@@ -68,19 +67,28 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         return false
     }
 
-    private fun parseVarName(str: String): String {
+    private fun pushVariablesToMemory(str: String): Boolean {
         var parsedStr = ""
+        var flag = false
 
         for (symbol in str) {
             if (symbol == '=') {
+                flag = true
                 break
             }
             if (symbol == ' ') {
                 continue
             }
+            if (symbol == ',') {
+                pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
+                parsedStr = ""
+                continue
+            }
             parsedStr += symbol
         }
-        return parsedStr
+
+        pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
+        return flag
     }
 
     private fun checkStatement(block: Block): Boolean {
