@@ -3,14 +3,12 @@ package com.example.bruhdroid
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import com.example.bruhdroid.model.*
-import com.example.bruhdroid.model.blocks.*
-import kotlin.math.exp
+import com.example.bruhdroid.model.src.blocks.*
 
 class CodingActivity : AppCompatActivity() {
     var viewBlocks: MutableList<View> = mutableListOf()

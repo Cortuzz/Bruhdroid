@@ -1,12 +1,13 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.blocks.Block
-import com.example.bruhdroid.model.blocks.Init
-import com.example.bruhdroid.model.blocks.RawInput
+import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.src.blocks.Init
+import com.example.bruhdroid.model.src.blocks.RawInput
+import com.example.bruhdroid.model.src.Instruction
 
 class Lexer {
     companion object {
-        var totalLines = 0
+        private var totalLines = 0
 
         fun checkBlocks(sequence: List<Block>) {
             var errors = ""

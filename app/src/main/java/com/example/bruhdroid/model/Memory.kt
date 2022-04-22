@@ -1,8 +1,8 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.blocks.Block
-import com.example.bruhdroid.model.blocks.Valuable
-import com.example.bruhdroid.model.blocks.Variable
+import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.Variable
 
 class Memory(val prevMemory: Memory?) {
     val stack: MutableMap<String, Valuable> = mutableMapOf()

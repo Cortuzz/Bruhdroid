@@ -1,6 +1,6 @@
-package com.example.bruhdroid.model.blocks
+package com.example.bruhdroid.model.src.blocks
 
-import com.example.bruhdroid.model.Instruction
+import com.example.bruhdroid.model.src.Instruction
 
 open class Block(val instruction: Instruction, val leftBody: Block?, val rightBody: Block?, var line: Int = 0)
 

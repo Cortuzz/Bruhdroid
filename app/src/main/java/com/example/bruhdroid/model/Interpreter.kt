@@ -1,6 +1,8 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.blocks.*
+import com.example.bruhdroid.model.src.blocks.*
+import com.example.bruhdroid.model.src.Instruction
+import com.example.bruhdroid.model.src.Type
 
 class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
     var memory = Memory(null)
@@ -87,8 +89,16 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             parsedStr += symbol
         }
 
+        if (flag) {
+            try {
+                tryFindInMemory(memory, Variable(parsedStr))
+            } catch (e: StackCorruptionError) {
+                pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
+            }
+            return true
+        }
         pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
-        return flag
+        return false
     }
 
     private fun checkStatement(block: Block): Boolean {
