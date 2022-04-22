@@ -1,4 +1,4 @@
-package com.example.bruhdroid.model
+package com.example.bruhdroid.model.src
 
 class RuntimeError(message: String = ""): Exception(message)
 

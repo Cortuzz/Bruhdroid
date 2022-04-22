@@ -4,6 +4,8 @@ import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.Init
 import com.example.bruhdroid.model.src.blocks.RawInput
 import com.example.bruhdroid.model.src.Instruction
+import com.example.bruhdroid.model.src.LexerError
+import com.example.bruhdroid.model.src.SyntaxError
 
 class Lexer {
     companion object {

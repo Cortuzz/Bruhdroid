@@ -1,5 +1,6 @@
 package com.example.bruhdroid.model
 
+import com.example.bruhdroid.model.src.StackCorruptionError
 import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable

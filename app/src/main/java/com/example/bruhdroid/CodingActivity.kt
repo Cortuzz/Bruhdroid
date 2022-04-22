@@ -8,6 +8,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import com.example.bruhdroid.model.*
+import com.example.bruhdroid.model.src.LexerError
+import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 
 class CodingActivity : AppCompatActivity() {

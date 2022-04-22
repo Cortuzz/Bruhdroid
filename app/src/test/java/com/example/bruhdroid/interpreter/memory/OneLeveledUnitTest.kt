@@ -61,8 +61,8 @@ class OneLeveledUnitTest {
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
 
-        assertEquals(2, interpreter.memory.stack.size)
         val memory = interpreter.memory.stack
+        assertEquals(2, memory.size)
 
         assertEquals("75", memory["a"]?.value)
         assertEquals("423", memory["b"]?.value)

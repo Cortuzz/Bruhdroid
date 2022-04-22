@@ -2,6 +2,8 @@ package com.example.bruhdroid.model
 
 import com.example.bruhdroid.model.src.blocks.*
 import com.example.bruhdroid.model.src.Instruction
+import com.example.bruhdroid.model.src.RuntimeError
+import com.example.bruhdroid.model.src.StackCorruptionError
 import com.example.bruhdroid.model.src.Type
 
 class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
@@ -15,7 +17,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             currentBlockchain = blockchain
         }
 
-        var statementApplied = false
+        var statementApplied = false // todo: check statement
         for (block in currentBlockchain) {
             try {
                 parse(block, statementApplied)

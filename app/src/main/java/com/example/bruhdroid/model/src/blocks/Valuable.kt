@@ -2,7 +2,7 @@ package com.example.bruhdroid.model.src.blocks
 
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.TypeError
+import com.example.bruhdroid.model.src.TypeError
 
 class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL,null, null) {
