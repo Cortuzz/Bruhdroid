@@ -1,7 +1,7 @@
 package com.example.bruhdroid.variables.integer
 
-import com.example.bruhdroid.model.Type
-import com.example.bruhdroid.model.blocks.Valuable
+import com.example.bruhdroid.model.src.Type
+import com.example.bruhdroid.model.src.blocks.Valuable
 import org.junit.Assert
 import org.junit.Test
 
