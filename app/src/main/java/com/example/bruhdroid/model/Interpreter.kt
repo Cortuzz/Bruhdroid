@@ -178,7 +178,6 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             } else if (data[count] == ' ') {
             } else {
                 var operand2 = stack.removeLast()
-                var operand1 = stack.removeLast()
 
                 if (operand2 is Variable) {
                     try {
@@ -189,6 +188,13 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                     }
                 }
                 operand2 as Valuable
+
+                if (data[count] == '±') {
+                    stack.add(Valuable(0, Type.INT) - operand2)
+                    count += 2
+                    continue
+                }
+                var operand1 = stack.removeLast()
 
                 if (data[count] == '=') {
                     operand1 as Variable
@@ -208,7 +214,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                     '*' -> operand1 * operand2
                     '/' -> operand1 / operand2
                     '=' -> {
-                        pushToLocalMemory(operand1.value, Type.INT, operand2)
+                        pushToLocalMemory(operand1.value, Type.INT, operand2) // todo: Any memory
                         operand2
                     }
                     else -> null
