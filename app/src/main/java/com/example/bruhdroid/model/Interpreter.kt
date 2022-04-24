@@ -162,15 +162,20 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         var tempStr = ""
 
         while (count < data.length) {
-            if (data[count].isDigit() || data[count].isLetter()) {
-                while (data[count].isDigit() || data[count].isLetter()) {
+            if (data[count].isDigit() || data[count].isLetter() || data[count] == '"') {
+                while (data[count].isDigit() || data[count].isLetter() || data[count] == '"') {
                     tempStr += data[count]
                     count++
                 }
                 if (tempStr.last().isLetter()) {
                     stack.add(Variable(tempStr))
                 } else {
-                    stack.add(Valuable(tempStr, Type.INT))
+                    if (tempStr.last() == '"' && tempStr.first() == '"') {
+                        // Maybe substring is better solution
+                        stack.add(Valuable(tempStr.replace("\"", ""), Type.STRING))
+                    } else {
+                        stack.add(Valuable(tempStr, Type.INT))
+                    }
                 }
 
                 tempStr = ""
@@ -217,6 +222,9 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                     '-' -> operand1 - operand2
                     '*' -> operand1 * operand2
                     '/' -> operand1 / operand2
+
+                    '&' -> operand1.and(operand2)
+                    '|' -> operand1.or(operand2)
 
                     '<' -> Valuable(operand1 < operand2, Type.BOOL)
                     '>' -> Valuable(operand1 > operand2, Type.BOOL)

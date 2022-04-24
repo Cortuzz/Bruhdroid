@@ -70,4 +70,28 @@ class Valuable(varValue: Any, var type: Type) :
     operator fun compareTo(operand: Valuable): Int {
         return value.toInt() - operand.value.toInt()
     }
+
+    fun and(operand: Valuable): Valuable {
+        val value1 = convertToBool(operand)
+        val value2 = convertToBool(this)
+
+        return Valuable(value1 && value2, Type.BOOL)
+    }
+
+    fun or(operand: Valuable): Valuable {
+        val value1 = convertToBool(operand)
+        val value2 = convertToBool(this)
+
+        return Valuable(value1 || value2, Type.BOOL)
+    }
+
+    private fun convertToBool(valuable: Valuable): Boolean {
+        return when (valuable.type) {
+            Type.BOOL -> valuable.value.toBoolean()
+            Type.INT -> valuable.value.toInt() != 0
+            Type.FLOAT -> valuable.value.toFloat() != 0f
+            Type.STRING -> valuable.value != ""
+            else -> throw TypeError("Bad type")
+        }
+    }
 }

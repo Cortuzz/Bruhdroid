@@ -10,6 +10,10 @@ import com.example.bruhdroid.model.src.SyntaxError
 class Lexer {
     companion object {
         private var totalLines = 0
+        private const val s = "(\\s)*"
+        private const val w = "(([a-zA-Z0-9]+)|([\"]$s[a-zA-Z0-9]*$s[\"]))"
+        private const val rawInputRegex = ("$s[-+]?$s[(]*[-+]?$s[-]?$w$s" +
+                "($s[&|<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w$s[)]*$s)*$s[)]*$s$")
 
         fun checkBlocks(sequence: List<Block>) {
             var errors = ""
@@ -33,8 +37,6 @@ class Lexer {
         }
 
         private fun checkInit(block: Init) {
-            val w = "[a-zA-Z0-9]"
-            val s = "(\\s)*"
             val input = block.body as RawInput
             val str = input.input
 
@@ -43,23 +45,27 @@ class Lexer {
                         "but mutually exclusive symbols '=' and ',' was found\n")
             }
             if (str.contains(',')) {
-                if (!str.contains("^$s$w+$s(,$s$w+$s)+\$".toRegex())) {
+                if (!str.contains("^$s$w$s(,$s$w$s)+\$".toRegex())) {
                     throw SyntaxError("Expected multiply initialization but operator was found\n")
                 }
                 return
             }
             if (str.contains('=')) {
-                var open = 0
-                var closed = 0
+                var openBrackets = 0
+                var closedBrackets = 0
+
+                var apostrophes = 0
+
                 for (symbol in str) {
                     when (symbol) {
-                        '(' -> open++
-                        ')' -> closed++
+                        '(' -> openBrackets++
+                        ')' -> closedBrackets++
+                        '"' -> apostrophes++
                     }
                 }
                 // TODO: New operators
-                if (!str.contains("^($s[a-zA-Z]+$s)=$s[-+]?$s[(]*[-+]?$s[-]?$w+$s($s[<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w+$s[)]*$s)*$s[)]*$s\$".toRegex()) ||
-                    (open != closed)) {
+                if (!str.contains("^($s[a-zA-Z]+$s)=$rawInputRegex".toRegex()) ||
+                    (openBrackets != closedBrackets) || apostrophes % 2 == 1) {
                     throw SyntaxError("Expected initialization but wrong syntax was found\n")
                 }
 
