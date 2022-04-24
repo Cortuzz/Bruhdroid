@@ -12,12 +12,17 @@ import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
+import java.util.*
 
-class CodingActivity : AppCompatActivity() {
+open class CodingActivity : AppCompatActivity(), Observer {
     var viewBlocks: MutableList<View> = mutableListOf()
+    val interpreter = Interpreter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_coding)
+
+        interpreter.addObserver(this)
 
         val addBlock: Button = findViewById(R.id.addBlock)
         addBlock.setOnClickListener {
@@ -43,23 +48,21 @@ class CodingActivity : AppCompatActivity() {
             val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
             blocks.add(Init(RawInput(expression)))
         }
-        val interpreter = Interpreter(blocks)
+        blocks.add(Print(RawInput("a + 3")))
+
         try {
             Lexer.checkBlocks(blocks)
+            interpreter.initBlocks(blocks)
             interpreter.run()
         } catch(e: RuntimeError) {
             print(e.message)
         } catch(e: LexerError) {
             print(e.message)
         }
-
-        printToConsole("a: " + interpreter.memory.pop("a")?.value)
-        printToConsole("b: " + interpreter.memory.pop("b")?.value)
-        printToConsole("c: " + interpreter.memory.pop("c")?.value)
     }
 
-    private fun printToConsole(message: String){
+    override fun update(p0: Observable?, p1: Any?) {
         val console: TextView = findViewById(R.id.console)
-        console.append(message+"\n")
+        console.append(interpreter.popOutput() + "\n")
     }
 }

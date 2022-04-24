@@ -5,13 +5,19 @@ import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.StackCorruptionError
 import com.example.bruhdroid.model.src.Type
+import java.util.*
 
-class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
+class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false): Observable() {
+    var output = ""
     var memory = Memory(null)
     var totalLines = 0
 
+    fun initBlocks(_blocks: List<Block>) {
+        blocks = _blocks
+    }
+
     fun run(blockchain: List<Block>? = null) {
-        var currentBlockchain = blocks
+        var currentBlockchain = blocks!!
         if (blockchain != null) {
             memory = Memory(memory)
             currentBlockchain = blockchain
@@ -36,6 +42,16 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
         totalLines++
         block.line = totalLines
         when (block.instruction) {
+            Instruction.PRINT -> {
+                block as Print
+                val rawList = (block.body as RawInput).input.split(',')
+
+                for (raw in rawList) {
+                    output += parseRawBlock(RawInput(raw)).value
+                }
+                setChanged()
+                notifyObservers()
+            }
             Instruction.INIT -> {
                 block as Init
                 val raw = block.body as RawInput
@@ -243,6 +259,16 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
             count++
         }
 
-        return stack.removeLast() as Valuable
+        val last = stack.removeLast()
+        if (last is Variable) {
+            return tryFindInMemory(memory, last) as Valuable
+        }
+        return last as Valuable
+    }
+
+    fun popOutput(): String {
+        val out = output
+        output = ""
+        return out
     }
 }

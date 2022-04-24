@@ -11,34 +11,29 @@
         android:id="@+id/launchButton"
         android:layout_width="117dp"
         android:layout_height="48dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="16dp"
         android:background="#FFAE0B"
         android:text="@string/start_code"
         android:textColor="#37474F"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/main_code"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.363" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:id="@+id/main_code"
         android:layout_width="414dp"
         android:layout_height="424dp"
+        android:layout_marginTop="20dp"
         android:background="#AD2F7C9F"
         android:contentDescription="@string/block"
         android:orientation="vertical"
         android:scrollbars="none"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.666"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.325">
+        app:layout_constraintTop_toBottomOf="@+id/launchButton">
 
         <LinearLayout
             android:id="@+id/container"
@@ -51,32 +46,15 @@
         </LinearLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/addBlock"
-        android:layout_width="208dp"
-        android:layout_height="51dp"
-        android:layout_marginBottom="16dp"
-        android:background="#67CF40"
-        android:text="@string/block"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/main_code"
-        app:layout_constraintVertical_bias="1.0"
-        tools:ignore="DuplicateSpeakableTextCheck" />
-
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="98dp"
-        android:layout_marginBottom="88dp"
         android:background="#474343"
         android:contentDescription="@string/console"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_code">
 
         <TextView
             android:id="@+id/console"
@@ -86,5 +64,19 @@
             android:textColor="#EF9A9A"
             android:textSize="20sp" />
     </ScrollView>
+
+    <Button
+        android:id="@+id/addBlock"
+        android:layout_width="208dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="16dp"
+        android:background="#67CF40"
+        android:text="@string/block"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2"
+        tools:ignore="DuplicateSpeakableTextCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,3 +11,5 @@ data class Init(val body: Block) : Block(Instruction.INIT, body, null)
 data class Assign(val name: String, val body: Block) : Block(Instruction.SET, body, null)
 
 data class RawInput(val input: String) : Block(Instruction.RAW, null, null)
+
+data class Print(val body: Block) : Block(Instruction.PRINT, body, null)
