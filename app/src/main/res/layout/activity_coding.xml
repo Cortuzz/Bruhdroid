@@ -66,15 +66,31 @@
     </ScrollView>
 
     <Button
+        android:id="@+id/chooseBlock"
+        android:layout_width="168dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:background="#40CFCF"
+        android:text="@string/choose_block"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.942"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2"
+        tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <Button
         android:id="@+id/addBlock"
-        android:layout_width="208dp"
-        android:layout_height="51dp"
+        android:layout_width="172dp"
+        android:layout_height="50dp"
         android:layout_marginTop="16dp"
         android:background="#67CF40"
         android:text="@string/block"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.078"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scrollView2"
         tools:ignore="DuplicateSpeakableTextCheck" />

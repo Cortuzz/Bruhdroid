@@ -12,7 +12,7 @@
         android:layout_width="100dp"
         android:layout_height="37dp"
         android:layout_marginEnd="16dp"
-        android:text="Print"
+        android:text="Input"
         android:textAlignment="center"
         android:textColor="#546E7A"
         android:textSize="34sp"

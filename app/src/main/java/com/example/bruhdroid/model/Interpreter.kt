@@ -9,6 +9,8 @@ import java.util.*
 
 class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false): Observable() {
     var output = ""
+    var input = ""
+    var waitingForInput = false
     var memory = Memory(null)
     var totalLines = 0
 
@@ -49,6 +51,11 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 for (raw in rawList) {
                     output += parseRawBlock(RawInput(raw)).value
                 }
+                setChanged()
+                notifyObservers()
+            }
+            Instruction.INPUT -> {
+                waitingForInput = true
                 setChanged()
                 notifyObservers()
             }
