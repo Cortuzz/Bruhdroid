@@ -31,13 +31,13 @@ class CodingActivity : AppCompatActivity() {
 
     private fun buildBlock() {
         val layout: LinearLayout = findViewById(R.id.container)
-        val view = layoutInflater.inflate(R.layout.block, null)
+        val view = layoutInflater.inflate(R.layout.block_init, null)
         layout.addView(view)
         viewBlocks.add(view)
     }
 
     private fun Launch() {
-        var blocks: MutableList<Block> = mutableListOf()
+        val blocks: MutableList<Block> = mutableListOf()
         for (view in viewBlocks) {
             val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
             blocks.add(Init(RawInput(expression)))

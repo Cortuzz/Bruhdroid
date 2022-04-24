@@ -27,25 +27,26 @@
 
     <ScrollView
         android:id="@+id/scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="567dp"
+        android:layout_width="414dp"
+        android:layout_height="424dp"
         android:background="#AD2F7C9F"
         android:contentDescription="@string/block"
         android:orientation="vertical"
         android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.465">
+        app:layout_constraintVertical_bias="0.325">
 
         <LinearLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:divider="@drawable/empty_tall_divider"
             android:orientation="vertical"
-            android:showDividers="middle"
-            android:divider="@drawable/empty_tall_divider">
+            android:showDividers="middle">
 
         </LinearLayout>
     </ScrollView>
@@ -66,4 +67,18 @@
         app:layout_constraintTop_toBottomOf="@+id/scrollView"
         app:layout_constraintVertical_bias="1.0"
         tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <ScrollView
+        android:layout_width="353dp"
+        android:layout_height="92dp"
+        android:layout_marginBottom="88dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
