@@ -58,4 +58,27 @@ class ArithmeticUnitTest {
         Assert.assertEquals("72", memory["b"]?.value)
         Assert.assertEquals("-13", memory["c"]?.value)
     }
+
+    @Test
+    fun basicInequalityArithmetic() {
+        val a = Init(RawInput("a = -5"))
+        val b = Init(RawInput("b = 3"))
+        val c = Init(RawInput("c = a < b"))
+        val d = Init(RawInput("d = a > b"))
+
+        val interpreter = Interpreter(listOf(a, b, c, d))
+        interpreter.run()
+
+        val memory = interpreter.memory.stack
+        Assert.assertEquals(4, memory.size)
+
+        Assert.assertEquals("-5", memory["a"]?.value)
+        Assert.assertEquals("3", memory["b"]?.value)
+
+        Assert.assertEquals("true", memory["c"]?.value)
+        Assert.assertEquals(Type.BOOL, memory["c"]?.type)
+
+        Assert.assertEquals("false", memory["d"]?.value)
+        Assert.assertEquals(Type.BOOL, memory["d"]?.type)
+    }
 }

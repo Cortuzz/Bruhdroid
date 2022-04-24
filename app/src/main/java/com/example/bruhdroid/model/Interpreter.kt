@@ -189,8 +189,12 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                 }
                 operand2 as Valuable
 
-                if (data[count] == '±') {
-                    stack.add(Valuable(0, Type.INT) - operand2)
+                if (data[count] in "∓±") {
+                    stack.add(when (data[count]) {
+                        '±' -> throw Exception()
+                        '∓' -> -operand2
+                        else -> throw Exception()
+                    })
                     count += 2
                     continue
                 }
@@ -213,6 +217,9 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                     '-' -> operand1 - operand2
                     '*' -> operand1 * operand2
                     '/' -> operand1 / operand2
+
+                    '<' -> Valuable(operand1 < operand2, Type.BOOL)
+                    '>' -> Valuable(operand1 > operand2, Type.BOOL)
                     '=' -> {
                         pushToLocalMemory(operand1.value, Type.INT, operand2) // todo: Any memory
                         operand2

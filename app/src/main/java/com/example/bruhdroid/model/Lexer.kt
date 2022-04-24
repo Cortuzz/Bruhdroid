@@ -58,7 +58,7 @@ class Lexer {
                     }
                 }
                 // TODO: New operators
-                if (!str.contains("^($s[a-zA-Z]+$s)=$s[-]?$s[(]*[-]?$s[-]?$w+$s($s[+*/-]$s[-]?$s[(]*$s[-]?$s[-]?$s$w+$s[)]*$s)*$s[)]*$s\$".toRegex()) ||
+                if (!str.contains("^($s[a-zA-Z]+$s)=$s[-+]?$s[(]*[-+]?$s[-]?$w+$s($s[<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w+$s[)]*$s)*$s[)]*$s\$".toRegex()) ||
                     (open != closed)) {
                     throw SyntaxError("Expected initialization but wrong syntax was found\n")
                 }

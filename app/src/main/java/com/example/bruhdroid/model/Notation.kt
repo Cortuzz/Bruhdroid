@@ -1,22 +1,23 @@
 package com.example.bruhdroid.model
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
 
 class Notation {
     companion object {
         private enum class Operator(val operator: Char, val priority: Int) {
-            UNARY_MINUS('±', 5),
-            MULTIPLY('*', 4), DIVIDE('/', 4),
-            SUBTRACT('-', 3), ADD('+', 3),
-            OPEN_BRACKET(')', 2), CLOSE_BRACKET(')', 2),
-            DEFINE('=', 1)
+            UNARY_MINUS('∓', 8), UNARY_PLUS('±', 8),
+            MULTIPLY('*', 7), DIVIDE('/', 7),
+            SUBTRACT('-', 6), ADD('+', 6),
+            LESS('<', 5), GREATER('>', 5),
+            NOT('!', 4), AND('&', 3), OR('|', 2),
+            OPEN_BRACKET(')', 1), CLOSE_BRACKET(')', 1),
+            DEFINE('=', 0)
         }
         private val operators = mapOf(
             '-' to Operator.SUBTRACT, '+' to Operator.ADD, '*' to Operator.MULTIPLY,
             '/' to Operator.DIVIDE, '(' to Operator.OPEN_BRACKET, ')' to Operator.CLOSE_BRACKET,
-            '=' to Operator.DEFINE, '±' to Operator.UNARY_MINUS)
+            '=' to Operator.DEFINE, '∓' to Operator.UNARY_MINUS, '±' to Operator.UNARY_PLUS,
+            '!' to Operator.NOT, '&' to Operator.AND, '|' to Operator.OR, '<' to Operator.LESS,
+            '>' to Operator.GREATER)
 
         fun convertToRpn(infixNotation: String): String {
             var mayUnary = true
@@ -52,14 +53,17 @@ class Notation {
                             mayUnary = false
                         }
                         else -> {
-                            if (mayUnary && infixNotation[count] == '-') {
-                                opStack.add('±')
+                            if (mayUnary && infixNotation[count] in "+-") {
+                                when (infixNotation[count]) {
+                                    '-' -> opStack.add('∓')
+                                    '+' -> opStack.add('±')
+                                }
                                 mayUnary = false
                                 count++
                                 continue
                             }
                             if (opStack.size > 0) {
-                                while (opStack.last() == '±') {
+                                while (opStack.last() == '±' || opStack.last() == '∓') {
                                     postfixNotation += opStack.removeLast() + " "
                                 }
                                 

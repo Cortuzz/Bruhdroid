@@ -8,6 +8,17 @@ class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL,null, null) {
     var value: String = varValue.toString()
 
+    operator fun unaryPlus() {
+        throw TypeError("dolbaeb?")
+    }
+
+    operator fun unaryMinus(): Valuable {
+        if (type == Type.INT) {
+            return Valuable(-value.toInt(), type)
+        }
+        throw TypeError("Unary minus can't be applied to type $type")
+    }
+
     operator fun plus(operand: Valuable): Valuable {
         if (type == Type.STRING && operand.type == Type.STRING) {
             return Valuable(value + operand.value, type)
@@ -54,5 +65,9 @@ class Valuable(varValue: Any, var type: Type) :
             return Valuable(value.toInt() % operand.value.toInt(), type)
         }
         throw TypeError("Expected INT or FLOAT but found ${operand.type}")
+    }
+
+    operator fun compareTo(operand: Valuable): Int {
+        return value.toInt() - operand.value.toInt()
     }
 }
