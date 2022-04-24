@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.TextView
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
@@ -52,8 +53,13 @@ class CodingActivity : AppCompatActivity() {
             print(e.message)
         }
 
-        println("a: " + interpreter.memory.pop("a")?.value)
-        println("b: " + interpreter.memory.pop("b")?.value)
-        println("c: " + interpreter.memory.pop("c")?.value)
+        printToConsole("a: " + interpreter.memory.pop("a")?.value)
+        printToConsole("b: " + interpreter.memory.pop("b")?.value)
+        printToConsole("c: " + interpreter.memory.pop("c")?.value)
+    }
+
+    private fun printToConsole(message: String){
+        val console: TextView = findViewById(R.id.console)
+        console.append(message+"\n")
     }
 }
