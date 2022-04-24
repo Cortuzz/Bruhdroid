@@ -163,7 +163,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
 
         while (count < data.length) {
             if (data[count].isDigit() || data[count].isLetter() || data[count] == '"') {
-                while (data[count].isDigit() || data[count].isLetter() || data[count] == '"') {
+                while (data[count].isDigit() || data[count].isLetter() || data[count] in "\".") {
                     tempStr += data[count]
                     count++
                 }
@@ -173,6 +173,8 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
                     if (tempStr.last() == '"' && tempStr.first() == '"') {
                         // Maybe substring is better solution
                         stack.add(Valuable(tempStr.replace("\"", ""), Type.STRING))
+                    } else if (tempStr.contains('.')) {
+                        stack.add(Valuable(tempStr, Type.FLOAT))
                     } else {
                         stack.add(Valuable(tempStr, Type.INT))
                     }
@@ -196,7 +198,7 @@ class Interpreter(val blocks: List<Block>, val debugMode: Boolean = false) {
 
                 if (data[count] in "∓±") {
                     stack.add(when (data[count]) {
-                        '±' -> throw Exception()
+                        '±' -> +operand2
                         '∓' -> -operand2
                         else -> throw Exception()
                     })

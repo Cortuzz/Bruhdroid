@@ -11,9 +11,9 @@ class Lexer {
     companion object {
         private var totalLines = 0
         private const val s = "(\\s)*"
-        private const val w = "(([a-zA-Z0-9]+)|([\"]$s[a-zA-Z0-9]*$s[\"]))"
-        private const val rawInputRegex = ("$s[-+]?$s[(]*[-+]?$s[-]?$w$s" +
-                "($s[&|<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w$s[)]*$s)*$s[)]*$s$")
+        private const val w = "(([a-zA-Z0-9]+)|([\"].[\"])|([0-9]+[.][0-9]+))"
+        private const val rawInputRegex = "$s[-+]?$s[(]*[-+]?$s[-]?$w$s" +
+                "($s[&|<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w$s[)]*$s)*$s[)]*$s$"
 
         fun checkBlocks(sequence: List<Block>) {
             var errors = ""

@@ -8,13 +8,25 @@ class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL,null, null) {
     var value: String = varValue.toString()
 
-    operator fun unaryPlus() {
-        throw TypeError("dolbaeb?")
+    operator fun unaryPlus(): Valuable {
+        if (type == Type.STRING) {
+            if (value.contains('.')) {
+                return Valuable(convertToFloat(this), Type.FLOAT)
+            }
+            return Valuable(convertToInt(this), Type.INT)
+        }
+        if (type == Type.UNDEFINED) {
+            throw TypeError("Unary plus can't be applied to type $type")
+        }
+        return this
     }
 
     operator fun unaryMinus(): Valuable {
         if (type == Type.INT) {
             return Valuable(-value.toInt(), type)
+        }
+        if (type == Type.FLOAT) {
+            return Valuable(-value.toFloat(), type)
         }
         throw TypeError("Unary minus can't be applied to type $type")
     }
@@ -23,22 +35,37 @@ class Valuable(varValue: Any, var type: Type) :
         if (type == Type.STRING && operand.type == Type.STRING) {
             return Valuable(value + operand.value, type)
         }
-        if (type == Type.INT && operand.type == Type.INT) {
-            return Valuable(value.toInt() + operand.value.toInt(), type)
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types && operand.type in types) {
+            if (checkFloating(this, operand)) {
+                return Valuable(value.toFloat() + operand.value.toFloat(), Type.FLOAT)
+            }
+            return Valuable(value.toInt() + operand.value.toInt(), Type.INT)
         }
         throw TypeError("Expected $type but found ${operand.type}")
     }
 
     operator fun minus(operand: Valuable): Valuable {
-        if (type == Type.INT && operand.type == Type.INT) {
-            return Valuable(value.toInt() - operand.value.toInt(), type)
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types && operand.type in types) {
+            if (checkFloating(this, operand)) {
+                return Valuable(value.toFloat() - operand.value.toFloat(), Type.FLOAT)
+            }
+            return Valuable(value.toInt() - operand.value.toInt(), Type.INT)
         }
         throw TypeError("Expected INT or FLOAT but found STRING")
     }
 
     operator fun times(operand: Valuable): Valuable {
-        if (type == Type.INT && operand.type == Type.INT) {
-            return Valuable(value.toInt() * operand.value.toInt(), type)
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types && operand.type in types) {
+            if (checkFloating(this, operand)) {
+                return Valuable(value.toFloat() * operand.value.toFloat(), Type.FLOAT)
+            }
+            return Valuable(value.toInt() * operand.value.toInt(), Type.INT)
         }
         if (type == Type.INT && operand.type == Type.STRING) {
             return Valuable(operand.value.repeat(value.toInt()), operand.type)
@@ -54,8 +81,13 @@ class Valuable(varValue: Any, var type: Type) :
     }
 
     operator fun div(operand: Valuable): Valuable {
-        if (type == Type.INT && operand.type == Type.INT) {
-            return Valuable(value.toInt() / operand.value.toInt(), type)
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types && operand.type in types) {
+                if (checkFloating(this, operand)) {
+                    return Valuable(value.toFloat() / operand.value.toFloat(), Type.FLOAT)
+                }
+            return Valuable(value.toInt() / operand.value.toInt(), Type.INT)
         }
         throw TypeError("Expected INT or FLOAT but found ${operand.type}")
     }
@@ -93,5 +125,44 @@ class Valuable(varValue: Any, var type: Type) :
             Type.STRING -> valuable.value != ""
             else -> throw TypeError("Bad type")
         }
+    }
+
+    private fun convertToFloat(valuable: Valuable): Float {
+        return when (valuable.type) {
+            //Type.BOOL -> valuable.value.toBoolean() todo: Boolean
+            Type.INT -> valuable.value.toFloat()
+            Type.FLOAT -> valuable.value.toFloat()
+            Type.STRING -> {
+                try {
+                    valuable.value.toFloat()
+                } catch (e: Exception) {
+                    throw TypeError("Expected number-containing string but ${valuable.value} was found")
+                }
+            }
+            else -> throw TypeError("Bad type")
+        }
+    }
+
+    private fun convertToInt(valuable: Valuable): Int {
+        return when (valuable.type) {
+            //Type.BOOL -> valuable.value.toBoolean() todo: Boolean
+            Type.INT -> valuable.value.toInt()
+            Type.FLOAT -> valuable.value.toInt()
+            Type.STRING -> {
+                try {
+                    valuable.value.toInt()
+                } catch (e: Exception) {
+                    throw TypeError("Expected number-containing string but ${valuable.value} was found")
+                }
+            }
+            else -> throw TypeError("Bad type")
+        }
+    }
+
+    private fun checkFloating(val1: Valuable, val2: Valuable): Boolean {
+        if (val1.type == Type.FLOAT || val2.type == Type.FLOAT) {
+            return true
+        }
+        return false
     }
 }
