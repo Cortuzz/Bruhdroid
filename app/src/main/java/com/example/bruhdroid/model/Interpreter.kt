@@ -12,37 +12,53 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     var input = ""
     var waitingForInput = false
     var memory = Memory(null)
-    var totalLines = 0
+    private var appliedConditions: MutableList<Boolean> = mutableListOf()
+    private var totalLines = 0
+    private var currentLine = -1
 
     fun initBlocks(_blocks: List<Block>) {
         blocks = _blocks
     }
 
-    fun run(blockchain: List<Block>? = null) {
-        var currentBlockchain = blocks!!
-        if (blockchain != null) {
-            memory = Memory(memory)
-            currentBlockchain = blockchain
-        }
-
+    fun run() {
         var statementApplied = false // todo: check statement
-        for (block in currentBlockchain) {
+        while (currentLine < blocks!!.size - 1) {
+            currentLine++
+            val block = blocks!![currentLine]
+
             try {
-                parse(block, statementApplied)
+                if (parse(block, statementApplied)) {
+                    skipFalseBranches()
+                }
             } catch (e: RuntimeError) {
                 throw RuntimeError("${e.message}\nAt line ${block.line}, " +
                         "At instruction: ${block.instruction}")
             }
         }
+    }
 
-        if (memory.prevMemory != null) {
-            memory = memory.prevMemory!!
+    private fun skipFalseBranches() {
+        var count = 1
+        while (currentLine < blocks!!.size - 1) {
+            currentLine++
+            val block = blocks!![currentLine]
+
+            if (block.instruction == Instruction.IF) { // todo: cycle check
+                count++
+            }
+            if (block.instruction == Instruction.END) {
+                count--
+            }
+
+            if (count == 0 || (count == 1 && (block.instruction == Instruction.ELIF ||
+                        block.instruction == Instruction.ELSE))) {
+                currentLine--
+                return
+            }
         }
     }
 
     private fun parse(block: Block, statementApplied: Boolean): Boolean {
-        totalLines++
-        block.line = totalLines
         when (block.instruction) {
             Instruction.PRINT -> {
                 val rawList = block.expression.split(',')
@@ -64,21 +80,32 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     parseRawBlock(raw)
                 }
             }
+            Instruction.SET -> {
+                val raw = block.expression
+                parseRawBlock(raw)
+            }
             Instruction.IF -> {
-                return if (checkStatement(block.expression)) {
-                    true
-                } else {
-                    false
-                }
+                val statement = checkStatement(block.expression)
+                appliedConditions.add(statement)
+                return !statement
             }
             Instruction.ELIF -> {
-                if (!statementApplied && checkStatement(block.expression)) {
+                if (appliedConditions.last()) {
                     return true
                 }
+                val statement = checkStatement(block.expression)
+                appliedConditions[appliedConditions.lastIndex] = statement
+                return !statement
             }
             Instruction.ELSE -> {
-                if (!statementApplied) {
+                if (appliedConditions.last()) {
+                    return true
                 }
+                return false
+            }
+            Instruction.END -> {
+                appliedConditions.removeLast()
+                return false
             }
             else -> parseRawBlock(block.expression)
         }
@@ -243,7 +270,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     '<' -> Valuable(operand1 < operand2, Type.BOOL)
                     '>' -> Valuable(operand1 > operand2, Type.BOOL)
                     '=' -> {
-                        pushToLocalMemory(operand1.value, Type.INT, operand2) // todo: Any memory
+                        tryPushToAnyMemory(memory, operand1.value, Type.INT, operand2) // todo: Any memory
                         operand2
                     }
                     else -> null
