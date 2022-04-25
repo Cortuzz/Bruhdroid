@@ -13,8 +13,8 @@ import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
 
 class Controller: Observable() {
-    lateinit var lexerErrors: String
-    lateinit var runtimeErrors: String
+    private var lexerErrors = ""
+    private var runtimeErrors = ""
 
     fun runProgram(interpreter: Interpreter, instructions: List<Instruction>, viewBlocks: List<View>) {
         val blocks: MutableList<Block> = mutableListOf()
