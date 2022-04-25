@@ -1,6 +1,7 @@
 package com.example.bruhdroid.interpreter.memory
 
 import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.blocks.*
 import org.junit.Assert.assertEquals
@@ -10,9 +11,9 @@ import org.junit.Test
 class OneLeveledUnitTest {
     @Test
     fun checkMemorySize() {
-        val a = Init(RawInput("a = 5"))
-        val b = Init(RawInput("b = 423"))
-        val c = Init(RawInput("a = 75"))
+        val a = Block(Instruction.INIT,"a = 5")
+        val b = Block(Instruction.INIT,"b = 423")
+        val c = Block(Instruction.INIT,"a = 75")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()

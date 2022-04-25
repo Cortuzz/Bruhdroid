@@ -1,5 +1,5 @@
 package com.example.bruhdroid.model.src
 
 enum class Instruction {
-    VAL, VAR, INIT, SET, IF, ELIF, ELSE, SCOPE, RAW, PRINT, INPUT, END
+    VAL, VAR, INIT, SET, IF, ELIF, ELSE, PRINT, INPUT, END
 }

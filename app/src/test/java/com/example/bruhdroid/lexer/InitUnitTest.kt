@@ -2,6 +2,7 @@ package com.example.bruhdroid.lexer
 
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.Lexer
+import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.blocks.*
@@ -12,9 +13,9 @@ import org.junit.Test
 class InitUnitTest {
     @Test
     fun basicExpression() {
-        val expression1 = Init(RawInput(" a   =   5 + 7   *1   - 3 "))
-        val expression2 = Init(RawInput("    a= gt + 5  "))
-        val expression3 = Init(RawInput(" a = f-a "))
+        val expression1 = Block(Instruction.INIT," a   =   5 + 7   *1   - 3 ")
+        val expression2 = Block(Instruction.INIT,"    a= gt + 5  ")
+        val expression3 = Block(Instruction.INIT," a = f-a ")
 
         val blocks = listOf(expression1, expression2, expression3)
 
@@ -30,9 +31,9 @@ class InitUnitTest {
 
     @Test
     fun multiplyInitialization() {
-        val expression1 = Init(RawInput("a,b,c"))
-        val expression2 = Init(RawInput("  a     , b "))
-        val expression3 = Init(RawInput(" a,  b   "))
+        val expression1 = Block(Instruction.INIT,"a,b,c")
+        val expression2 = Block(Instruction.INIT,"  a     , b ")
+        val expression3 = Block(Instruction.INIT," a,  b   ")
 
         val blocks = listOf(expression1, expression2, expression3)
 
@@ -60,11 +61,11 @@ class InitUnitTest {
                 "SyntaxError: Expected multiply initialization but operator was found\n" +
                 "Line: 5, Instruction: INIT"
 
-        val expression1 = Init(RawInput("a,b,c ="))
-        val expression2 = Init(RawInput("  a     , b 56"))
-        val expression3 = Init(RawInput(" a,  b_   "))
-        val expression4 = Init(RawInput(" ,a,  b"))
-        val expression5 = Init(RawInput("a,b,"))
+        val expression1 = Block(Instruction.INIT,"a,b,c =")
+        val expression2 = Block(Instruction.INIT,"  a     , b 56")
+        val expression3 = Block(Instruction.INIT," a,  b_   ")
+        val expression4 = Block(Instruction.INIT," ,a,  b")
+        val expression5 = Block(Instruction.INIT,"a,b,")
 
         val blocks = listOf(expression1, expression2, expression3, expression4, expression5)
 
@@ -92,11 +93,11 @@ class InitUnitTest {
                 "SyntaxError: Expected initialization but wrong syntax was found\n" +
                 "Line: 5, Instruction: INIT"
 
-        val expression1 = Init(RawInput("a - b = c"))
-        val expression2 = Init(RawInput(" a = 4 - "))
-        val expression3 = Init(RawInput(" a = 4 - 2 +"))
-        val expression4 = Init(RawInput(" a - = 5"))
-        val expression5 = Init(RawInput("a == b"))
+        val expression1 = Block(Instruction.INIT,"a - b = c")
+        val expression2 = Block(Instruction.INIT," a = 4 - ")
+        val expression3 = Block(Instruction.INIT," a = 4 - 2 +")
+        val expression4 = Block(Instruction.INIT," a - = 5")
+        val expression5 = Block(Instruction.INIT,"a == b")
 
         val blocks = listOf(expression1, expression2, expression3, expression4, expression5)
 
@@ -120,9 +121,9 @@ class InitUnitTest {
                 "SyntaxError: Expected initialization but declaration was not found\n" +
                 "Line: 3, Instruction: INIT"
 
-        val expression1 = Init(RawInput(""))
-        val expression2 = Init(RawInput("       "))
-        val expression3 = Init(RawInput("  b    54 + a "))
+        val expression1 = Block(Instruction.INIT,"")
+        val expression2 = Block(Instruction.INIT,"       ")
+        val expression3 = Block(Instruction.INIT,"  b    54 + a ")
 
         val blocks = listOf(expression1, expression2, expression3)
 

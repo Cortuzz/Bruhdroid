@@ -1,18 +1,18 @@
 package com.example.bruhdroid.interpreter.instructions
 
 import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Init
-import com.example.bruhdroid.model.src.blocks.RawInput
+import com.example.bruhdroid.model.src.blocks.Block
 import org.junit.Assert
 import org.junit.Test
 
 class InitializationUnitTest {
     @Test
     fun variableInit() {
-        val a = Init(RawInput("a"))
-        val b = Init(RawInput("b"))
-        val c = Init(RawInput("a"))
+        val a = Block(Instruction.INIT,"a")
+        val b = Block(Instruction.INIT,"b")
+        val c = Block(Instruction.INIT,"a")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -26,7 +26,7 @@ class InitializationUnitTest {
 
     @Test
     fun multiplyVariableInit() {
-        val a = Init(RawInput("a, b, c, d"))
+        val a = Block(Instruction.INIT,"a, b, c, d")
 
         val interpreter = Interpreter(listOf(a))
         interpreter.run()
@@ -42,9 +42,9 @@ class InitializationUnitTest {
 
     @Test
     fun variableInitByValuable() {
-        val a = Init(RawInput("a = 5"))
-        val b = Init(RawInput("b = 423"))
-        val c = Init(RawInput("a = 75"))
+        val a = Block(Instruction.INIT,"a = 5")
+        val b = Block(Instruction.INIT,"b = 423")
+        val c = Block(Instruction.INIT,"a = 75")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -58,8 +58,8 @@ class InitializationUnitTest {
 
     @Test
     fun variableInitByPreviousValue() {
-        val a = Init(RawInput("a = 6 * (1 + 3)"))
-        val b = Init(RawInput("a =  a - 10"))
+        val a = Block(Instruction.INIT,"a = 6 * (1 + 3)")
+        val b = Block(Instruction.INIT,"a =  a - 10")
 
         val interpreter = Interpreter(listOf(a, b))
         interpreter.run()
@@ -72,9 +72,9 @@ class InitializationUnitTest {
 
     @Test
     fun variableInitWithUnaryMinus() {
-        val a = Init(RawInput("a = -5"))
-        val b = Init(RawInput("b = -a"))
-        val c = Init(RawInput("c = -b * -a"))
+        val a = Block(Instruction.INIT,"a = -5")
+        val b = Block(Instruction.INIT,"b = -a")
+        val c = Block(Instruction.INIT,"c = -b * -a")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()

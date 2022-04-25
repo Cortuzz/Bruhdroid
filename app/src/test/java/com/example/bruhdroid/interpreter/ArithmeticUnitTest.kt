@@ -1,18 +1,18 @@
 package com.example.bruhdroid.interpreter
 
 import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Init
-import com.example.bruhdroid.model.src.blocks.RawInput
+import com.example.bruhdroid.model.src.blocks.Block
 import org.junit.Assert
 import org.junit.Test
 
 class ArithmeticUnitTest {
     @Test
     fun valuableArithmetic() {
-        val a = Init(RawInput("a = 5 * 2"))
-        val b = Init(RawInput("b = 5 + 1 * 2"))
-        val c = Init(RawInput("c = 9 * (1 - 5)"))
+        val a = Block(Instruction.INIT,"a = 5 * 2")
+        val b = Block(Instruction.INIT,"b = 5 + 1 * 2")
+        val c = Block(Instruction.INIT,"c = 9 * (1 - 5)")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -27,9 +27,9 @@ class ArithmeticUnitTest {
 
     @Test
     fun variableArithmetic() {
-        val a = Init(RawInput("a = 6 * (1 + 3)"))
-        val b = Init(RawInput("b = a - 20"))
-        val c = Init(RawInput("c = b * a - 50"))
+        val a = Block(Instruction.INIT,"a = 6 * (1 + 3)")
+        val b = Block(Instruction.INIT,"b = a - 20")
+        val c = Block(Instruction.INIT,"c = b * a - 50")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -44,9 +44,9 @@ class ArithmeticUnitTest {
 
     @Test
     fun unaryArithmetic() {
-        val a = Init(RawInput("a = -1 * -5"))
-        val b = Init(RawInput("b = (-3 + -a) * -9"))
-        val c = Init(RawInput("c = 100 * (-12 / -a * -(b)) / -(-3) / a / b"))
+        val a = Block(Instruction.INIT,"a = -1 * -5")
+        val b = Block(Instruction.INIT,"b = (-3 + -a) * -9")
+        val c = Block(Instruction.INIT,"c = 100 * (-12 / -a * -(b)) / -(-3) / a / b")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -61,10 +61,10 @@ class ArithmeticUnitTest {
 
     @Test
     fun basicInequalityArithmetic() {
-        val a = Init(RawInput("a = -5"))
-        val b = Init(RawInput("b = 3"))
-        val c = Init(RawInput("c = a < b"))
-        val d = Init(RawInput("d = a > b"))
+        val a = Block(Instruction.INIT,"a = -5")
+        val b = Block(Instruction.INIT,"b = 3")
+        val c = Block(Instruction.INIT,"c = a < b")
+        val d = Block(Instruction.INIT,"d = a > b")
 
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
