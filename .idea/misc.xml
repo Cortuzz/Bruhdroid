@@ -3,7 +3,20 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.26" />
+        <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/drawable/empty_tall_divider.xml" value="0.26" />
+        <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/drawable/ic_launcher_background.xml" value="0.26" />
+        <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.2625" />
+        <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.24791666666666667" />
+        <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/layout/block.xml" value="0.33" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/empty_tall_divider.xml" value="0.314" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_blocks.xml" value="0.31145833333333334" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.33" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block.xml" value="0.5" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_init.xml" value="0.4750905797101449" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_input.xml" value="0.29583333333333334" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_print.xml" value="0.4750905797101449" />
       </map>
     </option>
   </component>

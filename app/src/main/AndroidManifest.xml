@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bruhdroid">
         <activity
+            android:name=".BlocksActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CodingActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

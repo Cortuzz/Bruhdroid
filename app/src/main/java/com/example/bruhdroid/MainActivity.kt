@@ -1,11 +1,11 @@
 package com.example.bruhdroid
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import com.example.bruhdroid.variables.Integer
-import com.example.bruhdroid.variables.Str
+import android.widget.Button
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
@@ -13,11 +13,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val a = Integer("a", 5)
-        val b = Integer("b", 2)
+        startButton()
+        exitButton()
     }
 
-    fun exit(view: View) {
-        exitProcess(0)
+    private fun startButton() {
+        val startButton: Button = findViewById(R.id.startButton)
+        startButton.setOnClickListener {
+            val intent = Intent(this, CodingActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun exitButton() {
+        val exitButton: Button = findViewById(R.id.exitButton)
+        exitButton.setOnClickListener {
+            exitProcess(0)
+        }
     }
 }
