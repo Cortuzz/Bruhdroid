@@ -92,7 +92,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             buildAlertDialog("LEXER ERROR", lexerErrors)
         }
         if (output.isNotEmpty()) {
-            console.append(interpreter.popOutput() + "\n")
+            console.append(output + "\n")
         }
     }
 }

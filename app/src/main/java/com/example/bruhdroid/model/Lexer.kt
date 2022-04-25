@@ -9,9 +9,9 @@ class Lexer {
     companion object {
         private var totalLines = 0
         private const val s = "(\\s)*"
-        private const val w = "(([a-zA-Z0-9]+)|([\"].[\"])|([0-9]+[.][0-9]+))"
+        private const val w = "(([a-zA-Z0-9]+)|([\"].[\"])|([0-9]+[.][0-9]+))" // todo: not "
         private const val rawInputRegex = "$s[-+]?$s[(]*[-+]?$s[-]?$w$s" +
-                "($s[&|<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w$s[)]*$s)*$s[)]*$s$"
+                "($s[&|<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w$s[)]*$s)*$s[)]*$s"
 
         fun checkBlocks(sequence: List<Block>) {
             var errors = ""
@@ -23,6 +23,7 @@ class Lexer {
                 try {
                     when (block.instruction) {
                         Instruction.INIT -> checkInit(block.expression)
+                        Instruction.PRINT -> checkPrint(block.expression)
                     }
                 } catch (e: SyntaxError) {
                     errors += "${e.message}Line: ${block.line}, " +
@@ -46,21 +47,10 @@ class Lexer {
                 return
             }
             if (str.contains('=')) {
-                var openBrackets = 0
-                var closedBrackets = 0
 
-                var apostrophes = 0
-
-                for (symbol in str) {
-                    when (symbol) {
-                        '(' -> openBrackets++
-                        ')' -> closedBrackets++
-                        '"' -> apostrophes++
-                    }
-                }
                 // TODO: New operators
-                if (!str.contains("^($s[a-zA-Z]+$s)=$rawInputRegex".toRegex()) ||
-                    (openBrackets != closedBrackets) || apostrophes % 2 == 1) {
+                if (!str.contains("^($s[a-zA-Z]+$s)=$rawInputRegex$".toRegex()) &&
+                    (checkBrackets(str))) {
                     throw SyntaxError("Expected initialization but wrong syntax was found\n")
                 }
 
@@ -75,11 +65,38 @@ class Lexer {
             throw SyntaxError("Expected initialization but empty block was found\n")
         }
 
+        private fun checkBrackets(str: String): Boolean {
+            var openBrackets = 0
+            var closedBrackets = 0
+
+            var apostrophes = 0
+
+            for (symbol in str) {
+                when (symbol) {
+                    '(' -> openBrackets++
+                    ')' -> closedBrackets++
+                    '"' -> apostrophes++
+                }
+            }
+
+            return ((openBrackets == closedBrackets) && apostrophes % 2 == 0)
+        }
+
         private fun checkVariable(str: String): Boolean {
             if (str.contains("[a-zA-Z]".toRegex()) && str.contains("^(\\s)*([a-zA-Z0-9])+(\\s)*$".toRegex())) {
                 return true
             }
             return false
+        }
+
+        private fun checkPrint(str: String) {
+            if (str.contains("^$rawInputRegex($s,$rawInputRegex)*\$".toRegex()) && checkBrackets(str)) {
+                return
+            }
+            if (str.isNotEmpty()) {
+                throw SyntaxError("Expected output but wrong syntax was found\n")
+            }
+            throw SyntaxError("Expected output but empty expression was found\n")
         }
     }
 }
