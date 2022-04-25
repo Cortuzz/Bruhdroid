@@ -1,8 +1,6 @@
 package com.example.bruhdroid.model
 
 import com.example.bruhdroid.model.src.blocks.Block
-import com.example.bruhdroid.model.src.blocks.Init
-import com.example.bruhdroid.model.src.blocks.RawInput
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.SyntaxError
@@ -24,7 +22,7 @@ class Lexer {
 
                 try {
                     when (block.instruction) {
-                        Instruction.INIT -> checkInit(block as Init)
+                        Instruction.INIT -> checkInit(block.expression)
                     }
                 } catch (e: SyntaxError) {
                     errors += "${e.message}Line: ${block.line}, " +
@@ -36,10 +34,7 @@ class Lexer {
             }
         }
 
-        private fun checkInit(block: Init) {
-            val input = block.body as RawInput
-            val str = input.input
-
+        private fun checkInit(str: String) {
             if (str.contains(',') && str.contains('=')) {
                 throw SyntaxError("Expected initialization " +
                         "but mutually exclusive symbols '=' and ',' was found\n")
@@ -85,10 +80,6 @@ class Lexer {
                 return true
             }
             return false
-        }
-
-        private fun checkRawInput(block: RawInput) {
-
         }
     }
 }

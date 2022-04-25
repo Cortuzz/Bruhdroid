@@ -45,11 +45,10 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         block.line = totalLines
         when (block.instruction) {
             Instruction.PRINT -> {
-                block as Print
-                val rawList = (block.body as RawInput).input.split(',')
+                val rawList = block.expression.split(',')
 
                 for (raw in rawList) {
-                    output += parseRawBlock(RawInput(raw)).value
+                    output += parseRawBlock(raw).value + " "
                 }
                 setChanged()
                 notifyObservers()
@@ -60,35 +59,28 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 notifyObservers()
             }
             Instruction.INIT -> {
-                block as Init
-                val raw = block.body as RawInput
-                if (pushVariablesToMemory(raw.input)) {
-                    parseRawBlock(block.body)
+                val raw = block.expression
+                if (pushVariablesToMemory(raw)) {
+                    parseRawBlock(raw)
                 }
             }
             Instruction.IF -> {
-                return if (checkStatement(block)) {
-                    block.rightBody as Container
-                    run(block.rightBody.instructions)
+                return if (checkStatement(block.expression)) {
                     true
                 } else {
                     false
                 }
             }
             Instruction.ELIF -> {
-                if (!statementApplied && checkStatement(block)) {
-                    block.rightBody as Container
-                    run(block.rightBody.instructions)
+                if (!statementApplied && checkStatement(block.expression)) {
                     return true
                 }
             }
             Instruction.ELSE -> {
                 if (!statementApplied) {
-                    block.rightBody as Container
-                    run(block.rightBody.instructions)
                 }
             }
-            else -> parseRawBlock(block)
+            else -> parseRawBlock(block.expression)
         }
 
         return false
@@ -126,9 +118,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         return false
     }
 
-    private fun checkStatement(block: Block): Boolean {
-        val booleanBlock = parseRawBlock(block.leftBody!!)
-        if (booleanBlock.value != "") {
+    private fun checkStatement(statement: String): Boolean {
+        val booleanBlock = parseRawBlock(statement)
+        if (booleanBlock.value != "false") {
             return true
         }
         return false
@@ -175,10 +167,8 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         return tryFindInMemory(memory.prevMemory, block)
     }
 
-    private fun parseRawBlock(block: Block): Valuable {
-        block.line = totalLines
-        block as RawInput
-        val data = Notation.convertToRpn(Notation.normalizeString(block.input))
+    private fun parseRawBlock(raw: String): Valuable {
+        val data = Notation.convertToRpn(Notation.normalizeString(raw))
 
         var count = 0
         val stack = mutableListOf<Block>()
@@ -213,8 +203,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     try {
                         operand2 = tryFindInMemory(memory, operand2)
                     } catch (e: StackCorruptionError) {
-                        throw RuntimeError("${e.message}\nAt line ${block.line}, " +
-                                "At instruction: ${block.instruction}")
+                        throw RuntimeError("${e.message}\nAt expression $raw")
                     }
                 }
                 operand2 as Valuable

@@ -25,7 +25,7 @@ abstract class Controller: Observer, Observable() {
                 val instr = instructions[i]
 
                 val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-                blocks.add(getBlockClass(instr, RawInput(expression)))
+                blocks.add(Block(instr, expression))
             }
 
             try {
@@ -39,13 +39,13 @@ abstract class Controller: Observer, Observable() {
             }
         }
 
-        private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
+        /*private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
             return when (instruction) {
                 Instruction.INIT -> Init(data)
                 Instruction.PRINT -> Print(data)
                 Instruction.INPUT -> Input(data)
                 else -> throw Exception()
             }
-        }
+        }*/
     }
 }

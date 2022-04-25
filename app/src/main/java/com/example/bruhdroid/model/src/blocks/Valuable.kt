@@ -5,7 +5,7 @@ import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
 
 class Valuable(varValue: Any, var type: Type) :
-    Block(Instruction.VAL,null, null) {
+    Block(Instruction.VAL,"") {
     var value: String = varValue.toString()
 
     operator fun unaryPlus(): Valuable {
