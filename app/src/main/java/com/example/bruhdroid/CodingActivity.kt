@@ -1,13 +1,12 @@
 package com.example.bruhdroid
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.bruhdroid.model.*
@@ -25,11 +24,13 @@ class CodingActivity : AppCompatActivity(), Observer {
     private var viewBlocks: MutableList<View> = mutableListOf()
     private var instructions: MutableList<Instruction> = mutableListOf()
     private val interpreter = Interpreter()
+    private val controller = Controller()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_coding)
 
+        controller.addObserver(this)
         interpreter.addObserver(this)
 
         val addBlock: Button = findViewById(R.id.addBlock)
@@ -39,7 +40,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         val launch: Button = findViewById(R.id.launchButton)
         launch.setOnClickListener {
-            Controller.runProgram(interpreter, instructions, viewBlocks)
+            controller.runProgram(interpreter, instructions, viewBlocks)
         }
 
         val blocks: Button = findViewById(R.id.chooseBlock)
@@ -53,14 +54,12 @@ class CodingActivity : AppCompatActivity(), Observer {
                     currentInstruction = it.data?.getSerializableExtra("instruction") as Instruction
                     currentBlockLayout = it.data?.getSerializableExtra("blockLayout") as Int
                 }
-                else if (it.resultCode == RESULT_CANCELED) {
-                }
             }
     }
 
     private fun chooseBlock() {
-        val cardPickerIntent = Intent(this@CodingActivity, BlocksActivity::class.java)
-        activityLauncher.launch(cardPickerIntent)
+        val blockPickerIntent = Intent(this@CodingActivity, BlocksActivity::class.java)
+        activityLauncher.launch(blockPickerIntent)
     }
 
     private fun buildBlock() {
@@ -71,6 +70,15 @@ class CodingActivity : AppCompatActivity(), Observer {
         instructions.add(currentInstruction)
     }
 
+    private fun buildAlertDialog(label: String, message: String) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(label)
+        builder.setMessage(message)
+
+        builder.setPositiveButton(android.R.string.ok) { dialogInterface: DialogInterface, i: Int -> }
+        builder.show()
+    }
+
     override fun update(p0: Observable?, p1: Any?) {
         val console: TextView = findViewById(R.id.console)
 
@@ -78,6 +86,13 @@ class CodingActivity : AppCompatActivity(), Observer {
             interpreter.waitingForInput = false
         }
 
-        console.append(interpreter.popOutput() + "\n")
+        val lexerErrors = controller.popLexerErrors()
+        val output = interpreter.popOutput()
+        if (lexerErrors.isNotEmpty()) {
+            buildAlertDialog("LEXER ERROR", lexerErrors)
+        }
+        if (output.isNotEmpty()) {
+            console.append(interpreter.popOutput() + "\n")
+        }
     }
 }

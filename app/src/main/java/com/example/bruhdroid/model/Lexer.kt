@@ -26,7 +26,7 @@ class Lexer {
                     }
                 } catch (e: SyntaxError) {
                     errors += "${e.message}Line: ${block.line}, " +
-                            "Instruction: ${block.instruction}"
+                            "Instruction: ${block.instruction}\n\n"
                 }
             }
             if (errors.isNotEmpty()) {

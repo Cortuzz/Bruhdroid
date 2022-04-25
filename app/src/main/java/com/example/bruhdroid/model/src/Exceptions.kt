@@ -2,10 +2,9 @@ package com.example.bruhdroid.model.src
 
 class RuntimeError(message: String = ""): Exception(message)
 
-class LexerError(message: String = ""): Exception("LEXER ERROR:$message")
+class LexerError(message: String = ""): Exception(message)
 
-class SyntaxError(message: String = ""):
-    Exception("\nSyntaxError: $message")
+class SyntaxError(message: String = ""): Exception("SyntaxError: $message")
 
 class TypeError(message: String = ""):
     Exception("\nFATAL ERROR:\nTypeError: $message\nStack traceback:")

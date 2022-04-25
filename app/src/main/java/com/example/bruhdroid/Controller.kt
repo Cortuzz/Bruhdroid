@@ -12,40 +12,47 @@ import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
 
-abstract class Controller: Observer, Observable() {
-    companion object {
-        init {
+class Controller: Observable() {
+    lateinit var lexerErrors: String
+    lateinit var runtimeErrors: String
 
+    fun runProgram(interpreter: Interpreter, instructions: List<Instruction>, viewBlocks: List<View>) {
+        val blocks: MutableList<Block> = mutableListOf()
+        for (i in viewBlocks.indices) {
+            val view = viewBlocks[i]
+            val instr = instructions[i]
+
+            val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
+            blocks.add(Block(instr, expression))
         }
 
-        fun runProgram(interpreter: Interpreter, instructions: List<Instruction>, viewBlocks: List<View>) {
-            val blocks: MutableList<Block> = mutableListOf()
-            for (i in viewBlocks.indices) {
-                val view = viewBlocks[i]
-                val instr = instructions[i]
-
-                val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-                blocks.add(Block(instr, expression))
-            }
-
-            try {
-                Lexer.checkBlocks(blocks)
-                interpreter.initBlocks(blocks)
-                interpreter.run()
-            } catch (e: RuntimeError) {
-                print(e.message)
-            } catch (e: LexerError) {
-                print(e.message)
-            }
+        try {
+            Lexer.checkBlocks(blocks)
+            interpreter.initBlocks(blocks)
+            interpreter.run()
+        } catch (e: RuntimeError) {
+            runtimeErrors = e.message.toString()
+            setChanged()
+            notifyObservers()
+        } catch (e: LexerError) {
+            lexerErrors = e.message.toString().dropLast(2)
+            setChanged()
+            notifyObservers()
         }
-
-        /*private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
-            return when (instruction) {
-                Instruction.INIT -> Init(data)
-                Instruction.PRINT -> Print(data)
-                Instruction.INPUT -> Input(data)
-                else -> throw Exception()
-            }
-        }*/
     }
+
+    fun popLexerErrors(): String {
+        val err = lexerErrors
+        lexerErrors = ""
+        return err
+    }
+
+    /*private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
+        return when (instruction) {
+            Instruction.INIT -> Init(data)
+            Instruction.PRINT -> Print(data)
+            Instruction.INPUT -> Input(data)
+            else -> throw Exception()
+        }
+    }*/
 }
