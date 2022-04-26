@@ -25,7 +25,6 @@
         android:layout_width="414dp"
         android:layout_height="424dp"
         android:layout_marginTop="20dp"
-        android:background="#AD2F7C9F"
         android:contentDescription="@string/block"
         android:orientation="vertical"
         android:scrollbars="none"

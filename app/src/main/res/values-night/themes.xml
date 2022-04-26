@@ -1,9 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.Bruhdroid.Dark" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="backgroundColor">@color/background_dark</item>
-        <item name="colorPrimary">@color/primary_dark</item>
-        <item name="colorSecondary">@color/secondary_dark</item>
-
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
@@ -26,8 +22,20 @@
         <item name="borderRound">15dp</item>
     </style>
 
+    <style name="PrimaryText.Dark">
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:fontFamily">@font/gilroy_bold</item>
+    </style>
+
+    <style name="SecondaryText.Dark">
+        <item name="android:textColor">@color/secondary_dark</item>
+        <item name="android:fontFamily">@font/gilroy_bold</item>
+    </style>
+
     <style name="Theme.Bruhdroid" parent="Theme.Bruhdroid.Dark"/>
     <style name="Block" parent="Block.Dark"/>
     <style name="Expression" parent="Expression.Dark"/>
     <style name="AlertDialogCustom" parent="AlertDialogCustom.Dark"/>
+    <style name="PrimaryText" parent="PrimaryText.Dark"/>
+    <style name="SecondaryText" parent="SecondaryText.Dark"/>
 </resources>
