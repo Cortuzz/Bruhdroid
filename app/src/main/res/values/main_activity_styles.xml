@@ -14,7 +14,7 @@
         <item name="android:letterSpacing">0.1</item>
     </style>
 
-    <style name="button">
+    <style name="button" parent="SecondaryText">
         <item name="android:layout_width">300dp</item>
         <item name="android:layout_height">60dp</item>
         <item name="android:background">@drawable/btn_rounded_corner</item>

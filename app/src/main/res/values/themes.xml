@@ -37,4 +37,5 @@
     <style name="Expression" parent="Expression.Light"/>
     <style name="AlertDialogCustom" parent="AlertDialogCustom.Light"/>
     <style name="PrimaryText" parent="PrimaryText.Light"/>
+    <style name="SecondaryText" parent="SecondaryText.Light"/>
 </resources>

@@ -1,13 +1,15 @@
 package com.example.bruhdroid
 
+import android.content.res.Configuration
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.Lexer
-import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
+import java.security.AccessController.getContext
 import java.util.*
 
 class Controller: Observable() {
@@ -35,6 +37,15 @@ class Controller: Observable() {
             setChanged()
             notifyObservers()
         }
+    }
+
+    fun changeTheme(currentMode: Int) {
+        val mode = when (currentMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_NO -> AppCompatDelegate.MODE_NIGHT_YES
+            Configuration.UI_MODE_NIGHT_YES -> AppCompatDelegate.MODE_NIGHT_NO
+            else -> return
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     fun popLexerErrors(): String {

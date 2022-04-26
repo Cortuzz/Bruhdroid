@@ -12,15 +12,15 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="error_color">#FFE91E63</color>
+
+
     <color name="primary_background_light">#FFF4E8D8</color>
-    <color name="primary_background_dark">#FF373737</color>
-
     <color name="secondary_background_light">#FFFFFFFF</color>
-    <color name="secondary_background_dark">#979696</color>
-
     <color name="primary_light">#FFFF5F54</color>
-    <color name="primary_dark">#FFE0D9D9</color>
-
     <color name="secondary_light">#FF212330</color>
-    <color name="secondary_dark">#FF297EA5</color>
+
+    <color name="primary_background_dark">#FF373737</color>
+    <color name="secondary_background_dark">#979696</color>
+    <color name="primary_dark">#FF29B3B0</color>
+    <color name="secondary_dark">#FFE0D9D9</color>
 </resources>

@@ -87,6 +87,22 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_end="329dp" />
 
+        <ImageButton
+            android:id="@+id/changeThemeButton"
+            android:contentDescription="@null"
+            android:layout_width="47dp"
+            android:layout_height="50dp"
+            android:alpha="0"
+            android:rotation="10"
+            android:rotationX="2"
+            android:rotationY="2"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView"
+            app:layout_constraintEnd_toEndOf="@+id/imageView"
+            app:layout_constraintHorizontal_bias="0.8"
+            app:layout_constraintStart_toStartOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            app:layout_constraintVertical_bias="0.46"
+            app:srcCompat="@drawable/empty_tall_divider" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
