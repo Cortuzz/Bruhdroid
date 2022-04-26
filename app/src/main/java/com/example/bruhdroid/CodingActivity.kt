@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
@@ -71,7 +72,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     private fun buildAlertDialog(label: String, message: String) {
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         builder.setTitle(label)
         builder.setMessage(message)
 

@@ -19,6 +19,7 @@
     <style name="AlertDialogCustom" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:textColor">#E91E63</item>
         <item name="android:typeface">monospace</item>
+        <item name="android:dialogCornerRadius">15sp</item>
         <item name="android:textSize">20sp</item>
     </style>
 </resources>
