@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
         binding.startButton.setOnClickListener {
             val intent = Intent(this, CodingActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(R.anim.alpha_reversed, R.anim.alpha)
         }
         binding.exitButton.setOnClickListener {
             exitProcess(0)
