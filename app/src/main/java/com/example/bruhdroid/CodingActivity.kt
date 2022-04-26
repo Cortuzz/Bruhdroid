@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.*
@@ -14,8 +15,6 @@ import androidx.databinding.DataBindingUtil
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.LexerError
-import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
 
@@ -28,12 +27,11 @@ class CodingActivity : AppCompatActivity(), Observer {
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
     private val interpreter = Interpreter()
     private val controller = Controller()
-    private val binding: ActivityCodingBinding =
-        DataBindingUtil.setContentView(this, R.layout.activity_coding)
+    private lateinit var binding : ActivityCodingBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_coding)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
         controller.addObserver(this)
         interpreter.addObserver(this)
