@@ -1,8 +1,6 @@
 package com.example.bruhdroid
 
-import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.Lexer
@@ -16,14 +14,12 @@ class Controller: Observable() {
     private var lexerErrors = ""
     private var runtimeErrors = ""
 
-    fun runProgram(interpreter: Interpreter, instructions: List<Instruction>, viewBlocks: List<View>) {
+    fun runProgram(interpreter: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: LinkedList<View>) {
         val blocks: MutableList<Block> = mutableListOf()
-        for (i in viewBlocks.indices) {
-            val view = viewBlocks[i]
-            val instr = instructions[i]
+        for (i in viewBlocks) {
 
-            val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-            blocks.add(Block(instr, expression))
+            blockMap[i]!!.expression = i.findViewById<EditText>(R.id.expression).getText().toString()
+            blocks.add(blockMap[i]!!)
         }
 
         try {
@@ -53,12 +49,4 @@ class Controller: Observable() {
         return err
     }
 
-    /*private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
-        return when (instruction) {
-            Instruction.INIT -> Init(data)
-            Instruction.PRINT -> Print(data)
-            Instruction.INPUT -> Input(data)
-            else -> throw Exception()
-        }
-    }*/
 }

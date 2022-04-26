@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
@@ -66,7 +66,7 @@
     </ScrollView>
 
     <Button
-        android:id="@+id/chooseBlock"
+        android:id="@+id/chooseBlockButton"
         android:layout_width="168dp"
         android:layout_height="50dp"
         android:layout_marginTop="16dp"
@@ -81,7 +81,7 @@
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <Button
-        android:id="@+id/addBlock"
+        android:id="@+id/addBlockButton"
         android:layout_width="172dp"
         android:layout_height="50dp"
         android:layout_marginTop="16dp"
@@ -96,3 +96,4 @@
         tools:ignore="DuplicateSpeakableTextCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

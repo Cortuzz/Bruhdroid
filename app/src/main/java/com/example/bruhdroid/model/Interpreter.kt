@@ -19,8 +19,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
 
     fun run() {
         while (currentLine < blocks!!.size - 1) {
-            currentLine++
-            val block = blocks!![currentLine]
+            val block = blocks!![++currentLine]
 
             try {
                 if (parse(block)) {
@@ -36,8 +35,8 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     private fun skipFalseBranches() {
         var count = 1
         while (currentLine < blocks!!.size - 1) {
-            currentLine++
-            val block = blocks!![currentLine]
+
+            val block = blocks!![++currentLine]
 
             if (block.instruction == Instruction.IF) { // todo: cycle check
                 count++
