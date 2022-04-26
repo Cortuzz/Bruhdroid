@@ -38,7 +38,7 @@ class Lexer {
         private fun checkInit(str: String) {
             if (str.contains(',') && str.contains('=')) {
                 throw SyntaxError("Expected initialization " +
-                        "but mutually exclusive symbols '=' and ',' was found\n")
+                        "but mutually exclusive symbols = and , was found\n")
             }
             if (str.contains(',')) {
                 if (!str.contains("^$s$w$s(,$s$w$s)+\$".toRegex())) {

@@ -49,17 +49,17 @@ class InitUnitTest {
 
     @Test
     fun wrongMultiplyInitialization() {
-        val correctError = "LEXER ERROR:\n" +
-                "SyntaxError: Expected initialization but mutually exclusive symbols '=' and ',' was found\n" +
-                "Line: 1, Instruction: INIT\n" +
+        val correctError =
+                "SyntaxError: Expected initialization but mutually exclusive symbols = and , was found\n" +
+                "Line: 1, Instruction: INIT\n\n" +
                 "SyntaxError: Expected multiply initialization but operator was found\n" +
-                "Line: 2, Instruction: INIT\n" +
+                "Line: 2, Instruction: INIT\n\n" +
                 "SyntaxError: Expected multiply initialization but operator was found\n" +
-                "Line: 3, Instruction: INIT\n" +
+                "Line: 3, Instruction: INIT\n\n" +
                 "SyntaxError: Expected multiply initialization but operator was found\n" +
-                "Line: 4, Instruction: INIT\n" +
+                "Line: 4, Instruction: INIT\n\n" +
                 "SyntaxError: Expected multiply initialization but operator was found\n" +
-                "Line: 5, Instruction: INIT"
+                "Line: 5, Instruction: INIT\n\n"
 
         val expression1 = Block(Instruction.INIT,"a,b,c =")
         val expression2 = Block(Instruction.INIT,"  a     , b 56")
@@ -81,17 +81,17 @@ class InitUnitTest {
 
     @Test
     fun wrongInitialization() {
-        val correctError = "LEXER ERROR:\n" +
+        val correctError =
                 "SyntaxError: Expected initialization but wrong syntax was found\n" +
-                "Line: 1, Instruction: INIT\n" +
+                "Line: 1, Instruction: INIT\n\n" +
                 "SyntaxError: Expected initialization but wrong syntax was found\n" +
-                "Line: 2, Instruction: INIT\n" +
+                "Line: 2, Instruction: INIT\n\n" +
                 "SyntaxError: Expected initialization but wrong syntax was found\n" +
-                "Line: 3, Instruction: INIT\n" +
+                "Line: 3, Instruction: INIT\n\n" +
                 "SyntaxError: Expected initialization but wrong syntax was found\n" +
-                "Line: 4, Instruction: INIT\n" +
+                "Line: 4, Instruction: INIT\n\n" +
                 "SyntaxError: Expected initialization but wrong syntax was found\n" +
-                "Line: 5, Instruction: INIT"
+                "Line: 5, Instruction: INIT\n\n"
 
         val expression1 = Block(Instruction.INIT,"a - b = c")
         val expression2 = Block(Instruction.INIT," a = 4 - ")
@@ -113,13 +113,13 @@ class InitUnitTest {
 
     @Test
     fun emptyInitialization() {
-        val correctError = "LEXER ERROR:\n" +
+        val correctError =
                 "SyntaxError: Expected initialization but empty block was found\n" +
-                "Line: 1, Instruction: INIT\n" +
+                "Line: 1, Instruction: INIT\n\n" +
                 "SyntaxError: Expected initialization but declaration was not found\n" +
-                "Line: 2, Instruction: INIT\n" +
+                "Line: 2, Instruction: INIT\n\n" +
                 "SyntaxError: Expected initialization but declaration was not found\n" +
-                "Line: 3, Instruction: INIT"
+                "Line: 3, Instruction: INIT\n\n"
 
         val expression1 = Block(Instruction.INIT,"")
         val expression2 = Block(Instruction.INIT,"       ")

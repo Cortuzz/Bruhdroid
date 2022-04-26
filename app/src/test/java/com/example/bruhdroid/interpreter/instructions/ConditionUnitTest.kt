@@ -190,4 +190,68 @@ class ConditionUnitTest {
             Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
         }
     }
+
+    @Test
+    fun nestedIfElifElseIntoIfElse() {
+        val a = Block(Instruction.INIT,"a = 0")
+
+        val bTrue = Block(Instruction.IF,"a < 5")
+        val bFalse = Block(Instruction.IF,"a > 5")
+
+            val c = Block(Instruction.SET,"a = a + 4")
+
+            val dTrue = Block(Instruction.IF,"a < 5")
+            val dFalse = Block(Instruction.IF,"a > 5")
+
+                val e = Block(Instruction.SET,"a = a - 8")
+
+            val fTrue = Block(Instruction.ELIF,"a < 5")
+            val fFalse = Block(Instruction.ELIF,"a > 5")
+
+                val g = Block(Instruction.SET,"a = a - 2")
+
+            val else1 = Block(Instruction.ELSE)
+                val h = Block(Instruction.SET,"a = a - 30")
+
+            val end1 = Block(Instruction.END)
+
+        val else2 = Block(Instruction.ELSE)
+            val i = Block(Instruction.SET,"a = a - 7")
+
+            val jTrue = Block(Instruction.IF,"a < 5")
+            val jFalse = Block(Instruction.IF,"a > 5")
+
+                val k = Block(Instruction.SET,"a = a - 3")
+
+            val lTrue = Block(Instruction.ELIF,"a < 5")
+            val lFalse = Block(Instruction.ELIF,"a > 5")
+
+                val m = Block(Instruction.SET,"a = a - 9")
+
+            val else3 = Block(Instruction.ELSE)
+                val n = Block(Instruction.SET,"a = a - 50")
+
+            val end2 = Block(Instruction.END)
+
+            val o = Block(Instruction.SET,"a = a + 15")
+        val end3 = Block(Instruction.END)
+
+        val blocks = mapOf(
+            listOf(a, bTrue, c, dTrue, e, fTrue, g, else1, h, end1, else2, i, jTrue, k, lTrue, m, else3, n, end2, o, end3) to "-4",
+            listOf(a, bTrue, c, dTrue, e, fFalse, g, else1, h, end1, else2, i, jTrue, k, lTrue, m, else3, n, end2, o, end3) to "-4",
+            listOf(a, bTrue, c, dFalse, e, fTrue, g, else1, h, end1, else2, i, jTrue, k, lTrue, m, else3, n, end2, o, end3) to "2",
+            listOf(a, bTrue, c, dFalse, e, fFalse, g, else1, h, end1, else2, i, jTrue, k, lTrue, m, else3, n, end2, o, end3) to "-26",
+
+            listOf(a, bFalse, c, dTrue, e, fTrue, g, else1, h, end1, else2, i, jTrue, k, lTrue, m, else3, n, end2, o, end3) to "5",
+            listOf(a, bFalse, c, dTrue, e, fFalse, g, else1, h, end1, else2, i, jTrue, k, lFalse, m, else3, n, end2, o, end3) to "5",
+            listOf(a, bFalse, c, dFalse, e, fTrue, g, else1, h, end1, else2, i, jFalse, k, lTrue, m, else3, n, end2, o, end3) to "-1",
+            listOf(a, bFalse, c, dFalse, e, fTrue, g, else1, h, end1, else2, i, jFalse, k, lFalse, m, else3, n, end2, o, end3) to "-42",
+        )
+
+        for (block in blocks) {
+            val interpreter = Interpreter(block.key)
+            interpreter.run()
+            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+        }
+    }
 }
