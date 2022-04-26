@@ -1,10 +1,7 @@
 package com.example.bruhdroid.model
 
+import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.RuntimeError
-import com.example.bruhdroid.model.src.StackCorruptionError
-import com.example.bruhdroid.model.src.Type
 import java.util.*
 
 class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false): Observable() {
@@ -13,25 +10,24 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     var waitingForInput = false
     var memory = Memory(null)
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
-    private var totalLines = 0
     private var currentLine = -1
 
     fun initBlocks(_blocks: List<Block>) {
+        currentLine = -1
         blocks = _blocks
     }
 
     fun run() {
-        var statementApplied = false // todo: check statement
         while (currentLine < blocks!!.size - 1) {
             currentLine++
             val block = blocks!![currentLine]
 
             try {
-                if (parse(block, statementApplied)) {
+                if (parse(block)) {
                     skipFalseBranches()
                 }
             } catch (e: RuntimeError) {
-                throw RuntimeError("${e.message}\nAt line ${block.line}, " +
+                throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
                         "At instruction: ${block.instruction}")
             }
         }
@@ -58,7 +54,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         }
     }
 
-    private fun parse(block: Block, statementApplied: Boolean): Boolean {
+    private fun parse(block: Block): Boolean {
         when (block.instruction) {
             Instruction.PRINT -> {
                 val rawList = block.expression.split(',')
@@ -207,13 +203,13 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     tempStr += data[count]
                     count++
                 }
-                if (tempStr.last().isLetter()) {
+                if (tempStr.last() == '"' && tempStr.first() == '"') {
+                    // Maybe substring is better solution
+                    stack.add(Valuable(tempStr.replace("\"", ""), Type.STRING))
+                } else if (tempStr.contains("[A-Za-z]".toRegex())) {
                     stack.add(Variable(tempStr))
                 } else {
-                    if (tempStr.last() == '"' && tempStr.first() == '"') {
-                        // Maybe substring is better solution
-                        stack.add(Valuable(tempStr.replace("\"", ""), Type.STRING))
-                    } else if (tempStr.contains('.')) {
+                    if (tempStr.contains('.')) {
                         stack.add(Valuable(tempStr, Type.FLOAT))
                     } else {
                         stack.add(Valuable(tempStr, Type.INT))
@@ -224,67 +220,75 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 count--
             } else if (data[count] == ' ') {
             } else {
-                var operand2 = stack.removeLast()
+                try {
+                    var operand2 = stack.removeLast()
 
-                if (operand2 is Variable) {
-                    try {
-                        operand2 = tryFindInMemory(memory, operand2)
-                    } catch (e: StackCorruptionError) {
-                        throw RuntimeError("${e.message}\nAt expression $raw")
+                    if (operand2 is Variable) {
+                        try {
+                            operand2 = tryFindInMemory(memory, operand2)
+                        } catch (e: StackCorruptionError) {
+                            throw RuntimeError("${e.message}\nAt expression: $raw")
+                        }
                     }
-                }
-                operand2 as Valuable
+                    operand2 as Valuable
 
-                if (data[count] in "∓±") {
-                    stack.add(when (data[count]) {
-                        '±' -> +operand2
-                        '∓' -> -operand2
-                        else -> throw Exception()
-                    })
-                    count += 2
-                    continue
-                }
-                var operand1 = stack.removeLast()
-
-                if (data[count] == '=') {
-                    operand1 as Variable
-                    tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
-
-                     return operand2
-                }
-
-                if (operand1 is Variable) {
-                    operand1 = tryFindInMemory(memory, operand1)
-                }
-                operand1 as Valuable
-
-                var result: Valuable? = when (data[count]) {
-                    '+' -> operand1 + operand2
-                    '-' -> operand1 - operand2
-                    '*' -> operand1 * operand2
-                    '/' -> operand1 / operand2
-
-                    '&' -> operand1.and(operand2)
-                    '|' -> operand1.or(operand2)
-
-                    '<' -> Valuable(operand1 < operand2, Type.BOOL)
-                    '>' -> Valuable(operand1 > operand2, Type.BOOL)
-                    '=' -> {
-                        tryPushToAnyMemory(memory, operand1.value, Type.INT, operand2) // todo: Any memory
-                        operand2
+                    if (data[count] in "∓±") {
+                        stack.add(when (data[count]) {
+                            '±' -> +operand2
+                            '∓' -> -operand2
+                            else -> throw Exception()
+                        })
+                        count += 2
+                        continue
                     }
-                    else -> null
-                }
+                    var operand1 = stack.removeLast()
 
-                stack.add(result!!)
-                count++
+                    if (data[count] == '=') {
+                        operand1 as Variable
+                        tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
+
+                        return operand2
+                    }
+
+                    if (operand1 is Variable) {
+                        operand1 = tryFindInMemory(memory, operand1)
+                    }
+                    operand1 as Valuable
+
+                    var result: Valuable? = when (data[count]) {
+                        '+' -> operand1 + operand2
+                        '-' -> operand1 - operand2
+                        '*' -> operand1 * operand2
+                        '/' -> operand1 / operand2
+
+                        '&' -> operand1.and(operand2)
+                        '|' -> operand1.or(operand2)
+
+                        '<' -> Valuable(operand1 < operand2, Type.BOOL)
+                        '>' -> Valuable(operand1 > operand2, Type.BOOL)
+                        '=' -> {
+                            tryPushToAnyMemory(memory, operand1.value, Type.INT, operand2) // todo: Any memory
+                            operand2
+                        }
+                        else -> null
+                    }
+
+                    stack.add(result!!)
+                    count++
+                } catch (e: TypeError) {
+                    throw RuntimeError("${e.message}\nAt expression: $raw")
+                }
             }
             count++
         }
 
         val last = stack.removeLast()
         if (last is Variable) {
-            return tryFindInMemory(memory, last) as Valuable
+            try {
+                return tryFindInMemory(memory, last) as Valuable
+            } catch (e: StackCorruptionError) {
+                throw RuntimeError("${e.message}\nAt expression: $raw")
+            }
         }
         return last as Valuable
     }

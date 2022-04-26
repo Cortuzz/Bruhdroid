@@ -7,13 +7,13 @@ class LexerError(message: String = ""): Exception(message)
 class SyntaxError(message: String = ""): Exception("SyntaxError: $message")
 
 class TypeError(message: String = ""):
-    Exception("\nFATAL ERROR:\nTypeError: $message\nStack traceback:")
+    Exception("FATAL ERROR:\nTypeError: $message\nStack traceback:")
 
 class StackCorruptionError(message: String = ""):
-    Exception("\nFATAL ERROR:\nStackCorruptionError: $message\nStack traceback:")
+    Exception("FATAL ERROR:\nStackCorruptionError: $message\nStack traceback:")
 
 class HeapCorruptionError(message: String = ""):
-    Exception("\nFATAL ERROR:\nHeapCorruptionError: $message\nStack traceback:")
+    Exception("FATAL ERROR:\nHeapCorruptionError: $message\nStack traceback:")
 
 class BadInstructionError(message: String = ""):
-    Exception("\nFATAL ERROR:\nBadInstructionError: $message\nStack traceback:")
+    Exception("FATAL ERROR:\nBadInstructionError: $message\nStack traceback:")

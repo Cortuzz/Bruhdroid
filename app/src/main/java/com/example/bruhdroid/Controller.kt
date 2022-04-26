@@ -47,6 +47,12 @@ class Controller: Observable() {
         return err
     }
 
+    fun popRuntimeErrors(): String {
+        val err = runtimeErrors
+        runtimeErrors = ""
+        return err
+    }
+
     /*private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
         return when (instruction) {
             Instruction.INIT -> Init(data)

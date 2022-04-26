@@ -9,7 +9,7 @@ class Lexer {
     companion object {
         private var totalLines = 0
         private const val s = "(\\s)*"
-        private const val w = "(([a-zA-Z0-9]+)|([\"].[\"])|([0-9]+[.][0-9]+))" // todo: not "
+        private const val w = "(([a-zA-Z0-9]+)|([\"].*[\"])|([0-9]+[.][0-9]+))" // todo: not "
         private const val rawInputRegex = "$s[-+]?$s[(]*[-+]?$s[-]?$w$s" +
                 "($s[&|<>+*/-]$s[-+]?$s[(]*$s[-+]?$s[-+]?$s$w$s[)]*$s)*$s[)]*$s"
 
