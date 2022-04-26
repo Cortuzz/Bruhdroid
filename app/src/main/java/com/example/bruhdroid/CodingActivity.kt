@@ -19,15 +19,17 @@ import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
 
 class CodingActivity : AppCompatActivity(), Observer {
-    private lateinit var currentInstruction: Instruction
     private var currentBlockLayout = 0
-    private var viewToBlock: MutableMap<View, Block> = mutableMapOf()
+    private var viewToBlock = mutableMapOf<View, Block>()
     private var viewList = LinkedList<View>()
     private var prevBlock: View? = null
+
+    private lateinit var currentInstruction: Instruction
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
+    private lateinit var binding : ActivityCodingBinding
+
     private val interpreter = Interpreter()
     private val controller = Controller()
-    private lateinit var binding : ActivityCodingBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

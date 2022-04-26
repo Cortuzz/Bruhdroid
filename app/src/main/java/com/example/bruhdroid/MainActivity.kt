@@ -3,31 +3,22 @@ package com.example.bruhdroid
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.Button
+import androidx.databinding.DataBindingUtil
+import com.example.bruhdroid.databinding.ActivityMainBinding
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        startButton()
-        exitButton()
-    }
-
-    private fun startButton() {
-        val startButton: Button = findViewById(R.id.startButton)
-        startButton.setOnClickListener {
+        binding.startButton.setOnClickListener {
             val intent = Intent(this, CodingActivity::class.java)
             startActivity(intent)
         }
-    }
-
-    private fun exitButton() {
-        val exitButton: Button = findViewById(R.id.exitButton)
-        exitButton.setOnClickListener {
+        binding.exitButton.setOnClickListener {
             exitProcess(0)
         }
     }
