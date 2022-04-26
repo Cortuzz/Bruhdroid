@@ -82,17 +82,19 @@ class CodingActivity : AppCompatActivity(), Observer {
     override fun update(p0: Observable?, p1: Any?) {
         val console: TextView = findViewById(R.id.console)
 
-        if (interpreter.waitingForInput) {
-            interpreter.waitingForInput = false
+        val lexerErrors = controller.popLexerErrors()
+        val runtimeErrors = controller.popRuntimeErrors()
+        val output = interpreter.popOutput()
+
+        if (runtimeErrors.isNotEmpty()) {
+            buildAlertDialog("RUNTIME ERROR", runtimeErrors)
         }
 
-        val lexerErrors = controller.popLexerErrors()
-        val output = interpreter.popOutput()
         if (lexerErrors.isNotEmpty()) {
             buildAlertDialog("LEXER ERROR", lexerErrors)
         }
         if (output.isNotEmpty()) {
-            console.append(interpreter.popOutput() + "\n")
+            console.append(output + "\n")
         }
     }
 }
