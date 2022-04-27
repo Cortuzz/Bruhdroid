@@ -8,6 +8,8 @@
 
     <style name="AlertDialogCustom.Dark" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:textColor">@color/error_color</item>
+        <item name="android:textColorPrimary">@color/secondary</item>
+        <item name="android:background">@color/primary_background</item>
         <item name="android:typeface">monospace</item>
         <item name="android:textSize">20sp</item>
     </style>
@@ -22,20 +24,8 @@
         <item name="borderRound">15dp</item>
     </style>
 
-    <style name="PrimaryText.Dark">
-        <item name="android:textColor">@color/primary_dark</item>
-        <item name="android:fontFamily">@font/gilroy_bold</item>
-    </style>
-
-    <style name="SecondaryText.Dark">
-        <item name="android:textColor">@color/secondary_dark</item>
-        <item name="android:fontFamily">@font/gilroy_bold</item>
-    </style>
-
     <style name="Theme.Bruhdroid" parent="Theme.Bruhdroid.Dark"/>
     <style name="Block" parent="Block.Dark"/>
     <style name="Expression" parent="Expression.Dark"/>
     <style name="AlertDialogCustom" parent="AlertDialogCustom.Dark"/>
-    <style name="PrimaryText" parent="PrimaryText.Dark"/>
-    <style name="SecondaryText" parent="SecondaryText.Dark"/>
 </resources>
