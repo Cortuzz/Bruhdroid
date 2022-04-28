@@ -11,7 +11,7 @@ class ConditionUnitTest {
     @Test
     fun trueIf() {
         val a = Block(Instruction.INIT,"a = 3")
-        val b = Block(Instruction.IF,"a < 5")
+        val b = Block(Instruction.IF,"a")
         val c = Block(Instruction.SET,"a = 2")
         val d = Block(Instruction.END)
 
