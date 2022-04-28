@@ -100,7 +100,14 @@ class Valuable(varValue: Any, var type: Type) :
     }
 
     operator fun compareTo(operand: Valuable): Int {
-        return value.toInt() - operand.value.toInt()
+        val dif = value.toFloat() - operand.value.toFloat()
+        return if (dif < 0) {
+            -1
+        } else if (dif > 0) {
+            1
+        } else {
+            0
+        }
     }
 
     fun and(operand: Valuable): Valuable {

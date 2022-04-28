@@ -10,6 +10,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     var waitingForInput = false
     var memory = Memory(null)
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
+    private var cycleLines: MutableList<Int> = mutableListOf()
     private var currentLine = -1
 
     fun initBlocks(_blocks: List<Block>) {
@@ -35,10 +36,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     private fun skipFalseBranches() {
         var count = 1
         while (currentLine < blocks!!.size - 1) {
-
             val block = blocks!![++currentLine]
 
-            if (block.instruction == Instruction.IF) { // todo: cycle check
+            if (block.instruction == Instruction.IF) {
                 count++
             }
             if (block.instruction == Instruction.END) {
@@ -48,6 +48,24 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
             if (count == 0 || (count == 1 && (block.instruction == Instruction.ELIF ||
                         block.instruction == Instruction.ELSE))) {
                 currentLine--
+                return
+            }
+        }
+    }
+
+    private fun skipCycle() {
+        var count = 1
+        while (currentLine < blocks!!.size - 1) {
+            val block = blocks!![++currentLine]
+
+            if (block.instruction == Instruction.WHILE) {
+                count++
+            }
+            if (block.instruction == Instruction.END_WHILE) {
+                count--
+            }
+
+            if (count == 0) {
                 return
             }
         }
@@ -98,9 +116,18 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 }
                 return false
             }
+            Instruction.WHILE -> {
+                if (checkStatement(block.expression)) {
+                    cycleLines.add(currentLine)
+                } else {
+                    skipCycle()
+                }
+            }
             Instruction.END -> {
                 appliedConditions.removeLast()
-                return false
+            }
+            Instruction.END_WHILE -> {
+                currentLine = cycleLines.removeLast() - 1
             }
             else -> parseRawBlock(block.expression)
         }
