@@ -5,10 +5,8 @@ import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
-import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
@@ -38,23 +36,29 @@ class CodingActivity : AppCompatActivity(), Observer {
         controller.addObserver(this)
         interpreter.addObserver(this)
 
-        binding.addBlockButton.setOnClickListener {
-            buildBlock(prevBlock, currentBlockLayout, currentInstruction)
-        }
-        binding.launchButton.setOnClickListener {
-            controller.runProgram(interpreter, viewToBlock, viewList)
-        }
-        binding.chooseBlockButton.setOnClickListener {
-            chooseBlock()
+        val bottomSheetFragment = ButtomSheetFragment();
+
+        binding.menuButton.setOnClickListener {
+            bottomSheetFragment.show(supportFragmentManager, "BottomSheetDialog")
         }
 
-        activityLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (it.resultCode == RESULT_OK) {
-                    currentInstruction = it.data?.getSerializableExtra("instruction") as Instruction
-                    currentBlockLayout = it.data?.getSerializableExtra("blockLayout") as Int
-                }
-            }
+//        binding.addBlockButton.setOnClickListener {
+//            buildBlock(prevBlock, currentBlockLayout, currentInstruction)
+//        }
+//        binding.launchButton.setOnClickListener {
+//            controller.runProgram(interpreter, viewToBlock, viewList)
+//        }
+//        binding.chooseBlockButton.setOnClickListener {
+//            chooseBlock()
+//        }
+
+//        activityLauncher =
+//            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+//                if (it.resultCode == RESULT_OK) {
+//                    currentInstruction = it.data?.getSerializableExtra("instruction") as Instruction
+//                    currentBlockLayout = it.data?.getSerializableExtra("blockLayout") as Int
+//                }
+//            }
     }
 
     private fun chooseBlock() {

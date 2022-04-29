@@ -9,9 +9,15 @@
         <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.2625" />
         <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.24791666666666667" />
         <entry key="..\:/Coding/GitHubProjects/Bruhdroid/app/src/main/res/layout/block.xml" value="0.33" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable-night/btn_debug.xml" value="0.3485" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable-night/btn_launch.xml" value="0.3485" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable-night/btn_rounded_corner.xml" value="0.3485" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable-night/ic_background.xml" value="0.3485" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/bnt_launch.xml" value="0.3485" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/btn_debug.xml" value="0.3485" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/btn_launch.xml" value="0.3485" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/btn_rounded_corner.xml" value="0.2995" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/buttons_placeholder.xml" value="0.3145" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/empty_tall_divider.xml" value="0.314" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/ic_background.xml" value="0.3145" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/drawable/ic_launcher_background.xml" value="0.544" />
@@ -21,13 +27,28 @@
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/font/fira_code_medium.xml" value="0.58125" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/font/fira_code_semibold.xml" value="0.58125" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_blocks.xml" value="0.31145833333333334" />
-        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.33" />
+        <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.21" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block.xml" value="0.5" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_init.xml" value="0.4750905797101449" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_input.xml" value="0.67" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_print.xml" value="0.4750905797101449" />
         <entry key="..\:/Users/Cortuzz/AndroidStudioProjects/Bruhdroid/app/src/main/res/layout/block_set.xml" value="0.67" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/empty_tall_divider.xml" value="0.2445" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_background.xml" value="0.21" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2165" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_main_activity_background.xml" value="0.264" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_main_activity_button.xml" value="0.2445" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_menu.xml" value="0.21" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/font/fira_code.xml" value="0.1" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_blocks.xml" value="0.2" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.16799999999999998" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.176" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_init.xml" value="0.11927083333333334" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_input.xml" value="0.264" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_print.xml" value="0.2" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottom_sheet_fragment.xml" value="0.10130208333333333" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/buttomsheet_fragment.xml" value="0.16" />
       </map>
     </option>
   </component>

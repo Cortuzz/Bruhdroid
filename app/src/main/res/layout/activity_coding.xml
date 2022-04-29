@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
@@ -47,7 +48,7 @@
     <ScrollView
         android:id="@+id/scrollView2"
         android:layout_width="match_parent"
-        android:layout_height="98dp"
+        android:layout_height="100dp"
         android:background="#474343"
         android:contentDescription="@string/console"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,35 +64,17 @@
             android:textSize="20sp" />
     </ScrollView>
 
-    <Button
-        android:id="@+id/chooseBlockButton"
-        android:layout_width="168dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="16dp"
-        android:background="#40CFCF"
-        android:text="@string/choose_block"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.942"
+    <ImageButton
+        android:id="@+id/menuButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scrollView2"
-        />
-
-    <Button
-        android:id="@+id/addBlockButton"
-        android:layout_width="172dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="16dp"
-        android:background="#67CF40"
-        android:text="@string/block"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.078"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scrollView2"
-        />
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
