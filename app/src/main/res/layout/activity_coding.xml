@@ -38,7 +38,6 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:divider="@drawable/empty_tall_divider"
             android:orientation="vertical"
             android:showDividers="middle">
 

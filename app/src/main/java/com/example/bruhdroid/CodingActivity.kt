@@ -10,9 +10,12 @@ import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
+import androidx.databinding.adapters.ViewBindingAdapter.setOnLongClickListener
 import com.example.bruhdroid.databinding.ActivityCodingBinding
+import com.example.bruhdroid.databinding.BlockInitBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
@@ -29,6 +32,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     private lateinit var binding : ActivityCodingBinding
     private lateinit var bindingSheet: BottomsheetFragmentBinding
+    private lateinit var bindingBlock: BlockInitBinding
     private lateinit var bottomSheet: BottomSheetDialog
     private lateinit var currentDrag: View
 
@@ -39,6 +43,8 @@ class CodingActivity : AppCompatActivity(), Observer {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
         bindingSheet = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
+        bindingBlock = DataBindingUtil.inflate(layoutInflater, R.layout.block_init, null, false)
+
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
@@ -53,13 +59,13 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
 
         bindingSheet.blockInit.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT)
+            buildBlock(prevBlock, "Init", Instruction.INIT)
         }
         bindingSheet.blockPrint.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT)
+            buildBlock(prevBlock, "Print", Instruction.PRINT)
         }
         bindingSheet.blockInput.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT)
+            buildBlock(prevBlock, "Input", Instruction.INPUT)
         }
     }
 
@@ -122,23 +128,34 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction) {
-        val view = layoutInflater.inflate(layoutId, null)
+    private fun generateDragArea(view: View) {
+        if (applicationInfo.targetSdkVersion < 24) {
+            return
+        }
 
         view.apply {
             tag = ""
             setOnLongClickListener { v ->
-                val item = ClipData.Item(v.tag as? CharSequence)
-
-                val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
-                val myShadow = MyDragShadowBuilder(view)
-                v.startDragAndDrop(dragData, myShadow, null, 0)
                 currentDrag = v
                 currentDragIndex = viewList.indexOf(v)
+                if (applicationInfo.targetSdkVersion >= 24) {
+                    val item = ClipData.Item(v.tag as? CharSequence)
+
+                    val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
+                    val myShadow = MyDragShadowBuilder(view)
+
+                    v.startDragAndDrop(dragData, myShadow, null, 0)
+                }
                 true
             }
         }
+    }
 
+    private fun buildBlock(prevView: View?, layoutId: String, instruction: Instruction) {
+        val view = layoutInflater.inflate(R.layout.block_init, null)
+        view.findViewById<TextView>(R.id.textView).text = layoutId
+
+        generateDragArea(view)
         view.setOnDragListener { v, event ->
             generateDropArea(v, event)
         }
