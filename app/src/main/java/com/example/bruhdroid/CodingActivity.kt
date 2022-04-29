@@ -221,7 +221,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     override fun update(p0: Observable?, p1: Any?) {
         val lexerErrors = controller.popLexerErrors()
         val runtimeErrors = controller.popRuntimeErrors()
-        val output = interpreter.popOutput()
+        val output = interpreter.output
 
         if (runtimeErrors.isNotEmpty()) {
             buildAlertDialog("RUNTIME ERROR", runtimeErrors)
@@ -231,7 +231,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             buildAlertDialog("LEXER ERROR", lexerErrors)
         }
         if (output.isNotEmpty()) {
-            binding.console.append(output + "\n")
+            binding.console.text = output
         }
     }
 }

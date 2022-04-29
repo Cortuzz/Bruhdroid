@@ -89,6 +89,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 for (raw in rawList) {
                     output += "${getVisibleValue(parseRawBlock(raw))} "
                 }
+                output += "\n"
                 setChanged()
                 notifyObservers()
             }
@@ -341,11 +342,5 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
             }
         }
         return last as Valuable
-    }
-
-    fun popOutput(): String {
-        val out = output
-        output = ""
-        return out
     }
 }
