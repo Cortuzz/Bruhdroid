@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AlertDialogCustom.Dark.V28" parent="AlertDialogCustom.Dark">
+        <item name="android:dialogCornerRadius">15sp</item>
+    </style>
+
+    <style name="Theme.Bruhdroid" parent="Theme.Bruhdroid.Dark"/>
+    <style name="Block" parent="Block.Dark"/>
+    <style name="Expression" parent="Expression.Dark"/>
+    <style name="AlertDialogCustom" parent="AlertDialogCustom.Dark.V28"/>
+</resources>

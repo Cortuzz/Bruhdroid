@@ -11,9 +11,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="primary_background">#F4E8D8</color>
-    <color name="secondary_background">#FFFFFF</color>
-    <color name="primary">#FF5F54</color>
-    <color name="secondary">#212330</color>
-    <color name="error_color">#9A1140</color>
+    <color name="primary_background">#373737</color>
+    <color name="secondary_background">#979696</color>
+    <color name="primary">#29B3B0</color>
+    <color name="secondary">#E0D9D9</color>
+    <color name="error_color">#E91E63</color>
 </resources>

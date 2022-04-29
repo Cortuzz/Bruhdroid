@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="init">Init</string>
+    <string name="set">Set</string>
+    <string name="output">Output</string>
+    <string name="input">Input</string>
+</resources>

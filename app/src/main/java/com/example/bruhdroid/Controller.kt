@@ -1,29 +1,26 @@
 package com.example.bruhdroid
 
-import android.os.Bundle
+import android.content.res.Configuration
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.Lexer
-import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
+import java.security.AccessController.getContext
 import java.util.*
 
 class Controller: Observable() {
     private var lexerErrors = ""
     private var runtimeErrors = ""
 
-    fun runProgram(interpreter: Interpreter, instructions: List<Instruction>, viewBlocks: List<View>) {
+    fun runProgram(interpreter: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>) {
         val blocks: MutableList<Block> = mutableListOf()
-        for (i in viewBlocks.indices) {
-            val view = viewBlocks[i]
-            val instr = instructions[i]
-
-            val expression = view.findViewById<EditText>(R.id.expression).getText().toString()
-            blocks.add(Block(instr, expression))
+        for (i in viewBlocks) {
+            blockMap[i]!!.expression = i.findViewById<EditText>(R.id.expression).getText().toString()
+            blocks.add(blockMap[i]!!)
         }
 
         try {
@@ -41,6 +38,15 @@ class Controller: Observable() {
         }
     }
 
+    fun changeTheme(currentMode: Int) {
+        val mode = when (currentMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_NO -> AppCompatDelegate.MODE_NIGHT_YES
+            Configuration.UI_MODE_NIGHT_YES -> AppCompatDelegate.MODE_NIGHT_NO
+            else -> return
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
+    }
+
     fun popLexerErrors(): String {
         val err = lexerErrors
         lexerErrors = ""
@@ -53,12 +59,4 @@ class Controller: Observable() {
         return err
     }
 
-    /*private fun getBlockClass(instruction: Instruction, data: RawInput, additionalBlocks: List<Block>? = null): Block {
-        return when (instruction) {
-            Instruction.INIT -> Init(data)
-            Instruction.PRINT -> Print(data)
-            Instruction.INPUT -> Input(data)
-            else -> throw Exception()
-        }
-    }*/
 }

@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.bruhdroid"
-        minSdk 17
+        minSdk 21
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -29,12 +29,16 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     testImplementation 'junit:junit:4.13.2'
