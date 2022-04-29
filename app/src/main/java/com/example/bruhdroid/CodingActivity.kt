@@ -4,35 +4,30 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.DialogInterface
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.adapters.ViewBindingAdapter.setOnLongClickListener
 import com.example.bruhdroid.databinding.ActivityCodingBinding
-import com.example.bruhdroid.databinding.BlockInitBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
-import kotlin.math.abs
 
 class CodingActivity : AppCompatActivity(), Observer {
     private var currentDragIndex = 0
     private var viewToBlock = mutableMapOf<View, Block>()
-    private var viewList = LinkedList<View>()
+    private var viewList = mutableListOf<View>()
     private var prevBlock: View? = null
 
     private lateinit var binding : ActivityCodingBinding
     private lateinit var bindingSheet: BottomsheetFragmentBinding
-    private lateinit var bindingBlock: BlockInitBinding
     private lateinit var bottomSheet: BottomSheetDialog
     private lateinit var currentDrag: View
 
@@ -43,8 +38,6 @@ class CodingActivity : AppCompatActivity(), Observer {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
         bindingSheet = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
-        bindingBlock = DataBindingUtil.inflate(layoutInflater, R.layout.block_init, null, false)
-
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
@@ -59,13 +52,13 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
 
         bindingSheet.blockInit.setOnClickListener {
-            buildBlock(prevBlock, "Init", Instruction.INIT)
+            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT)
         }
         bindingSheet.blockPrint.setOnClickListener {
-            buildBlock(prevBlock, "Print", Instruction.PRINT)
+            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT)
         }
         bindingSheet.blockInput.setOnClickListener {
-            buildBlock(prevBlock, "Input", Instruction.INPUT)
+            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT)
         }
     }
 
@@ -96,23 +89,21 @@ class CodingActivity : AppCompatActivity(), Observer {
             }
 
             DragEvent.ACTION_DROP -> {
-                val item: ClipData.Item = event.clipData.getItemAt(0)
-
                 if (currentDrag === receiverView) {
                     return false
                 }
                 var newIndex = viewList.indexOf(receiverView)
-                viewList.remove(currentDrag)
 
+                newIndex = when(newIndex > viewList.indexOf(currentDrag)) {
+                    true -> newIndex - 1
+                    false -> newIndex
+                }
                 newIndex = when(event.y < receiverView.height / 2) {
                     true -> newIndex
                     else -> newIndex + 1
                 }
-                viewList.add(newIndex, currentDrag)
 
-                binding.container.removeView(currentDrag)
-                binding.container.addView(currentDrag, newIndex)
-
+               reBuildBlocks(newIndex, currentDrag)
                 v.invalidate()
                 true
             }
@@ -126,6 +117,27 @@ class CodingActivity : AppCompatActivity(), Observer {
                 false
             }
         }
+    }
+
+    private fun reBuildBlocks(index: Int, drag: View) {
+        val set = ConstraintSet()
+        set.clone(binding.container)
+        for  (i in 0 until viewList.size) {
+            set.clear(viewList[i].id, ConstraintSet.TOP)
+            set.clear(viewList[i].id, ConstraintSet.BOTTOM)
+        }
+
+        viewList.remove(drag)
+        if (index > viewList.lastIndex) {
+            viewList.add(drag)
+        } else {
+            viewList.add(index, drag)
+        }
+
+        for  (i in 1 until viewList.size) {
+            set.connect(viewList[i].id, ConstraintSet.TOP, viewList[i - 1].id, ConstraintSet.BOTTOM, 5)
+        }
+        set.applyTo(binding.container)
     }
 
     private fun generateDragArea(view: View) {
@@ -151,22 +163,26 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun buildBlock(prevView: View?, layoutId: String, instruction: Instruction) {
-        val view = layoutInflater.inflate(R.layout.block_init, null)
-        view.findViewById<TextView>(R.id.textView).text = layoutId
+    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction) {
+        val view = layoutInflater.inflate(layoutId, null)
+        binding.container.addView(view)
+        view.id = View.generateViewId()
+
+        val set = ConstraintSet()
+        set.clone(binding.container)
 
         generateDragArea(view)
         view.setOnDragListener { v, event ->
             generateDropArea(v, event)
         }
 
-        binding.container.addView(view)
-        if (prevView == null) {
-            viewList.add(view)
-        } else {
-            val prevIndex = viewList.indexOf(prevView)
-            viewList.add(prevIndex, view)
+        viewList.add(view)
+        if (prevView != null) {
+            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 5)
+            set.applyTo(binding.container)
         }
+
+        prevBlock = view
         viewToBlock[view] = Block(instruction, "")
     }
 
