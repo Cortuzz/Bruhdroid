@@ -14,6 +14,12 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     private var currentLine = -1
 
     fun initBlocks(_blocks: List<Block>) {
+        output = ""
+        input = ""
+        waitingForInput = false
+        appliedConditions.clear()
+        cycleLines.clear()
+        memory =  Memory(null)
         currentLine = -1
         blocks = _blocks
     }

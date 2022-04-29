@@ -16,10 +16,9 @@ class Controller: Observable() {
     private var lexerErrors = ""
     private var runtimeErrors = ""
 
-    fun runProgram(interpreter: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: LinkedList<View>) {
+    fun runProgram(interpreter: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>) {
         val blocks: MutableList<Block> = mutableListOf()
         for (i in viewBlocks) {
-
             blockMap[i]!!.expression = i.findViewById<EditText>(R.id.expression).getText().toString()
             blocks.add(blockMap[i]!!)
         }
