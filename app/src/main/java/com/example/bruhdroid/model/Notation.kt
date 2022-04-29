@@ -7,17 +7,20 @@ class Notation {
             UNARY_MINUS('∓', 8), UNARY_PLUS('±', 8),
             MULTIPLY('*', 7), DIVIDE('/', 7),
             SUBTRACT('-', 6), ADD('+', 6),
+            EQUALS('=', 5), NOT_EQUALS('≠', 5),
             LESS('<', 5), GREATER('>', 5),
+            LESS_OR_EQUALS('≤', 5), GREATER_OR_EQUALS('≥', 5),
             NOT('!', 4), AND('&', 3), OR('|', 2),
             OPEN_BRACKET(')', 1), CLOSE_BRACKET(')', 1),
-            DEFINE('=', 0)
+            DEFINE('≈', 0)
         }
         private val operators = mapOf(
             '-' to Operator.SUBTRACT, '+' to Operator.ADD, '*' to Operator.MULTIPLY,
             '/' to Operator.DIVIDE, '(' to Operator.OPEN_BRACKET, ')' to Operator.CLOSE_BRACKET,
-            '=' to Operator.DEFINE, '∓' to Operator.UNARY_MINUS, '±' to Operator.UNARY_PLUS,
+            '≈' to Operator.DEFINE, '∓' to Operator.UNARY_MINUS, '±' to Operator.UNARY_PLUS,
             '!' to Operator.NOT, '&' to Operator.AND, '|' to Operator.OR, '<' to Operator.LESS,
-            '>' to Operator.GREATER)
+            '>' to Operator.GREATER, '=' to Operator.EQUALS, '≠' to Operator.NOT_EQUALS,
+            '≤' to Operator.LESS_OR_EQUALS, '≥' to Operator.GREATER_OR_EQUALS)
 
         fun convertToRpn(infixNotation: String): String {
             var mayUnary = true
@@ -66,14 +69,12 @@ class Notation {
                                 while (opStack.last() == '±' || opStack.last() == '∓') {
                                     postfixNotation += opStack.removeLast() + " "
                                 }
-                                
+
                                 if (operators[infixNotation[count]]!!.priority <=
                                     operators[opStack.last()]!!.priority) {
                                         postfixNotation += opStack.removeLast() + " "
                                 }
                             }
-
-
                             opStack.add(infixNotation[count])
                             mayUnary = true
                         }
@@ -91,11 +92,40 @@ class Notation {
 
         fun normalizeString(str: String): String {
             var normalizedString = ""
+            var i = 0
+            var isString = false
 
-            for (symbol in str) {
-                if (symbol != ' ') {
+            while (i < str.length) {
+                var symbol = str[i]
+                if (symbol != ' ' || isString) {
+                    if (symbol == '"') {
+                        isString = !isString
+                    }
+
+                    if (symbol == '=') {
+                        if (str[i + 1] == '=') {
+                            symbol = '='
+                            ++i
+                        } else {
+                            symbol = '≈'
+                        }
+                    }
+                    if (i + 1 < str.length && str[i + 1] == '=') {
+                        symbol = when (symbol) {
+                            '!' -> '≠'
+                            '<' -> '≤'
+                            '>' -> '≥'
+                            else -> {
+                                ++i
+                                symbol
+                            }
+                        }
+                        ++i
+                    }
+
                     normalizedString += symbol
                 }
+                ++i
             }
 
             return normalizedString

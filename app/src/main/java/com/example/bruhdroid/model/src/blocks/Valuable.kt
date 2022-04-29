@@ -100,7 +100,22 @@ class Valuable(varValue: Any, var type: Type) :
     }
 
     operator fun compareTo(operand: Valuable): Int {
-        return value.toInt() - operand.value.toInt()
+        val dif = value.toFloat() - operand.value.toFloat()
+        return if (dif < 0) {
+            -1
+        } else if (dif > 0) {
+            1
+        } else {
+            0
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        other as Valuable
+        if (other.type == type && other.value == value) {
+            return true
+        }
+        return false
     }
 
     fun and(operand: Valuable): Valuable {
@@ -117,7 +132,7 @@ class Valuable(varValue: Any, var type: Type) :
         return Valuable(value1 || value2, Type.BOOL)
     }
 
-    private fun convertToBool(valuable: Valuable): Boolean {
+    fun convertToBool(valuable: Valuable): Boolean {
         return when (valuable.type) {
             Type.BOOL -> valuable.value.toBoolean()
             Type.INT -> valuable.value.toInt() != 0
@@ -129,7 +144,12 @@ class Valuable(varValue: Any, var type: Type) :
 
     private fun convertToFloat(valuable: Valuable): Float {
         return when (valuable.type) {
-            //Type.BOOL -> valuable.value.toBoolean() todo: Boolean
+            Type.BOOL -> {
+                if (valuable.value == "true") {
+                    return 1f
+                }
+                0f
+            }
             Type.INT -> valuable.value.toFloat()
             Type.FLOAT -> valuable.value.toFloat()
             Type.STRING -> {
@@ -145,7 +165,12 @@ class Valuable(varValue: Any, var type: Type) :
 
     private fun convertToInt(valuable: Valuable): Int {
         return when (valuable.type) {
-            //Type.BOOL -> valuable.value.toBoolean() todo: Boolean
+            Type.BOOL -> {
+                if (valuable.value == "true") {
+                    return 1
+                }
+                0
+            }
             Type.INT -> valuable.value.toInt()
             Type.FLOAT -> valuable.value.toInt()
             Type.STRING -> {

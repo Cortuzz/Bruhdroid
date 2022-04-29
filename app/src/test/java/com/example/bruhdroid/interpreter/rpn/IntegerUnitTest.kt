@@ -71,6 +71,6 @@ class IntegerUnitTest {
     fun define() {
         val value = "a = (5 + 6) * 3 - (5 - 3) / 2"
         val actual = Notation.convertToRpn(Notation.normalizeString(value))
-        assertEquals("a 5 6 + 3 * 5 3 - 2 / - = ", actual)
+        assertEquals("a 5 6 + 3 * 5 3 - 2 / - ≈ ", actual)
     }
 }

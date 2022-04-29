@@ -10,6 +10,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     var waitingForInput = false
     var memory = Memory(null)
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
+    private var cycleLines: MutableList<Int> = mutableListOf()
     private var currentLine = -1
 
     fun initBlocks(_blocks: List<Block>) {
@@ -35,10 +36,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     private fun skipFalseBranches() {
         var count = 1
         while (currentLine < blocks!!.size - 1) {
-
             val block = blocks!![++currentLine]
 
-            if (block.instruction == Instruction.IF) { // todo: cycle check
+            if (block.instruction == Instruction.IF) {
                 count++
             }
             if (block.instruction == Instruction.END) {
@@ -53,13 +53,41 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         }
     }
 
+    private fun skipCycle() {
+        var count = 1
+        while (currentLine < blocks!!.size - 1) {
+            val block = blocks!![++currentLine]
+
+            if (block.instruction == Instruction.WHILE) {
+                count++
+            }
+            if (block.instruction == Instruction.END_WHILE) {
+                count--
+            }
+
+            if (count == 0) {
+                return
+            }
+        }
+    }
+
+    private fun getVisibleValue(valuable: Valuable): String {
+        val rawValue = valuable.value
+        return when (valuable.type) {
+            Type.STRING -> "\"$rawValue\""
+            Type.BOOL -> rawValue.uppercase()
+            Type.UNDEFINED -> "UNDEFINED"
+            else -> rawValue
+        }
+    }
+
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
             Instruction.PRINT -> {
                 val rawList = block.expression.split(',')
 
                 for (raw in rawList) {
-                    output += parseRawBlock(raw).value + " "
+                    output += "${getVisibleValue(parseRawBlock(raw))} "
                 }
                 setChanged()
                 notifyObservers()
@@ -98,9 +126,18 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 }
                 return false
             }
+            Instruction.WHILE -> {
+                if (checkStatement(block.expression)) {
+                    cycleLines.add(currentLine)
+                } else {
+                    skipCycle()
+                }
+            }
             Instruction.END -> {
                 appliedConditions.removeLast()
-                return false
+            }
+            Instruction.END_WHILE -> {
+                currentLine = cycleLines.removeLast() - 1
             }
             else -> parseRawBlock(block.expression)
         }
@@ -141,8 +178,10 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     }
 
     private fun checkStatement(statement: String): Boolean {
-        val booleanBlock = parseRawBlock(statement)
-        if (booleanBlock.value != "false") {
+        var booleanBlock = parseRawBlock(statement)
+        booleanBlock = Valuable(booleanBlock.convertToBool(booleanBlock), Type.BOOL)
+
+        if (booleanBlock.value == "true") {
             return true
         }
         return false
@@ -198,7 +237,15 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
 
         while (count < data.length) {
             if (data[count].isDigit() || data[count].isLetter() || data[count] == '"') {
-                while (data[count].isDigit() || data[count].isLetter() || data[count] in "\".") {
+                var isString = false
+                if (data[count] == '"') {
+                    isString = true
+                }
+
+                while (data[count].isDigit() || data[count].isLetter() || data[count] in "\"." || isString) {
+                    if (data[count] == '"' && tempStr.isNotEmpty()) {
+                        isString = false
+                    }
                     tempStr += data[count]
                     count++
                 }
@@ -242,7 +289,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
                     var operand1 = stack.removeLast()
 
-                    if (data[count] == '=') {
+                    if (data[count] == '≈') {
                         operand1 as Variable
                         tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
 
@@ -263,10 +310,14 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                         '&' -> operand1.and(operand2)
                         '|' -> operand1.or(operand2)
 
+                        '=' -> Valuable(operand1 == operand2, Type.BOOL)
+                        '≠' -> Valuable(operand1 != operand2, Type.BOOL)
                         '<' -> Valuable(operand1 < operand2, Type.BOOL)
                         '>' -> Valuable(operand1 > operand2, Type.BOOL)
-                        '=' -> {
-                            tryPushToAnyMemory(memory, operand1.value, Type.INT, operand2) // todo: Any memory
+                        '≤' -> Valuable(operand1 < operand2 || operand1 == operand2, Type.BOOL)
+                        '≥' -> Valuable(operand1 > operand2 || operand1 == operand2, Type.BOOL)
+                        '≈' -> {
+                            tryPushToAnyMemory(memory, operand1.value, Type.INT, operand2)
                             operand2
                         }
                         else -> null
