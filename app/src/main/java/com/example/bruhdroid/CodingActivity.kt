@@ -1,14 +1,16 @@
 package com.example.bruhdroid
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipDescription
 import android.content.DialogInterface
-import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ContextThemeWrapper
+import android.view.DragEvent
 import android.view.View
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
@@ -17,9 +19,10 @@ import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
+import kotlin.math.abs
 
 class CodingActivity : AppCompatActivity(), Observer {
-    private var currentBlockLayout = 0
+    private var currentDragIndex = 0
     private var viewToBlock = mutableMapOf<View, Block>()
     private var viewList = LinkedList<View>()
     private var prevBlock: View? = null
@@ -27,6 +30,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private lateinit var binding : ActivityCodingBinding
     private lateinit var bindingSheet: BottomsheetFragmentBinding
     private lateinit var bottomSheet: BottomSheetDialog
+    private lateinit var currentDrag: View
 
     private val interpreter = Interpreter()
     private val controller = Controller()
@@ -59,8 +63,86 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun generateDropArea(v: View, event: DragEvent): Boolean {
+        val receiverView: ConstraintLayout = v as ConstraintLayout
+
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                if (event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+                    v.invalidate()
+                    true
+                } else {
+                    false
+                }
+            }
+
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_LOCATION ->
+                true
+
+            DragEvent.ACTION_DRAG_EXITED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DROP -> {
+                val item: ClipData.Item = event.clipData.getItemAt(0)
+
+                if (currentDrag === receiverView) {
+                    return false
+                }
+                var newIndex = viewList.indexOf(receiverView)
+                viewList.remove(currentDrag)
+
+                newIndex = when(event.y < receiverView.height / 2) {
+                    true -> newIndex
+                    else -> newIndex + 1
+                }
+                viewList.add(newIndex, currentDrag)
+
+                binding.container.removeView(currentDrag)
+                binding.container.addView(currentDrag, newIndex)
+
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENDED -> {
+                v.invalidate()
+                true
+            }
+
+            else -> {
+                false
+            }
+        }
+    }
+
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction) {
         val view = layoutInflater.inflate(layoutId, null)
+
+        view.apply {
+            tag = ""
+            setOnLongClickListener { v ->
+                val item = ClipData.Item(v.tag as? CharSequence)
+
+                val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
+                val myShadow = MyDragShadowBuilder(view)
+                v.startDragAndDrop(dragData, myShadow, null, 0)
+                currentDrag = v
+                currentDragIndex = viewList.indexOf(v)
+                true
+            }
+        }
+
+        view.setOnDragListener { v, event ->
+            generateDropArea(v, event)
+        }
+
         binding.container.addView(view)
         if (prevView == null) {
             viewList.add(view)
