@@ -52,7 +52,7 @@ class Controller: Observable() {
 
     fun resumeProgram() {
         try {
-            notifying = interpreter.run()
+            notifying = interpreter.runOnce()
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
             notifying = true

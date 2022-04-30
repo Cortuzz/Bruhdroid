@@ -24,7 +24,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         blocks = _blocks
     }
 
-    fun run(): Boolean {
+    fun runOnce(): Boolean {
         if (currentLine >= blocks!!.size - 1) {
             return false
         }
@@ -39,6 +39,21 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     "At instruction: ${block.instruction}")
         }
         return true
+    }
+
+    fun run() {
+        while (currentLine < blocks!!.size - 1) {
+            val block = blocks!![++currentLine]
+
+            try {
+                if (parse(block)) {
+                    skipFalseBranches()
+                }
+            } catch (e: RuntimeError) {
+                throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
+                        "At instruction: ${block.instruction}")
+            }
+        }
     }
 
     private fun skipFalseBranches() {

@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private fun buildAlertDialog() {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         builder.setTitle("Are you sure you want to quit?")
-        builder.setMessage("Or maybe it’s better to write some useful code.")
+        builder.setMessage("Maybe it’s better to write some useful code.")
 
         builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
             finishAffinity()
