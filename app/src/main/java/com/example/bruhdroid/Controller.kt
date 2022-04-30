@@ -14,6 +14,9 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class Controller: Observable() {
+    companion object {
+        var suppressingWarns = false
+    }
     private var lexerErrors = ""
     private var runtimeErrors = ""
     private lateinit var interpreter: Interpreter
@@ -32,13 +35,18 @@ class Controller: Observable() {
         try {
             Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
+
+            GlobalScope.launch {
+                resumeProgram()
+            }
         } catch (e: LexerError) {
             lexerErrors = e.message.toString().dropLast(2)
             setChanged()
             notifyObservers()
-        }
-        GlobalScope.launch {
-            resumeProgram()
+        } catch (e: RuntimeError) {
+            runtimeErrors = e.message.toString()
+            setChanged()
+            notifyObservers()
         }
     }
 

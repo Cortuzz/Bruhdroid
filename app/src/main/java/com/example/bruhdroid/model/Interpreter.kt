@@ -269,8 +269,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
 
                 tempStr = ""
                 count--
-            } else if (data[count] == ' ') {
-            } else {
+            } else if (data[count] != ' ') {
                 try {
                     var operand2 = stack.removeLast()
 
@@ -306,7 +305,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
                     operand1 as Valuable
 
-                    var result: Valuable? = when (data[count]) {
+                    val result: Valuable? = when (data[count]) {
                         '+' -> operand1 + operand2
                         '-' -> operand1 - operand2
                         '*' -> operand1 * operand2

@@ -1,15 +1,16 @@
 package com.example.bruhdroid
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.DialogInterface
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
-import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
@@ -20,8 +21,6 @@ import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -69,6 +68,25 @@ class CodingActivity : AppCompatActivity(), Observer {
         bindingSheet.blockWhile.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
         }
+    }
+
+    override fun onBackPressed() {
+        if (!Controller.suppressingWarns) { // todo: Save check
+            val builder = buildAlertDialog("DATA WARNING", "There are unsaved changes.\n\n" +
+                    "This action will wipe all unsaved changes.")
+            builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
+                super.onBackPressed()
+            }
+            builder.setNeutralButton(R.string.suppress_data_warning)  { _: DialogInterface, _: Int ->
+                Controller.suppressingWarns = true
+                super.onBackPressed()
+            }
+            builder.setNegativeButton(android.R.string.cancel) { _: DialogInterface, _: Int -> }
+            builder.show()
+
+            return
+        }
+        super.onBackPressed()
     }
 
     private fun generateDropArea(v: View, event: DragEvent): Boolean {
@@ -144,6 +162,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             when (viewToBlock[view]!!.instruction) {
                 in endInstructions -> --count
                 in startInstructions -> ++count
+                else -> {}
             }
 
             tempViews.add(view)
@@ -239,7 +258,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     private fun generateDragArea(view: View) {
-        if (applicationInfo.targetSdkVersion < 24) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             return
         }
 
@@ -248,19 +267,19 @@ class CodingActivity : AppCompatActivity(), Observer {
             setOnLongClickListener { v ->
                 currentDrag = v
                 currentDragIndex = viewList.indexOf(v)
-                if (applicationInfo.targetSdkVersion >= 24) {
-                    val item = ClipData.Item(v.tag as? CharSequence)
 
-                    val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
-                    val myShadow = MyDragShadowBuilder(view)
+                val item = ClipData.Item(v.tag as? CharSequence)
 
-                    v.startDragAndDrop(dragData, myShadow, null, 0)
-                }
+                val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
+                val myShadow = MyDragShadowBuilder(view)
+
+                v.startDragAndDrop(dragData, myShadow, null, 0)
                 true
             }
         }
     }
 
+    @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
         viewList.add(view)
@@ -337,12 +356,17 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     }
 
-    private fun buildAlertDialog(label: String, message: String) {
+    private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         builder.setTitle(label)
         builder.setMessage(message)
 
-        builder.setPositiveButton(android.R.string.ok) { dialogInterface: DialogInterface, i: Int -> }
+        return builder
+    }
+
+    private fun showErrorDialog(label: String, message: String) {
+        val builder = buildAlertDialog(label, message)
+        builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int -> }
         builder.show()
     }
 
@@ -353,11 +377,12 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         runOnUiThread {
             if (runtimeErrors.isNotEmpty()) {
-                buildAlertDialog("RUNTIME ERROR", runtimeErrors)
+                showErrorDialog("RUNTIME ERROR", runtimeErrors)
             }
 
             if (lexerErrors.isNotEmpty()) {
-                buildAlertDialog("LEXER ERROR", lexerErrors)
+                showErrorDialog("LEXER ERROR", lexerErrors)
+                return@runOnUiThread
             }
             if (output.isNotEmpty()) {
                 binding.console.text = output
