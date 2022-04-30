@@ -11,7 +11,6 @@ import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.security.AccessController.getContext
 import java.util.*
 
 class Controller: Observable() {
