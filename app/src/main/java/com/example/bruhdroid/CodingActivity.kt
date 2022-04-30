@@ -68,6 +68,9 @@ class CodingActivity : AppCompatActivity(), Observer {
         bindingSheet.blockWhile.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
         }
+        bindingSheet.blockIf.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
+        }
     }
 
     override fun onBackPressed() {
@@ -130,7 +133,8 @@ class CodingActivity : AppCompatActivity(), Observer {
                     else -> newIndex + 1
                 }
 
-                if (viewToBlock[currentDrag]!!.instruction == Instruction.WHILE) {
+                val instr = viewToBlock[currentDrag]!!.instruction
+                if (instr == Instruction.WHILE || instr == Instruction.IF) {
                     reBuildBlocks(newIndex, currentDrag, true)
                 } else {
                     reBuildBlocks(newIndex, currentDrag)
@@ -215,6 +219,9 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     private fun buildConstraints(set: ConstraintSet, height: Int, newIndex: Int, lastIndex: Int, count: Int) {
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
+
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -222,12 +229,12 @@ class CodingActivity : AppCompatActivity(), Observer {
             val view = viewList[i]
             val prevView = viewList[i - 1]
 
-            if (viewToBlock[prevView]!!.instruction == Instruction.WHILE) {
+            if (viewToBlock[prevView]!!.instruction in startInstructions) {
                 nestViews.add(prevView)
                 nestCount.add(0)
             }
 
-            if (viewToBlock[view]!!.instruction == Instruction.END_WHILE) {
+            if (viewToBlock[view]!!.instruction in endInstructions) {
                 val nest = nestViews.removeLast()
                 val nestId = nest.id
                 val connector = connectorsMap[view]!!
@@ -240,7 +247,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
                 set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, 0)
                 set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 0)
+                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 10)
             }
 
             if (nestViews.isNotEmpty()) {
@@ -316,14 +323,24 @@ class CodingActivity : AppCompatActivity(), Observer {
         var connector: View? = null
 
         if (connect) {
-            endBlock = layoutInflater.inflate(R.layout.empty_block, null)
+            val endInstruction: Instruction
+
+            if (instruction == Instruction.WHILE) {
+                endBlock = layoutInflater.inflate(R.layout.empty_block, null)
+                endInstruction = Instruction.END_WHILE
+
+            } else {
+                endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
+                endInstruction = Instruction.END
+            }
+
             connector = layoutInflater.inflate(R.layout.block_connector, null)
 
-            binding.container.addView(endBlock)
             binding.container.addView(connector)
+            binding.container.addView(endBlock)
 
             viewList.add(endBlock)
-            viewToBlock[endBlock] = Block(Instruction.END_WHILE, "")
+            viewToBlock[endBlock] = Block(endInstruction, "")
             endBlock.id = View.generateViewId()
             connector.id = View.generateViewId()
 
@@ -350,38 +367,15 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         if (endBlock != null && connector != null) {
             connectorsMap[endBlock] = connector
+            set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
+            set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
+            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 10)
+
             set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
-
-            set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, -100)
-            set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, -100)
-
             prevBlock = endBlock
         }
         set.applyTo(binding.container)
         viewToBlock[view] = Block(instruction, "")
-    }
-
-    private fun removeBlock(view: View) {
-        val block: Block = viewToBlock[view] ?: return
-        if (!(block.instruction == Instruction.IF || block.instruction == Instruction.ELIF || block.instruction == Instruction.ELSE)) {
-            viewToBlock.remove(view)
-            viewList.remove(view)
-            return
-        }
-        var counter = 1
-        val index = viewList.indexOf(view)
-        while (counter > 0) {
-
-            if (viewToBlock[viewList[index]]!!.instruction == Instruction.END) {
-                counter--
-            }
-            if (viewToBlock[viewList[index]]!!.instruction == Instruction.IF) {
-                counter++
-            }
-            viewToBlock.remove(viewList[index])
-            viewList.removeAt(index)
-        }
-
     }
 
     private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {
