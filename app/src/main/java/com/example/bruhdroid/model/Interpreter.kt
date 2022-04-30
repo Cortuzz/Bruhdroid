@@ -19,24 +19,26 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         waitingForInput = false
         appliedConditions.clear()
         cycleLines.clear()
-        memory =  Memory(null)
+        memory = Memory(null)
         currentLine = -1
         blocks = _blocks
     }
 
-    fun run() {
-        while (currentLine < blocks!!.size - 1) {
-            val block = blocks!![++currentLine]
-
-            try {
-                if (parse(block)) {
-                    skipFalseBranches()
-                }
-            } catch (e: RuntimeError) {
-                throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
-                        "At instruction: ${block.instruction}")
-            }
+    fun run(): Boolean {
+        if (currentLine >= blocks!!.size - 1) {
+            return false
         }
+        val block = blocks!![++currentLine]
+
+        try {
+            if (parse(block)) {
+                skipFalseBranches()
+            }
+        } catch (e: RuntimeError) {
+            throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
+                    "At instruction: ${block.instruction}")
+        }
+        return true
     }
 
     private fun skipFalseBranches() {
@@ -96,13 +98,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     output += "${getVisibleValue(parseRawBlock(raw))} "
                 }
                 output += "\n"
-                setChanged()
-                notifyObservers()
             }
             Instruction.INPUT -> {
                 waitingForInput = true
-                setChanged()
-                notifyObservers()
             }
             Instruction.INIT -> {
                 val raw = block.expression
