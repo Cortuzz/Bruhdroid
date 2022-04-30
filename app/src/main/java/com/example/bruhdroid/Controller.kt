@@ -9,30 +9,48 @@ import com.example.bruhdroid.model.Lexer
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.security.AccessController.getContext
 import java.util.*
 
 class Controller: Observable() {
     private var lexerErrors = ""
     private var runtimeErrors = ""
+    private lateinit var interpreter: Interpreter
+    private var notifying = false
 
-    fun runProgram(interpreter: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>) {
+    fun runProgram(ip: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>) {
+        interpreter = ip
+
         val blocks: MutableList<Block> = mutableListOf()
         for (i in viewBlocks) {
-            blockMap[i]!!.expression = i.findViewById<EditText>(R.id.expression).getText().toString()
+            val expression = i.findViewById<EditText>(R.id.expression)?.text ?: ""
+            blockMap[i]!!.expression = expression.toString()
             blocks.add(blockMap[i]!!)
         }
 
         try {
             Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
-            interpreter.run()
-        } catch (e: RuntimeError) {
-            runtimeErrors = e.message.toString()
-            setChanged()
-            notifyObservers()
         } catch (e: LexerError) {
             lexerErrors = e.message.toString().dropLast(2)
+            setChanged()
+            notifyObservers()
+        }
+        GlobalScope.launch {
+            resumeProgram()
+        }
+    }
+
+    fun resumeProgram() {
+        try {
+            notifying = interpreter.run()
+        } catch (e: RuntimeError) {
+            runtimeErrors = e.message.toString()
+            notifying = true
+        }
+        if (notifying) {
             setChanged()
             notifyObservers()
         }
@@ -58,5 +76,4 @@ class Controller: Observable() {
         runtimeErrors = ""
         return err
     }
-
 }
