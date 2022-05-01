@@ -37,6 +37,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         } catch (e: RuntimeError) {
             throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
                     "At instruction: ${block.instruction}")
+        } catch (e: Exception) {
+            throw RuntimeError("${e}\nAt line: ${block.line}, " +
+                    "At instruction: ${block.instruction}")
         }
         return true
     }
@@ -190,41 +193,16 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 currentLine = cycleLines.removeLast() - 1
                 memory = memory.prevMemory!!
             }
+            Instruction.BREAK -> {
+                skipCycle()
+            }
+            Instruction.CONTINUE -> {
+                currentLine = cycleLines.removeLast() - 1
+                memory = memory.prevMemory!!
+            }
             else -> parseRawBlock(block.expression)
         }
 
-        return false
-    }
-
-    private fun pushVariablesToMemory(str: String): Boolean {
-        var parsedStr = ""
-        var flag = false
-
-        for (symbol in str) {
-            if (symbol == '=') {
-                flag = true
-                break
-            }
-            if (symbol == ' ') {
-                continue
-            }
-            if (symbol == ',') {
-                pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
-                parsedStr = ""
-                continue
-            }
-            parsedStr += symbol
-        }
-
-        if (flag) {
-            try {
-                tryFindInMemory(memory, Variable(parsedStr))
-            } catch (e: StackCorruptionError) {
-                pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
-            }
-            return true
-        }
-        pushToLocalMemory(parsedStr, valueBlock=Valuable("", Type.UNDEFINED))
         return false
     }
 
@@ -340,11 +318,26 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     var operand1 = stack.removeLast()
 
                     if (data[count] == '≈') {
+                        if (operand1 is Valuable) {
+                            operand1.value = operand2.value
+                            operand1.type = operand2.type
+                        } else if (operand1 is Variable) {
+                            if (initialize) {
+                                pushToLocalMemory(operand1.name, operand2.type, operand2)
+                            } else {
+                                tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
+                            }
+                        }
+
+                        return operand2
+                    }
+
+                    if (data[count] == '#') {
                         operand1 as Variable
                         if (initialize) {
-                            pushToLocalMemory(operand1.name, operand2.type, operand2)
+                            pushToLocalMemory(operand1.name, Type.LIST, operand2)
                         } else {
-                            tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
+                            tryPushToAnyMemory(memory, operand1.name, Type.LIST, operand2)
                         }
 
                         return operand2
@@ -356,6 +349,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     operand1 as Valuable
 
                     val result: Valuable? = when (data[count]) {
+                        '?' -> operand1.array[operand2.value.toInt()]
                         '+' -> operand1 + operand2
                         '-' -> operand1 - operand2
                         '*' -> operand1 * operand2

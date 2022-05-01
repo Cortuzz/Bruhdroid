@@ -71,6 +71,9 @@ class CodingActivity : AppCompatActivity(), Observer {
         bindingSheet.blockIf.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
         }
+        bindingSheet.blockSet.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
+        }
     }
 
     override fun onBackPressed() {

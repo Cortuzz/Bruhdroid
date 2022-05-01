@@ -7,6 +7,7 @@ import com.example.bruhdroid.model.src.TypeError
 class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL,"") {
     var value: String = varValue.toString()
+    var array: MutableList<Valuable> = mutableListOf()
 
     operator fun unaryPlus(): Valuable {
         if (type == Type.STRING) {
