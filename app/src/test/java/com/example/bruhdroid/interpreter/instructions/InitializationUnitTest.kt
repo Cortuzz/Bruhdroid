@@ -10,9 +10,9 @@ import org.junit.Test
 class InitializationUnitTest {
     @Test
     fun variableInit() {
-        val a = Block(Instruction.INIT,"a")
-        val b = Block(Instruction.INIT,"b")
-        val c = Block(Instruction.INIT,"a")
+        val a = Block(Instruction.INIT,"a = 1")
+        val b = Block(Instruction.INIT,"b = 2")
+        val c = Block(Instruction.INIT,"a = 3")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -20,13 +20,13 @@ class InitializationUnitTest {
         Assert.assertEquals(2, interpreter.memory.stack.size)
         val memory = interpreter.memory.stack
 
-        Assert.assertEquals(Type.UNDEFINED, memory["a"]?.type)
-        Assert.assertEquals(Type.UNDEFINED, memory["b"]?.type)
+        Assert.assertEquals("3", memory["a"]?.value)
+        Assert.assertEquals("2", memory["b"]?.value)
     }
 
     @Test
     fun multiplyVariableInit() {
-        val a = Block(Instruction.INIT,"a, b, c, d")
+        val a = Block(Instruction.INIT,"a = 1, b = 2.45, c = \"45\", d = \"3,2\"")
 
         val interpreter = Interpreter(listOf(a))
         interpreter.run()
@@ -34,10 +34,15 @@ class InitializationUnitTest {
         Assert.assertEquals(4, interpreter.memory.stack.size)
         val memory = interpreter.memory.stack
 
-        Assert.assertEquals(Type.UNDEFINED, memory["a"]?.type)
-        Assert.assertEquals(Type.UNDEFINED, memory["b"]?.type)
-        Assert.assertEquals(Type.UNDEFINED, memory["c"]?.type)
-        Assert.assertEquals(Type.UNDEFINED, memory["d"]?.type)
+        Assert.assertEquals("1", memory["a"]?.value)
+        Assert.assertEquals("2.45", memory["b"]?.value)
+        Assert.assertEquals("45", memory["c"]?.value)
+        Assert.assertEquals("3,2", memory["d"]?.value)
+
+        Assert.assertEquals(Type.INT, memory["a"]?.type)
+        Assert.assertEquals(Type.FLOAT, memory["b"]?.type)
+        Assert.assertEquals(Type.STRING, memory["c"]?.type)
+        Assert.assertEquals(Type.STRING, memory["d"]?.type)
     }
 
     @Test

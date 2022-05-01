@@ -31,7 +31,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private var connectorsMap = mutableMapOf<View, View>()
     private var prevBlock: View? = null
 
-    private lateinit var binding : ActivityCodingBinding
+    private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheet: BottomsheetFragmentBinding
     private lateinit var bottomSheet: BottomSheetDialog
     private lateinit var currentDrag: View

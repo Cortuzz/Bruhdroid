@@ -51,4 +51,20 @@ class CyclesUnitTest {
         Assert.assertEquals("6912", memory["a"]?.value)
         Assert.assertEquals("11", memory["count"]?.value)
     }
+
+    @Test
+    fun falseWhile() {
+        val a = Block(Instruction.INIT, "a = 1")
+
+        val b = Block(Instruction.WHILE, "a > 100")
+            val c = Block(Instruction.SET, "a = a * 2")
+        val d = Block(Instruction.END_WHILE)
+
+        val interpreter = Interpreter(listOf(a, b, c, d))
+        interpreter.run()
+
+        val memory = interpreter.memory.stack
+
+        Assert.assertEquals("1", memory["a"]?.value)
+    }
 }
