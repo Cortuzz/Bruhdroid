@@ -11,7 +11,7 @@
         android:id="@+id/textView"
         android:layout_width="112dp"
         android:layout_height="45dp"
-        android:text="@string/set"
+        android:text="@string/if_block"
         android:textAlignment="center"
         android:textColor="#546E7A"
         android:textSize="34sp"

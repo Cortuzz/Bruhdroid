@@ -24,6 +24,8 @@ class Lexer {
                     when (block.instruction) {
                         Instruction.INIT -> checkInit(block.expression)
                         Instruction.PRINT -> checkPrint(block.expression)
+                        Instruction.END -> totalLines--
+                        Instruction.END_WHILE -> totalLines--
                     }
                 } catch (e: SyntaxError) {
                     errors += "${e.message}Line: ${block.line}, " +

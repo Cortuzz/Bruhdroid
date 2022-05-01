@@ -11,10 +11,12 @@ import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.security.AccessController.getContext
 import java.util.*
 
 class Controller: Observable() {
+    companion object {
+        var suppressingWarns = false
+    }
     private var lexerErrors = ""
     private var runtimeErrors = ""
     private lateinit var interpreter: Interpreter
@@ -31,21 +33,26 @@ class Controller: Observable() {
         }
 
         try {
-            Lexer.checkBlocks(blocks)
+            //Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
+
+            GlobalScope.launch {
+                resumeProgram()
+            }
         } catch (e: LexerError) {
             lexerErrors = e.message.toString().dropLast(2)
             setChanged()
             notifyObservers()
-        }
-        GlobalScope.launch {
-            resumeProgram()
+        } catch (e: RuntimeError) {
+            runtimeErrors = e.message.toString()
+            setChanged()
+            notifyObservers()
         }
     }
 
     fun resumeProgram() {
         try {
-            notifying = interpreter.run()
+            notifying = interpreter.runOnce()
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
             notifying = true

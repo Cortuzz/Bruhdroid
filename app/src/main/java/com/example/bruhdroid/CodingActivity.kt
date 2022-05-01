@@ -1,15 +1,16 @@
 package com.example.bruhdroid
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.DialogInterface
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
-import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
@@ -20,8 +21,6 @@ import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -29,10 +28,10 @@ class CodingActivity : AppCompatActivity(), Observer {
     private var currentDragIndex = 0
     private var viewToBlock = mutableMapOf<View, Block>()
     private var viewList = mutableListOf<View>()
-    private var connectorsMap = mutableMapOf<View, Int>()
+    private var connectorsMap = mutableMapOf<View, View>()
     private var prevBlock: View? = null
 
-    private lateinit var binding : ActivityCodingBinding
+    private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheet: BottomsheetFragmentBinding
     private lateinit var bottomSheet: BottomSheetDialog
     private lateinit var currentDrag: View
@@ -69,6 +68,31 @@ class CodingActivity : AppCompatActivity(), Observer {
         bindingSheet.blockWhile.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
         }
+        bindingSheet.blockIf.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
+        }
+        bindingSheet.blockSet.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
+        }
+    }
+
+    override fun onBackPressed() {
+        if (!Controller.suppressingWarns) { // todo: Save check
+            val builder = buildAlertDialog("DATA WARNING", "There are unsaved changes.\n\n" +
+                    "This action will wipe all unsaved changes.")
+            builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
+                super.onBackPressed()
+            }
+            builder.setNeutralButton(R.string.suppress_data_warning)  { _: DialogInterface, _: Int ->
+                Controller.suppressingWarns = true
+                super.onBackPressed()
+            }
+            builder.setNegativeButton(android.R.string.cancel) { _: DialogInterface, _: Int -> }
+            builder.show()
+
+            return
+        }
+        super.onBackPressed()
     }
 
     private fun generateDropArea(v: View, event: DragEvent): Boolean {
@@ -112,7 +136,8 @@ class CodingActivity : AppCompatActivity(), Observer {
                     else -> newIndex + 1
                 }
 
-                if (viewToBlock[currentDrag]!!.instruction == Instruction.WHILE) {
+                val instr = viewToBlock[currentDrag]!!.instruction
+                if (instr == Instruction.WHILE || instr == Instruction.IF) {
                     reBuildBlocks(newIndex, currentDrag, true)
                 } else {
                     reBuildBlocks(newIndex, currentDrag)
@@ -133,10 +158,11 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun replaceUntilEnd(indexLast: Int, indexNew: Int) {
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE)
+    private fun replaceUntilEnd(indexLast: Int, indexNew: Int): List<Int> {
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
         val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
         val tempViews = mutableListOf<View>()
+        var height = 0
         var count = 0
 
         do {
@@ -144,14 +170,19 @@ class CodingActivity : AppCompatActivity(), Observer {
             when (viewToBlock[view]!!.instruction) {
                 in endInstructions -> --count
                 in startInstructions -> ++count
+                else -> {}
             }
 
+            height += view.height + 10
             tempViews.add(view)
         } while(count > 0)
 
+        val size: Int = tempViews.size
         while (tempViews.size > 0) {
             viewList.add(indexNew, tempViews.removeLast())
         }
+
+        return listOf(height, size)
     }
 
     private fun clearConstraints(set: ConstraintSet, view: View) {
@@ -162,7 +193,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         set.clear(id, ConstraintSet.LEFT)
         set.clear(id, ConstraintSet.RIGHT)
 
-        val connector = connectorsMap[view]
+        val connector = connectorsMap[view]?.id
         if (connector != null) {
             set.clear(connector, ConstraintSet.TOP)
             set.clear(connector, ConstraintSet.BOTTOM)
@@ -171,60 +202,55 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
+    private fun getRatio(ind: Int, y1: Float, y2: Float, h: Int, new: Int, old: Int, c: Int, cycleLength: Int): Float? {
+        val prevSize = y1 - y2
+        val cycleStart = ind - cycleLength - 1
+        val decrease = (new + c > ind || new <= cycleStart) && cycleStart < old + c && old + c <= ind
+        val increase = (old + c > ind || old <= cycleStart) && cycleStart < new && new + c <= ind // todo: cycleStart < new ? c ?
+
+        if (decrease && increase) {
+            return null
+        }
+
+        if (decrease) {
+            return prevSize - h
+        }
+        if (increase) {
+            return prevSize + h
+        }
+        return null
+    }
+
+    private fun buildConstraints(set: ConstraintSet, height: Int, newIndex: Int, lastIndex: Int, count: Int) {
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
+
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
-        val set = ConstraintSet()
-        set.clone(binding.container)
-        for  (i in 0 until viewList.size) {
-            clearConstraints(set, viewList[i])
-        }
-
-        if (untilEnd) {
-            replaceUntilEnd(viewList.indexOf(drag), index)
-        } else {
-            viewList.remove(drag)
-            if (index > viewList.lastIndex) {
-                viewList.add(drag)
-            } else {
-                viewList.add(index, drag)
-            }
-
-        }
 
         for (i in 1 until viewList.size) {
             val view = viewList[i]
             val prevView = viewList[i - 1]
-            if (viewToBlock[prevView]!!.instruction == Instruction.WHILE &&
-                    viewToBlock[view]!!.instruction == Instruction.END_WHILE) {
 
-                val nest = prevView.id
-                val connector = connectorsMap[view]!!
-                set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 50)
-                set.connect(view.id, ConstraintSet.LEFT, prevView.id, ConstraintSet.LEFT, 0)
-
-                set.connect(connector, ConstraintSet.TOP, nest, ConstraintSet.BOTTOM, 0)
-                set.connect(connector, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connector, ConstraintSet.LEFT, nest, ConstraintSet.LEFT, 0)
-                continue
-            }
-
-            if (viewToBlock[prevView]!!.instruction == Instruction.WHILE) {
+            if (viewToBlock[prevView]!!.instruction in startInstructions) {
                 nestViews.add(prevView)
                 nestCount.add(0)
             }
 
-            if (viewToBlock[view]!!.instruction == Instruction.END_WHILE) {
-                val count = nestCount.removeLast()
-                val nest = nestViews.removeLast().id
+            if (viewToBlock[view]!!.instruction in endInstructions) {
+                val nest = nestViews.removeLast()
+                val nestId = nest.id
                 val connector = connectorsMap[view]!!
-                set.setScaleY(connector, count * 1f)
+                val connectorId = connector.id
 
-                set.connect(connector, ConstraintSet.TOP, nest, ConstraintSet.BOTTOM, 0)
-                set.connect(connector, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                //set.connect(view.id, ConstraintSet.LEFT, nest, ConstraintSet.LEFT, 150)
+                val ratio = getRatio(i, view.y, nest.y, height, newIndex, lastIndex, count, nestCount.removeLast())?.div(connector.height)
+                if (ratio != null) {
+                    set.setScaleY(connectorId, ratio)
+                }
 
-                set.connect(connector, ConstraintSet.LEFT, nest, ConstraintSet.LEFT, 0)
+                set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, 0)
+                set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
+                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 10)
             }
 
             if (nestViews.isNotEmpty()) {
@@ -234,12 +260,43 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 10)
         }
+    }
+
+    private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
+        val set = ConstraintSet()
+        val lastIndex = viewList.indexOf(drag)
+        val blockHeight: Int
+        val count: Int
+
+        set.clone(binding.container)
+        for  (i in 0 until viewList.size) {
+            clearConstraints(set, viewList[i])
+        }
+
+        if (untilEnd) {
+            val data = replaceUntilEnd(viewList.indexOf(drag), index)
+            blockHeight = data[0]
+            count = data[1]
+        } else {
+            blockHeight = drag.height
+            count = 1
+
+            viewList.remove(drag)
+            if (index > viewList.lastIndex) {
+                viewList.add(drag)
+            } else {
+                viewList.add(index, drag)
+            }
+
+        }
+
+        buildConstraints(set, blockHeight, index, lastIndex, count)
         prevBlock = viewList.last()
         set.applyTo(binding.container)
     }
 
     private fun generateDragArea(view: View) {
-        if (applicationInfo.targetSdkVersion < 24) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             return
         }
 
@@ -248,19 +305,19 @@ class CodingActivity : AppCompatActivity(), Observer {
             setOnLongClickListener { v ->
                 currentDrag = v
                 currentDragIndex = viewList.indexOf(v)
-                if (applicationInfo.targetSdkVersion >= 24) {
-                    val item = ClipData.Item(v.tag as? CharSequence)
 
-                    val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
-                    val myShadow = MyDragShadowBuilder(view)
+                val item = ClipData.Item(v.tag as? CharSequence)
 
-                    v.startDragAndDrop(dragData, myShadow, null, 0)
-                }
+                val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
+                val myShadow = MyDragShadowBuilder(view)
+
+                v.startDragAndDrop(dragData, myShadow, null, 0)
                 true
             }
         }
     }
 
+    @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
         viewList.add(view)
@@ -269,14 +326,24 @@ class CodingActivity : AppCompatActivity(), Observer {
         var connector: View? = null
 
         if (connect) {
-            endBlock = layoutInflater.inflate(R.layout.empty_block, null)
+            val endInstruction: Instruction
+
+            if (instruction == Instruction.WHILE) {
+                endBlock = layoutInflater.inflate(R.layout.empty_block, null)
+                endInstruction = Instruction.END_WHILE
+
+            } else {
+                endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
+                endInstruction = Instruction.END
+            }
+
             connector = layoutInflater.inflate(R.layout.block_connector, null)
 
-            binding.container.addView(endBlock)
             binding.container.addView(connector)
+            binding.container.addView(endBlock)
 
             viewList.add(endBlock)
-            viewToBlock[endBlock] = Block(Instruction.END_WHILE, "")
+            viewToBlock[endBlock] = Block(endInstruction, "")
             endBlock.id = View.generateViewId()
             connector.id = View.generateViewId()
 
@@ -302,47 +369,29 @@ class CodingActivity : AppCompatActivity(), Observer {
         prevBlock = view
 
         if (endBlock != null && connector != null) {
-            connectorsMap[endBlock] = connector.id
-            set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 50)
+            connectorsMap[endBlock] = connector
+            set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
+            set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
+            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 10)
 
-            set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, -100)
-            set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, -100)
-
+            set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
             prevBlock = endBlock
         }
         set.applyTo(binding.container)
         viewToBlock[view] = Block(instruction, "")
     }
 
-    private fun removeBlock(view: View) {
-        val block: Block = viewToBlock[view] ?: return
-        if (!(block.instruction == Instruction.IF || block.instruction == Instruction.ELIF || block.instruction == Instruction.ELSE)) {
-            viewToBlock.remove(view)
-            viewList.remove(view)
-            return
-        }
-        var counter = 1
-        val index = viewList.indexOf(view)
-        while (counter > 0) {
-
-            if (viewToBlock[viewList[index]]!!.instruction == Instruction.END) {
-                counter--
-            }
-            if (viewToBlock[viewList[index]]!!.instruction == Instruction.IF) {
-                counter++
-            }
-            viewToBlock.remove(viewList[index])
-            viewList.removeAt(index)
-        }
-
-    }
-
-    private fun buildAlertDialog(label: String, message: String) {
+    private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         builder.setTitle(label)
         builder.setMessage(message)
 
-        builder.setPositiveButton(android.R.string.ok) { dialogInterface: DialogInterface, i: Int -> }
+        return builder
+    }
+
+    private fun showErrorDialog(label: String, message: String) {
+        val builder = buildAlertDialog(label, message)
+        builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int -> }
         builder.show()
     }
 
@@ -353,11 +402,12 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         runOnUiThread {
             if (runtimeErrors.isNotEmpty()) {
-                buildAlertDialog("RUNTIME ERROR", runtimeErrors)
+                showErrorDialog("RUNTIME ERROR", runtimeErrors)
             }
 
             if (lexerErrors.isNotEmpty()) {
-                buildAlertDialog("LEXER ERROR", lexerErrors)
+                showErrorDialog("LEXER ERROR", lexerErrors)
+                return@runOnUiThread
             }
             if (output.isNotEmpty()) {
                 binding.console.text = output
