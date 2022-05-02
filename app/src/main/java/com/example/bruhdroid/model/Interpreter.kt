@@ -321,6 +321,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                         if (operand1 is Valuable) {
                             operand1.value = operand2.value
                             operand1.type = operand2.type
+                            operand1.array = operand2.array
                         } else if (operand1 is Variable) {
                             if (initialize) {
                                 pushToLocalMemory(operand1.name, operand2.type, operand2)
