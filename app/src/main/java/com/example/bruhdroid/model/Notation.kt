@@ -1,5 +1,8 @@
 package com.example.bruhdroid.model
 
+import com.example.bruhdroid.model.src.LexerError
+import com.example.bruhdroid.model.src.SyntaxError
+
 
 class Notation {
     companion object {
@@ -16,30 +19,46 @@ class Notation {
             OPEN_INDEX('[', 0), CLOSE_INDEX(']', 0),
             INIT_ARRAY('#', -1), DEFINE('≈', -2)
         }
-        private val operators = mapOf(
-            '-' to Operator.SUBTRACT, '+' to Operator.ADD, '*' to Operator.MULTIPLY,
-            '/' to Operator.DIVIDE, '(' to Operator.OPEN_BRACKET, ')' to Operator.CLOSE_BRACKET,
-            '≈' to Operator.DEFINE, '∓' to Operator.UNARY_MINUS, '±' to Operator.UNARY_PLUS,
-            '!' to Operator.NOT, '&' to Operator.AND, '|' to Operator.OR, '<' to Operator.LESS,
-            '>' to Operator.GREATER, '=' to Operator.EQUALS, '≠' to Operator.NOT_EQUALS,
-            '≤' to Operator.LESS_OR_EQUALS, '≥' to Operator.GREATER_OR_EQUALS,
-            '[' to Operator.OPEN_INDEX, ']' to Operator.CLOSE_INDEX, '?' to Operator.DEFINE_BY_INDEX,
-            '#' to Operator.INIT_ARRAY)
 
-        fun convertToRpn(infixNotation: String): String {
+        private val operators = mapOf(
+            "-" to Operator.SUBTRACT,
+            "+" to Operator.ADD,
+            "*" to Operator.MULTIPLY,
+            "/" to Operator.DIVIDE,
+            "(" to Operator.OPEN_BRACKET,
+            ")" to Operator.CLOSE_BRACKET,
+            "≈" to Operator.DEFINE,
+            "∓" to Operator.UNARY_MINUS,
+            "±" to Operator.UNARY_PLUS,
+            "!" to Operator.NOT,
+            "&" to Operator.AND,
+            "|" to Operator.OR,
+            "<" to Operator.LESS,
+            ">" to Operator.GREATER,
+            "=" to Operator.EQUALS,
+            "≠" to Operator.NOT_EQUALS,
+            "≤" to Operator.LESS_OR_EQUALS,
+            "≥" to Operator.GREATER_OR_EQUALS,
+            "[" to Operator.OPEN_INDEX,
+            "]" to Operator.CLOSE_INDEX,
+            "?" to Operator.DEFINE_BY_INDEX,
+            "#" to Operator.INIT_ARRAY
+        )
+
+        fun convertToRpn(infixNotation: List<String>): List<String> {
             var mayUnary = true
             var arrayInit = false
             var postfixNotation = ""
             val opStack = mutableListOf<Char>()
             var count = 0
 
-            while (count < infixNotation.length) {
+            while (count < infixNotation.size) {
                 if (infixNotation[count] !in operators) {
                     while (infixNotation[count] !in operators) {
                         postfixNotation += infixNotation[count]
                         count++
 
-                        if (count == infixNotation.length) {
+                        if (count == infixNotation.size) {
                             break
                         }
                     }
@@ -70,7 +89,7 @@ class Notation {
                                 postfixNotation += "$s "
                                 s = opStack.removeLast()
                             }
-                            postfixNotation += when(arrayInit) {
+                            postfixNotation += when (arrayInit) {
                                 true -> ""
                                 false -> "? "
                             }
@@ -96,8 +115,9 @@ class Notation {
                                 postfixNotation += opStack.removeLast() + " "
                             }
                             if (opStack.size > 0 && operators[infixNotation[count]]!!.priority <=
-                                operators[opStack.last()]!!.priority) {
-                                    postfixNotation += opStack.removeLast() + " "
+                                operators[opStack.last()]!!.priority
+                            ) {
+                                postfixNotation += opStack.removeLast() + " "
                             }
 
                             opStack.add(infixNotation[count])
@@ -115,45 +135,17 @@ class Notation {
             return postfixNotation
         }
 
-        fun normalizeString(str: String): String {
-            var normalizedString = ""
-            var i = 0
-            var isString = false
-
-            while (i < str.length) {
-                var symbol = str[i]
-                if (symbol != ' ' || isString) {
-                    if (symbol == '"') {
-                        isString = !isString
-                    }
-
-                    if (symbol == '=') {
-                        if (str[i + 1] == '=') {
-                            symbol = '='
-                            ++i
-                        } else {
-                            symbol = '≈'
-                        }
-                    }
-                    if (i + 1 < str.length && str[i + 1] == '=') {
-                        symbol = when (symbol) {
-                            '!' -> '≠'
-                            '<' -> '≤'
-                            '>' -> '≥'
-                            else -> {
-                                ++i
-                                symbol
-                            }
-                        }
-                        ++i
-                    }
-
-                    normalizedString += symbol
-                }
-                ++i
+        fun tokenizeString(str: String): List<String> {
+            val name = "([\\d]+\\.?[\\d]*|\\w[\\w\\d_]*|\".*\")"
+            val operator = "(\\+|-|\\*|==|=|!=|>=|<=|<|>|)"
+            val bracket = "(\\(|\\)|\\[|\\])"
+            val exp = Regex("($bracket|$name|$operator)")
+            val strSeq=exp.findAll(str).toList().map { it.destructured.toList()[0] }.toMutableList()
+            strSeq.removeLast()
+            if ("" in strSeq){
+                throw SyntaxError("Invalid syntax")
             }
-
-            return normalizedString
+            return strSeq
         }
     }
 }

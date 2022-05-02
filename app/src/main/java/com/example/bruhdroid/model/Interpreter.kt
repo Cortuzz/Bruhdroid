@@ -4,7 +4,8 @@ import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
 
-class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false): Observable() {
+class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false) :
+    Observable() {
     var output = ""
     var input = ""
     var waitingForInput = false
@@ -35,11 +36,15 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 skipFalseBranches()
             }
         } catch (e: RuntimeError) {
-            throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
-                    "At instruction: ${block.instruction}")
+            throw RuntimeError(
+                "${e.message}\nAt line: ${block.line}, " +
+                        "At instruction: ${block.instruction}"
+            )
         } catch (e: Exception) {
-            throw RuntimeError("${e}\nAt line: ${block.line}, " +
-                    "At instruction: ${block.instruction}")
+            throw RuntimeError(
+                "${e}\nAt line: ${block.line}, " +
+                        "At instruction: ${block.instruction}"
+            )
         }
         return true
     }
@@ -53,8 +58,10 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     skipFalseBranches()
                 }
             } catch (e: RuntimeError) {
-                throw RuntimeError("${e.message}\nAt line: ${block.line}, " +
-                        "At instruction: ${block.instruction}")
+                throw RuntimeError(
+                    "${e.message}\nAt line: ${block.line}, " +
+                            "At instruction: ${block.instruction}"
+                )
             }
         }
     }
@@ -72,7 +79,8 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
             }
 
             if (count == 0 || (count == 1 && (block.instruction == Instruction.ELIF ||
-                        block.instruction == Instruction.ELSE))) {
+                        block.instruction == Instruction.ELSE))
+            ) {
                 currentLine--
                 return
             }
@@ -226,7 +234,12 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         memory.push(name, valueBlock)
     }
 
-    private fun tryPushToAnyMemory(memory: Memory, name: String, type: Type, valueBlock: Block): Boolean {
+    private fun tryPushToAnyMemory(
+        memory: Memory,
+        name: String,
+        type: Type,
+        valueBlock: Block
+    ): Boolean {
         valueBlock as Valuable
         valueBlock.type = type
 
@@ -261,7 +274,8 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     }
 
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        val data = Notation.convertToRpn(Notation.normalizeString(raw))
+        println(Notation.tokenizeString(raw))
+        val data = Notation.convertToRpn(raw)
 
         var count = 0
         val stack = mutableListOf<Block>()
@@ -310,11 +324,13 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     operand2 as Valuable
 
                     if (data[count] in "∓±") {
-                        stack.add(when (data[count]) {
-                            '±' -> +operand2
-                            '∓' -> -operand2
-                            else -> throw Exception()
-                        })
+                        stack.add(
+                            when (data[count]) {
+                                '±' -> +operand2
+                                '∓' -> -operand2
+                                else -> throw Exception()
+                            }
+                        )
                         count += 2
                         continue
                     }
@@ -329,7 +345,12 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                             if (initialize) {
                                 pushToLocalMemory(operand1.name, operand2.type, operand2.clone())
                             } else {
-                                tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2.clone())
+                                tryPushToAnyMemory(
+                                    memory,
+                                    operand1.name,
+                                    operand2.type,
+                                    operand2.clone()
+                                )
                             }
                         }
 
@@ -372,7 +393,12 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                             if (initialize) {
                                 pushToLocalMemory(operand1.value, operand2.type, operand2.clone())
                             } else {
-                                tryPushToAnyMemory(memory, operand1.value, operand2.type, operand2.clone())
+                                tryPushToAnyMemory(
+                                    memory,
+                                    operand1.value,
+                                    operand2.type,
+                                    operand2.clone()
+                                )
                             }
                             operand2
                         }
