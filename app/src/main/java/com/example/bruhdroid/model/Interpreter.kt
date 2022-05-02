@@ -1,5 +1,6 @@
 package com.example.bruhdroid.model
 
+import androidx.core.text.isDigitsOnly
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
@@ -272,45 +273,31 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
 
         return tryFindInMemory(memory.prevMemory, block)
     }
+    
+    private fun getValue(data: String): Block? {
+        return if (data.last() == '"' && data.first() == '"') {
+            // Maybe substring is better solution
+            Valuable(data.replace("\"", ""), Type.STRING)
+        } else if (data.contains("[A-Za-z]".toRegex())) {
+            Variable(data)
+        } else {
+            when {
+                data.contains('.') -> Valuable(data, Type.FLOAT)
+                data.isDigitsOnly() -> Valuable(data, Type.INT)
+                else -> null
+            }
+        }
+    }
 
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        println(Notation.tokenizeString(raw))
-        val data = Notation.convertToRpn(raw)
-
-        var count = 0
+        val data = Notation.convertToRpn(Notation.tokenizeString(raw))
         val stack = mutableListOf<Block>()
-        var tempStr = ""
-
-        while (count < data.length) {
-            if (data[count].isDigit() || data[count].isLetter() || data[count] == '"') {
-                var isString = false
-                if (data[count] == '"') {
-                    isString = true
-                }
-
-                while (data[count].isDigit() || data[count].isLetter() || data[count] in "\"." || isString) {
-                    if (data[count] == '"' && tempStr.isNotEmpty()) {
-                        isString = false
-                    }
-                    tempStr += data[count]
-                    count++
-                }
-                if (tempStr.last() == '"' && tempStr.first() == '"') {
-                    // Maybe substring is better solution
-                    stack.add(Valuable(tempStr.replace("\"", ""), Type.STRING))
-                } else if (tempStr.contains("[A-Za-z]".toRegex())) {
-                    stack.add(Variable(tempStr))
-                } else {
-                    if (tempStr.contains('.')) {
-                        stack.add(Valuable(tempStr, Type.FLOAT))
-                    } else {
-                        stack.add(Valuable(tempStr, Type.INT))
-                    }
-                }
-
-                tempStr = ""
-                count--
-            } else if (data[count] != ' ') {
+        
+        for (value in data) {
+            val parsedValue = getValue(value)
+            if (parsedValue != null) {
+                stack.add(parsedValue)
+            } else {
                 try {
                     var operand2 = stack.removeLast()
 
@@ -323,20 +310,19 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
                     operand2 as Valuable
 
-                    if (data[count] in "∓±") {
+                    if (value in "∓±") {
                         stack.add(
-                            when (data[count]) {
-                                '±' -> +operand2
-                                '∓' -> -operand2
+                            when (value) {
+                                "±" -> +operand2
+                                "∓" -> -operand2
                                 else -> throw Exception()
                             }
                         )
-                        count += 2
                         continue
                     }
                     var operand1 = stack.removeLast()
 
-                    if (data[count] == '≈') {
+                    if (value == "=") {
                         if (operand1 is Valuable) {
                             operand1.value = operand2.value
                             operand1.type = operand2.type
@@ -357,7 +343,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                         return operand2
                     }
 
-                    if (data[count] == '#') {
+                    if (value == "#") {
                         operand1 as Variable
                         if (initialize) {
                             pushToLocalMemory(operand1.name, Type.LIST, operand2)
@@ -373,23 +359,23 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
                     operand1 as Valuable
 
-                    val result: Valuable? = when (data[count]) {
-                        '?' -> operand1.array[operand2.value.toInt()]
-                        '+' -> operand1 + operand2
-                        '-' -> operand1 - operand2
-                        '*' -> operand1 * operand2
-                        '/' -> operand1 / operand2
+                    val result: Valuable? = when (value) {
+                        "?" -> operand1.array[operand2.value.toInt()]
+                        "+" -> operand1 + operand2
+                        "-" -> operand1 - operand2
+                        "*" -> operand1 * operand2
+                        "/" -> operand1 / operand2
 
-                        '&' -> operand1.and(operand2)
-                        '|' -> operand1.or(operand2)
+                        "&" -> operand1.and(operand2)
+                        "|" -> operand1.or(operand2)
 
-                        '=' -> Valuable(operand1 == operand2, Type.BOOL)
-                        '≠' -> Valuable(operand1 != operand2, Type.BOOL)
-                        '<' -> Valuable(operand1 < operand2, Type.BOOL)
-                        '>' -> Valuable(operand1 > operand2, Type.BOOL)
-                        '≤' -> Valuable(operand1 < operand2 || operand1 == operand2, Type.BOOL)
-                        '≥' -> Valuable(operand1 > operand2 || operand1 == operand2, Type.BOOL)
-                        '≈' -> {
+                        "==" -> Valuable(operand1 == operand2, Type.BOOL)
+                        "!=" -> Valuable(operand1 != operand2, Type.BOOL)
+                        "<" -> Valuable(operand1 < operand2, Type.BOOL)
+                        ">" -> Valuable(operand1 > operand2, Type.BOOL)
+                        "<=" -> Valuable(operand1 < operand2 || operand1 == operand2, Type.BOOL)
+                        ">=" -> Valuable(operand1 > operand2 || operand1 == operand2, Type.BOOL)
+                        "=" -> {
                             if (initialize) {
                                 pushToLocalMemory(operand1.value, operand2.type, operand2.clone())
                             } else {
@@ -406,14 +392,12 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
 
                     stack.add(result!!)
-                    count++
                 } catch (e: TypeError) {
                     throw RuntimeError("${e.message}\nAt expression: $raw")
                 }
             }
-            count++
         }
-
+        
         val last = stack.removeLast()
         if (last is Variable) {
             try {

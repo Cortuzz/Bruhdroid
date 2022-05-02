@@ -27,7 +27,7 @@ class Notation {
             "/" to Operator.DIVIDE,
             "(" to Operator.OPEN_BRACKET,
             ")" to Operator.CLOSE_BRACKET,
-            "≈" to Operator.DEFINE,
+            "=" to Operator.DEFINE,
             "∓" to Operator.UNARY_MINUS,
             "±" to Operator.UNARY_PLUS,
             "!" to Operator.NOT,
@@ -35,10 +35,10 @@ class Notation {
             "|" to Operator.OR,
             "<" to Operator.LESS,
             ">" to Operator.GREATER,
-            "=" to Operator.EQUALS,
-            "≠" to Operator.NOT_EQUALS,
-            "≤" to Operator.LESS_OR_EQUALS,
-            "≥" to Operator.GREATER_OR_EQUALS,
+            "==" to Operator.EQUALS,
+            "!=" to Operator.NOT_EQUALS,
+            "<=" to Operator.LESS_OR_EQUALS,
+            ">=" to Operator.GREATER_OR_EQUALS,
             "[" to Operator.OPEN_INDEX,
             "]" to Operator.CLOSE_INDEX,
             "?" to Operator.DEFINE_BY_INDEX,
@@ -48,23 +48,13 @@ class Notation {
         fun convertToRpn(infixNotation: List<String>): List<String> {
             var mayUnary = true
             var arrayInit = false
-            var postfixNotation = ""
-            val opStack = mutableListOf<Char>()
-            var count = 0
+            val postfixNotation = mutableListOf<String>()
+            val opStack = mutableListOf<String>()
 
-            while (count < infixNotation.size) {
+            for (count in infixNotation.indices) {
                 if (infixNotation[count] !in operators) {
-                    while (infixNotation[count] !in operators) {
-                        postfixNotation += infixNotation[count]
-                        count++
-
-                        if (count == infixNotation.size) {
-                            break
-                        }
-                    }
+                    postfixNotation.add(infixNotation[count])
                     mayUnary = false
-                    postfixNotation += " "
-                    count--
                 } else {
                     when (operators[infixNotation[count]]) {
                         Operator.OPEN_BRACKET -> {
@@ -78,7 +68,7 @@ class Notation {
                         Operator.CLOSE_BRACKET -> {
                             var s = opStack.removeLast()
                             while (operators[s] != Operator.OPEN_BRACKET) {
-                                postfixNotation += "$s "
+                                postfixNotation.add(s)
                                 s = opStack.removeLast()
                             }
                             mayUnary = false
@@ -86,12 +76,11 @@ class Notation {
                         Operator.CLOSE_INDEX -> {
                             var s = opStack.removeLast()
                             while (operators[s] != Operator.OPEN_INDEX) {
-                                postfixNotation += "$s "
+                                postfixNotation.add(s)
                                 s = opStack.removeLast()
                             }
-                            postfixNotation += when (arrayInit) {
-                                true -> ""
-                                false -> "? "
+                            if (!arrayInit) {
+                                postfixNotation.add("?")
                             }
                             arrayInit = false
                             mayUnary = false
@@ -99,25 +88,24 @@ class Notation {
                         else -> {
                             if (mayUnary && infixNotation[count] in "+-*") {
                                 when (infixNotation[count]) {
-                                    '-' -> opStack.add('∓')
-                                    '+' -> opStack.add('±')
-                                    '*' -> {
-                                        opStack.add('#')
+                                    "-" -> opStack.add("∓")
+                                    "+" -> opStack.add("±")
+                                    "*" -> {
+                                        opStack.add("#")
                                         arrayInit = true
                                     }
                                 }
                                 mayUnary = false
-                                count++
                                 continue
                             }
 
                             while (opStack.size > 0 && opStack.last() in "±∓#") {
-                                postfixNotation += opStack.removeLast() + " "
+                                postfixNotation.add(opStack.removeLast())
                             }
                             if (opStack.size > 0 && operators[infixNotation[count]]!!.priority <=
                                 operators[opStack.last()]!!.priority
                             ) {
-                                postfixNotation += opStack.removeLast() + " "
+                                postfixNotation.add(opStack.removeLast())
                             }
 
                             opStack.add(infixNotation[count])
@@ -125,11 +113,10 @@ class Notation {
                         }
                     }
                 }
-                count++
             }
 
             for (i in opStack.reversed()) {
-                postfixNotation += "$i "
+                postfixNotation.add(i)
             }
 
             return postfixNotation
@@ -137,12 +124,11 @@ class Notation {
 
         fun tokenizeString(str: String): List<String> {
             val name = "([\\d]+\\.?[\\d]*|\\w[\\w\\d_]*|\".*\")"
-            val operator = "(\\+|-|\\*|==|=|!=|>=|<=|<|>|)"
+            val operator = "(\\+|-|\\*|==|=|!=|>=|<=|<|>)"
             val bracket = "(\\(|\\)|\\[|\\])"
             val exp = Regex("($bracket|$name|$operator)")
-            val strSeq=exp.findAll(str).toList().map { it.destructured.toList()[0] }.toMutableList()
-            strSeq.removeLast()
-            if ("" in strSeq){
+            val strSeq=exp.findAll(str).toList().map { it.destructured.toList()[0] }
+            if ("" in strSeq) {
                 throw SyntaxError("Invalid syntax")
             }
             return strSeq
