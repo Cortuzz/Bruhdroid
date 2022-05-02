@@ -9,6 +9,12 @@ class Valuable(varValue: Any, var type: Type) :
     var value: String = varValue.toString()
     var array: MutableList<Valuable> = mutableListOf()
 
+    fun clone(): Valuable {
+        val valuable = Valuable(value, type)
+        valuable.array = array
+        return valuable
+    }
+
     operator fun unaryPlus(): Valuable {
         if (type == Type.STRING) {
             if (value.contains('.')) {

@@ -150,8 +150,11 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 }
             }
             Instruction.SET -> {
-                val raw = block.expression
-                parseRawBlock(raw)
+                val rawList = split(block.expression)
+
+                for (raw in rawList) {
+                    parseRawBlock(raw)
+                }
             }
             Instruction.IF -> {
                 val statement = checkStatement(block.expression)
@@ -324,9 +327,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                             operand1.array = operand2.array
                         } else if (operand1 is Variable) {
                             if (initialize) {
-                                pushToLocalMemory(operand1.name, operand2.type, operand2)
+                                pushToLocalMemory(operand1.name, operand2.type, operand2.clone())
                             } else {
-                                tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2)
+                                tryPushToAnyMemory(memory, operand1.name, operand2.type, operand2.clone())
                             }
                         }
 
@@ -367,9 +370,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                         '≥' -> Valuable(operand1 > operand2 || operand1 == operand2, Type.BOOL)
                         '≈' -> {
                             if (initialize) {
-                                pushToLocalMemory(operand1.value, operand2.type, operand2)
+                                pushToLocalMemory(operand1.value, operand2.type, operand2.clone())
                             } else {
-                                tryPushToAnyMemory(memory, operand1.value, operand2.type, operand2)
+                                tryPushToAnyMemory(memory, operand1.value, operand2.type, operand2.clone())
                             }
                             operand2
                         }
