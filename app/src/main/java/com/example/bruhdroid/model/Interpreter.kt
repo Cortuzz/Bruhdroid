@@ -109,10 +109,16 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
 
     private fun getVisibleValue(valuable: Valuable): String {
         val rawValue = valuable.value
+
         return when (valuable.type) {
             Type.STRING -> "\"$rawValue\""
             Type.BOOL -> rawValue.uppercase()
             Type.UNDEFINED -> "UNDEFINED"
+            Type.LIST -> {
+                val str = mutableListOf<String>()
+                valuable.array.forEach { el -> str.add(getVisibleValue(el)) }
+                str.toString()
+            }
             else -> rawValue
         }
     }
