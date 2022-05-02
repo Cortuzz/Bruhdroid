@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.ContextThemeWrapper
 import androidx.databinding.DataBindingUtil
 import com.example.bruhdroid.databinding.ActivityMainBinding
-import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -18,6 +17,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.startButton.setOnClickListener {
             val intent = Intent(this, CodingActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(R.anim.alpha_reversed, R.anim.alpha)
+        }
+        binding.loadButton.setOnClickListener {
+            val intent = Intent(this, TemplatesActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.alpha_reversed, R.anim.alpha)
         }

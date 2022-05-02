@@ -3,14 +3,15 @@
     <string name="logo_of_app_2">App</string>
     <string name="descriptions">Modern and safe programming language</string>
     <string name="start_button">Let\'s code</string>
-    <string name="settings_button">Settings</string>
+    <string name="load_button">Load templates</string>
     <string name="exit_button">Exit =(</string>
+
+    <string name="templates">Templates</string>
+    <string name="bubble_sort_button">Bubble sort</string>
 
     <string name="app_name">Bruhdroid</string>
     <string name="logo">Logo</string>
     <string name="suppress_data_warning">Suppress</string>
-    <string name="elif_button">Elif</string>
-    <string name="else_button">Else</string>
 
     <string name="start_code">Launch</string>
     <string name="choose_block">Blocks</string>
@@ -26,4 +27,6 @@
     <string name="input">Input</string>
     <string name="while_cycle">While</string>
     <string name="if_block">If</string>
+    <string name="elif_button">Elif</string>
+    <string name="else_button">Else</string>
 </resources>

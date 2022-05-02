@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
@@ -46,6 +48,8 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
+        // todo (intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
+
         controller.addObserver(this)
         interpreter.addObserver(this)
 
@@ -74,6 +78,10 @@ class CodingActivity : AppCompatActivity(), Observer {
         bindingSheet.blockSet.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
         }
+    }
+
+    private fun parseBlocks(blocks: Array<*>) {
+        TODO()
     }
 
     override fun onBackPressed() {
@@ -318,7 +326,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     @SuppressLint("InflateParams")
-    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
+    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, expression: String = "") {
         val view = layoutInflater.inflate(layoutId, null)
         viewList.add(view)
 
@@ -378,7 +386,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             prevBlock = endBlock
         }
         set.applyTo(binding.container)
-        viewToBlock[view] = Block(instruction, "")
+        viewToBlock[view] = Block(instruction, expression)
     }
 
     private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {
