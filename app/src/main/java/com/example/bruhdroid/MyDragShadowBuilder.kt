@@ -7,7 +7,8 @@ import android.graphics.drawable.ColorDrawable
 import android.view.View
 
 class MyDragShadowBuilder(private val v: View) : View.DragShadowBuilder(v) {
-    private val shadow = ColorDrawable(Color.GRAY)
+    private val shadow = ColorDrawable()
+
     override fun onProvideShadowMetrics(size: Point, touch: Point) {
         val width: Int = view.width
         val height: Int = view.height

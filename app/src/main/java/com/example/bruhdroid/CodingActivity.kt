@@ -5,9 +5,11 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
@@ -110,8 +112,10 @@ class CodingActivity : AppCompatActivity(), Observer {
                 true
             }
 
-            DragEvent.ACTION_DRAG_LOCATION ->
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                v.invalidate()
                 true
+            }
 
             DragEvent.ACTION_DRAG_EXITED -> {
                 v.invalidate()
@@ -145,6 +149,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             }
 
             DragEvent.ACTION_DRAG_ENDED -> {
+                currentDrag.visibility = View.VISIBLE
                 v.invalidate()
                 true
             }
@@ -265,6 +270,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         val blockHeight: Int
         val count: Int
 
+
         set.clone(binding.container)
         for  (i in 0 until viewList.size) {
             clearConstraints(set, viewList[i])
@@ -306,9 +312,10 @@ class CodingActivity : AppCompatActivity(), Observer {
                 val item = ClipData.Item(v.tag as? CharSequence)
 
                 val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
-                val myShadow = MyDragShadowBuilder(view)
+                val myShadow = View.DragShadowBuilder(v)
 
                 v.startDragAndDrop(dragData, myShadow, null, 0)
+                v.visibility = View.INVISIBLE
                 true
             }
         }
