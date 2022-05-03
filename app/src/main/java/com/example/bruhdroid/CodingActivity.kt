@@ -149,7 +149,25 @@ class CodingActivity : AppCompatActivity(), Observer {
             }
 
             DragEvent.ACTION_DRAG_ENDED -> {
-                currentDrag.visibility = View.VISIBLE
+                GlobalScope.launch {
+                    runOnUiThread {
+                        currentDrag.visibility = View.VISIBLE
+                        if (viewToBlock[currentDrag]!!.instruction == Instruction.WHILE || viewToBlock[currentDrag]!!.instruction == Instruction.IF) {
+                            var index = viewList.indexOf(currentDrag) + 1
+                            val instruction = when (viewToBlock[currentDrag]!!.instruction){
+                                Instruction.WHILE -> Instruction.END_WHILE
+                                Instruction.IF -> Instruction.END
+                                else -> false
+                            }
+                            while (viewToBlock[viewList[index]]!!.instruction !== instruction) {
+                                viewList[index].visibility = View.VISIBLE
+                                index++
+                            }
+                            viewList[index].visibility = View.VISIBLE
+                            connectorsMap[viewList[index]]!!.visibility = View.VISIBLE
+                        }
+                    }
+                }
                 v.invalidate()
                 true
             }
@@ -316,6 +334,22 @@ class CodingActivity : AppCompatActivity(), Observer {
 
                 v.startDragAndDrop(dragData, myShadow, null, 0)
                 v.visibility = View.INVISIBLE
+
+                if (viewToBlock[currentDrag]!!.instruction == Instruction.WHILE || viewToBlock[currentDrag]!!.instruction == Instruction.IF) {
+                    var index = viewList.indexOf(currentDrag) + 1
+                    val instruction = when (viewToBlock[currentDrag]!!.instruction){
+                        Instruction.WHILE -> Instruction.END_WHILE
+                        Instruction.IF -> Instruction.END
+                        else -> false
+                    }
+                    while (viewToBlock[viewList[index]]!!.instruction !== instruction) {
+                        viewList[index].visibility = View.INVISIBLE
+                        index++
+                    }
+                    viewList[index].visibility = View.INVISIBLE
+                    connectorsMap[viewList[index]]!!.visibility = View.INVISIBLE
+                }
+
                 true
             }
         }
@@ -377,7 +411,6 @@ class CodingActivity : AppCompatActivity(), Observer {
             set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
             set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
             set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 10)
-
             set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
             prevBlock = endBlock
         }
