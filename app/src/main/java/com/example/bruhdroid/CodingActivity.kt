@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.widget.EditText
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
@@ -58,20 +59,20 @@ class CodingActivity : AppCompatActivity(), Observer {
             controller.runProgram(interpreter, viewToBlock, viewList)
         }
 
-        bindingSheet.blockInit.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT)
-        }
         bindingSheet.blockPrint.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT)
+            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheet.expression1.text.toString())
+        }
+        bindingSheet.blockInit.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheet.expression3.text.toString())
         }
         bindingSheet.blockInput.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT)
+            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheet.expression2.text.toString())
         }
         bindingSheet.blockWhile.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
+            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheet.expression4.text.toString())
         }
         bindingSheet.blockIf.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
+            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheet.expression5.text.toString())
         }
     }
 
@@ -356,8 +357,9 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     @SuppressLint("InflateParams")
-    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
+    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, text: String) {
         val view = layoutInflater.inflate(layoutId, null)
+        view.findViewById<EditText>(R.id.expression)?.setText(text)
         viewList.add(view)
 
         var endBlock: View? = null
