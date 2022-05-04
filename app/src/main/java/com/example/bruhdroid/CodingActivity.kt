@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
@@ -23,6 +24,7 @@ import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -40,6 +42,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     private val interpreter = Interpreter()
     private val controller = Controller()
+    private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +51,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
-        // todo (intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
+        (intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
 
         controller.addObserver(this)
         interpreter.addObserver(this)
@@ -79,9 +82,58 @@ class CodingActivity : AppCompatActivity(), Observer {
             buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
         }
     }
-
     private fun parseBlocks(blocks: Array<*>) {
-        TODO()
+        val layoutMap = mapOf(
+            Instruction.PRINT to R.layout.block_print,
+            Instruction.INIT to R.layout.block_init,
+            Instruction.WHILE to R.layout.block_while,
+            Instruction.IF to R.layout.block_if,
+            Instruction.SET to R.layout.block_set,
+            Instruction.END_WHILE to R.layout.empty_block,
+            Instruction.END to R.layout.condition_block_end
+        )
+
+        GlobalScope.launch {
+            for (block in blocks) {
+                block as Block
+                val instr = block.instruction
+                val view = layoutInflater.inflate(layoutMap[instr]!!, null)
+
+                if (instr in connectingInstructions) {
+                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
+                    connector.id = View.generateViewId()
+                    runOnUiThread {
+                        binding.container.addView(connector)
+                    }
+
+                    connectorsMap[view] = connector
+                } else {
+                    generateDragArea(view)
+
+                }
+                view.setOnDragListener { v, event ->
+                    generateDropArea(v, event)
+                }
+
+                view.id = View.generateViewId()
+                runOnUiThread {
+                    binding.container.addView(view)
+                }
+
+                viewList.add(view)
+                prevBlock = view
+                viewToBlock[view] = Block(instr, "")
+            }
+            delay(100)
+            for (i in 0 until viewList.lastIndex) {
+                val view = viewList[i]
+                val view2 = viewList[i + 1]
+                runOnUiThread {
+                    reBuildBlocks(i, view2)
+                    reBuildBlocks(i + 1, view)
+                }
+            }
+        }
     }
 
     override fun onBackPressed() {
