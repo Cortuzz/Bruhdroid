@@ -263,7 +263,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         return tryPushToAnyMemory(memory.prevMemory, name, type, valueBlock)
     }
 
-    private fun tryFindInMemory(memory: Memory, block: Block): Block {
+    private fun tryFindInMemory(memory: Memory, block: Block): Valuable {
         block as Variable
         val address = block.name
         val value = memory.get(address)
@@ -328,20 +328,29 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
                     var operand1 = stack.removeLast()
 
-                    if (value == "=") {
+                    if (value in listOf("=","/=", "+=", "-=", "*=", "%=", "//=")) {
                         if (operand1 is Valuable) {
                             operand1.value = operand2.value
                             operand1.type = operand2.type
                             operand1.array = operand2.array
                         } else if (operand1 is Variable) {
+                            val operand = when(value) {
+                                "=" -> operand2
+                                "/=" -> tryFindInMemory(memory, operand1) / operand2
+                                "*=" -> tryFindInMemory(memory, operand1) * operand2
+                                "+=" -> tryFindInMemory(memory, operand1) + operand2
+                                "-=" -> tryFindInMemory(memory, operand1) - operand2
+                                else -> throw Exception("Bad define operator")
+                            }
+
                             if (initialize) {
-                                pushToLocalMemory(operand1.name, operand2.type, operand2.clone())
+                                pushToLocalMemory(operand1.name, operand2.type, operand.clone())
                             } else {
                                 tryPushToAnyMemory(
                                     memory,
                                     operand1.name,
                                     operand2.type,
-                                    operand2.clone()
+                                    operand.clone()
                                 )
                             }
                         }
@@ -407,7 +416,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         val last = stack.removeLast()
         if (last is Variable) {
             try {
-                return tryFindInMemory(memory, last) as Valuable
+                return tryFindInMemory(memory, last)
             } catch (e: StackCorruptionError) {
                 throw RuntimeError("${e.message}\nAt expression: $raw")
             }
