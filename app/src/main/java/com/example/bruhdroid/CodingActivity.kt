@@ -13,7 +13,9 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
@@ -74,6 +76,10 @@ class CodingActivity : AppCompatActivity(), Observer {
         bindingSheet.blockIf.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheet.expression5.text.toString())
         }
+
+        binding.binButton.setOnDragListener { v, event ->
+            generateDropAreaForBin(v, event)
+        }
     }
 
     override fun onBackPressed() {
@@ -93,6 +99,56 @@ class CodingActivity : AppCompatActivity(), Observer {
             return
         }
         super.onBackPressed()
+    }
+
+    private fun generateDropAreaForBin(v: View, event:DragEvent): Boolean {
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                if (event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+                    v.invalidate()
+                    true
+                } else {
+                    false
+                }
+            }
+
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_EXITED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DROP -> {
+                val index = -1;
+                val instr = viewToBlock[currentDrag]!!.instruction
+                if (instr == Instruction.WHILE || instr == Instruction.IF) {
+                    reBuildBlocks(index , currentDrag, true)
+                } else {
+                    reBuildBlocks(index , currentDrag)
+                }
+
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENDED -> {
+                v.invalidate()
+                true
+            }
+
+            else -> {
+                false
+            }
+        }
     }
 
     private fun generateDropArea(v: View, event: DragEvent): Boolean {
@@ -125,7 +181,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             DragEvent.ACTION_DROP -> {
                 if (currentDrag === receiverView) {
-                    return false
+                    false
                 }
                 var newIndex = viewList.indexOf(receiverView)
 
@@ -152,20 +208,8 @@ class CodingActivity : AppCompatActivity(), Observer {
             DragEvent.ACTION_DRAG_ENDED -> {
                 GlobalScope.launch {
                     runOnUiThread {
-                        currentDrag.visibility = View.VISIBLE
-                        if (viewToBlock[currentDrag]!!.instruction == Instruction.WHILE || viewToBlock[currentDrag]!!.instruction == Instruction.IF) {
-                            var index = viewList.indexOf(currentDrag) + 1
-                            val instruction = when (viewToBlock[currentDrag]!!.instruction){
-                                Instruction.WHILE -> Instruction.END_WHILE
-                                Instruction.IF -> Instruction.END
-                                else -> false
-                            }
-                            while (viewToBlock[viewList[index]]!!.instruction !== instruction) {
-                                viewList[index].visibility = View.VISIBLE
-                                index++
-                            }
-                            viewList[index].visibility = View.VISIBLE
-                            connectorsMap[viewList[index]]!!.visibility = View.VISIBLE
+                        if (viewToBlock[currentDrag] != null) {
+                            makeBlocksVisible(currentDrag)
                         }
                     }
                 }
@@ -193,14 +237,20 @@ class CodingActivity : AppCompatActivity(), Observer {
                 in startInstructions -> ++count
                 else -> {}
             }
+            if (indexNew == -1) {
+                viewToBlock.remove(view)
+            }
 
             height += view.height + 10
             tempViews.add(view)
         } while(count > 0)
 
         val size: Int = tempViews.size
-        while (tempViews.size > 0) {
-            viewList.add(indexNew, tempViews.removeLast())
+
+        if (indexNew != -1) {
+            while (tempViews.size > 0) {
+                viewList.add(indexNew, tempViews.removeLast())
+            }
         }
 
         return listOf(height, size)
@@ -306,15 +356,63 @@ class CodingActivity : AppCompatActivity(), Observer {
             viewList.remove(drag)
             if (index > viewList.lastIndex) {
                 viewList.add(drag)
-            } else {
+            } else if (index != -1) {
                 viewList.add(index, drag)
+            } else {
+                viewToBlock.remove(drag)
             }
 
         }
 
         buildConstraints(set, blockHeight, index, lastIndex, count)
-        prevBlock = viewList.last()
+        if (viewList.isEmpty()) {
+            prevBlock = null;
+        } else {
+            prevBlock = viewList.last()
+        }
         set.applyTo(binding.container)
+    }
+
+    private fun makeBlocksInvisible(v: View) {
+        v.visibility = View.INVISIBLE
+
+        if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
+            var index = viewList.indexOf(v) + 1
+            var count = 1
+
+            while (count != 0) {
+                viewList[index].visibility = View.INVISIBLE
+                val block = viewToBlock[viewList[index]]
+                if (block!!.instruction == Instruction.END_WHILE || block!!.instruction == Instruction.END) {
+                    connectorsMap[viewList[index]]!!.visibility = View.INVISIBLE
+                    count--
+                } else if (block!!.instruction == Instruction.WHILE || block!!.instruction == Instruction.IF) {
+                    count++;
+                }
+                index++
+            }
+        }
+    }
+
+    private fun makeBlocksVisible(v: View) {
+        v.visibility = View.VISIBLE
+
+        if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
+            var index = viewList.indexOf(v) + 1
+            var count = 1
+
+            while (count != 0) {
+                viewList[index].visibility = View.VISIBLE
+                val block = viewToBlock[viewList[index]]
+                if (block!!.instruction == Instruction.END_WHILE || block!!.instruction == Instruction.END) {
+                    connectorsMap[viewList[index]]!!.visibility = View.VISIBLE
+                    count--
+                } else if (block!!.instruction == Instruction.WHILE || block!!.instruction == Instruction.IF) {
+                    count++;
+                }
+                index++
+            }
+        }
     }
 
     private fun generateDragArea(view: View) {
@@ -334,22 +432,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 val myShadow = View.DragShadowBuilder(v)
 
                 v.startDragAndDrop(dragData, myShadow, null, 0)
-                v.visibility = View.INVISIBLE
-
-                if (viewToBlock[currentDrag]!!.instruction == Instruction.WHILE || viewToBlock[currentDrag]!!.instruction == Instruction.IF) {
-                    var index = viewList.indexOf(currentDrag) + 1
-                    val instruction = when (viewToBlock[currentDrag]!!.instruction){
-                        Instruction.WHILE -> Instruction.END_WHILE
-                        Instruction.IF -> Instruction.END
-                        else -> false
-                    }
-                    while (viewToBlock[viewList[index]]!!.instruction !== instruction) {
-                        viewList[index].visibility = View.INVISIBLE
-                        index++
-                    }
-                    viewList[index].visibility = View.INVISIBLE
-                    connectorsMap[viewList[index]]!!.visibility = View.INVISIBLE
-                }
+                makeBlocksInvisible(v)
 
                 true
             }
@@ -452,7 +535,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 binding.console.text = output
             }
 
-                GlobalScope.launch {
+            GlobalScope.launch {
                 controller.resumeProgram()
             }
         }
