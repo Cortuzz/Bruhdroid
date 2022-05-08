@@ -53,7 +53,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
-        //(intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
+        (intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
 
         controller.addObserver(this)
         interpreter.addObserver(this)
@@ -95,8 +95,6 @@ class CodingActivity : AppCompatActivity(), Observer {
             Instruction.END to R.layout.condition_block_end
         )
 
-        val connectors = mutableListOf<View>()
-
         GlobalScope.launch {
             for (block in blocks) {
                 block as Block
@@ -106,9 +104,10 @@ class CodingActivity : AppCompatActivity(), Observer {
                 if (instr in connectingInstructions) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
                     connector.id = View.generateViewId()
-                    connectors.add(connector)
-
                     connectorsMap[view] = connector
+                    runOnUiThread {
+                        binding.container.addView(connector)
+                    }
                 } else {
                     generateDragArea(view)
                 }
@@ -117,17 +116,14 @@ class CodingActivity : AppCompatActivity(), Observer {
                 }
 
                 view.id = View.generateViewId()
-                runOnUiThread {
-                    binding.container.addView(view)
-                }
 
                 viewList.add(view)
                 prevBlock = view
                 viewToBlock[view] = Block(instr, "")
             }
             runOnUiThread {
-                for(connector in connectors) {
-                    binding.container.addView(connector)
+                for(view in viewList) {
+                    binding.container.addView(view)
                 }
             }
             delay(100)
