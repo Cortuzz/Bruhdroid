@@ -42,7 +42,13 @@ class Notation {
             "[" to Operator.OPEN_INDEX,
             "]" to Operator.CLOSE_INDEX,
             "?" to Operator.DEFINE_BY_INDEX,
-            "#" to Operator.INIT_ARRAY
+            "#" to Operator.INIT_ARRAY,
+            "+=" to Operator.DEFINE,
+            "-=" to Operator.DEFINE,
+            "*=" to Operator.DEFINE,
+            "/=" to Operator.DEFINE,
+            "//=" to Operator.DEFINE,
+            "%=" to Operator.DEFINE
         )
 
         fun convertToRpn(infixNotation: List<String>): List<String> {
@@ -124,7 +130,7 @@ class Notation {
 
         fun tokenizeString(str: String): List<String> {
             val name = "([\\d]+\\.?[\\d]*|\\w[\\w\\d_]*|\".*\")"
-            val operator = "(\\+|-|\\*|%|/|==|=|!=|>=|<=|<|>)"
+            val operator = "(\\+=|-=|\\*=|/=|%=|\\+|-|\\*|%|/|==|=|!=|>=|<=|<|>)"
             val bracket = "(\\(|\\)|\\[|\\])"
             val exp = Regex("($bracket|$name|$operator)")
             val strSeq=exp.findAll(str).toList().map { it.destructured.toList()[0] }

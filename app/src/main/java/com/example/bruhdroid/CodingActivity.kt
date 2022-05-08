@@ -53,7 +53,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
-        (intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
+        //(intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
 
         controller.addObserver(this)
         interpreter.addObserver(this)
