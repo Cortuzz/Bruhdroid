@@ -1,6 +1,7 @@
 package com.example.bruhdroid.model
 
 import com.example.bruhdroid.model.src.StackCorruptionError
+import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
@@ -10,18 +11,31 @@ class Memory(val prevMemory: Memory?) {
 
     fun push(address: String, value: Block) {
         value as Valuable
+        if (value.type == Type.LIST) {
+            initArray(value, value.value.toInt())
+        }
         stack[address] = value
+    }
+
+    fun initArray(value: Valuable, count: Int) {
+        for (i in 0 until count) {
+            value.array.add(Valuable("", type=Type.UNDEFINED))
+        }
     }
 
     fun get(address: String): Valuable? {
         return stack[address]
     }
 
-    fun pop(address: String): Valuable? {
-        return stack.remove(address)
-    }
-
     fun throwStackError(address: String) {
+        val corruptedVar = Variable(address)
+        throw StackCorruptionError("Expected reserved memory for Variable ${address}@" +
+                "${corruptedVar.hashCode()} at address 0x" +
+                "${corruptedVar.toString().split('@').last().uppercase()} " +
+                "but stack corruption has occurred")
+    }
+    //todo
+    fun throwHeapError(address: String) {
         val corruptedVar = Variable(address)
         throw StackCorruptionError("Expected reserved memory for Variable ${address}@" +
                 "${corruptedVar.hashCode()} at address 0x" +

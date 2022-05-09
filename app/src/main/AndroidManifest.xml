@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bruhdroid">
         <activity
-            android:name=".BlocksActivity"
+            android:name=".TemplatesActivity"
             android:exported="false" />
         <activity
             android:name=".CodingActivity"

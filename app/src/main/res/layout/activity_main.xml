@@ -34,7 +34,7 @@
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/guideline4"
-            app:layout_constraintVertical_bias="0.767" />
+            app:layout_constraintVertical_bias="1.0" />
 
         <TextView
             android:id="@+id/header_title_2"
@@ -63,8 +63,18 @@
         <Button
             android:id="@+id/startButton"
             style="@style/button"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="8dp"
             android:text="@string/start_button"
+            app:layout_constraintBottom_toTopOf="@+id/loadButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/loadButton"
+            style="@style/button"
+            android:layout_marginBottom="8dp"
+            android:text="@string/load_button"
             app:layout_constraintBottom_toTopOf="@+id/exitButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
@@ -73,7 +83,7 @@
         <Button
             android:id="@+id/exitButton"
             style="@style/button"
-            android:layout_marginBottom="36dp"
+            android:layout_marginBottom="16dp"
             android:text="@string/exit_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

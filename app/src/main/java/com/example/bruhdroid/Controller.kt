@@ -33,7 +33,7 @@ class Controller: Observable() {
         }
 
         try {
-            Lexer.checkBlocks(blocks)
+            //Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
 
             GlobalScope.launch {
