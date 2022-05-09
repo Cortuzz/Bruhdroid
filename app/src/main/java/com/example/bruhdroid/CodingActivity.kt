@@ -1,18 +1,12 @@
 package com.example.bruhdroid
 
-import android.R.attr.button
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.ClipData
-import android.content.ClipDescription
 import android.content.DialogInterface
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -53,7 +47,10 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheet = BottomSheetDialog(this@CodingActivity)
         bottomSheet.setContentView(bindingSheet.root)
 
-        (intent.getSerializableExtra("blocks")!! as Array<*>?)?.let { parseBlocks(it) }
+        val blocks=intent.getSerializableExtra("blocks")
+        if(blocks is Array<*>){
+            parseBlocks(blocks)
+        }
 
         controller.addObserver(this)
         interpreter.addObserver(this)
@@ -84,6 +81,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             buildBlock(prevBlock, R.layout.block_set, Instruction.SET)
         }
     }
+
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
             Instruction.PRINT to R.layout.block_print,
@@ -122,7 +120,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 viewToBlock[view] = Block(instr, "")
             }
             runOnUiThread {
-                for(view in viewList) {
+                for (view in viewList) {
                     binding.container.addView(view)
                 }
             }
@@ -136,8 +134,10 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     override fun onBackPressed() {
         if (!Controller.suppressingWarns) { // todo: Save check
-            val builder = buildAlertDialog("DATA WARNING", "There are unsaved changes.\n\n" +
-                    "This action will wipe all unsaved changes.")
+            val builder = buildAlertDialog(
+                "DATA WARNING", "There are unsaved changes.\n\n" +
+                        "This action will wipe all unsaved changes."
+            )
             builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
                 super.onBackPressed()
             }
@@ -158,12 +158,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                if (event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                    v.invalidate()
-                    true
-                } else {
-                    false
-                }
+                true
             }
 
             DragEvent.ACTION_DRAG_ENTERED -> {
@@ -185,11 +180,11 @@ class CodingActivity : AppCompatActivity(), Observer {
                 }
                 var newIndex = viewList.indexOf(receiverView)
 
-                newIndex = when(newIndex > viewList.indexOf(currentDrag)) {
+                newIndex = when (newIndex > viewList.indexOf(currentDrag)) {
                     true -> newIndex - 1
                     false -> newIndex
                 }
-                newIndex = when(event.y < receiverView.height / 2) {
+                newIndex = when (event.y < receiverView.height / 2) {
                     true -> newIndex
                     else -> newIndex + 1
                 }
@@ -233,7 +228,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             height += view.height + 10
             tempViews.add(view)
-        } while(count > 0)
+        } while (count > 0)
 
         val size: Int = tempViews.size
         while (tempViews.size > 0) {
@@ -321,7 +316,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 }
             }
 
-            runOnUiThread() {
+            runOnUiThread {
                 set.applyTo(binding.container)
                 buildConstraints()
             }
@@ -330,24 +325,10 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     private fun generateDragArea(view: View) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            return
-        }
-
-        view.apply {
-            tag = ""
-            setOnLongClickListener { v ->
-                currentDrag = v
-                currentDragIndex = viewList.indexOf(v)
-
-                val item = ClipData.Item(v.tag as? CharSequence)
-
-                val dragData = ClipData(v.tag as? CharSequence, arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN), item)
-                val myShadow = MyDragShadowBuilder(view)
-
-                v.startDragAndDrop(dragData, myShadow, null, 0)
-                true
-            }
+        view.setOnLongClickListener {
+            currentDrag = it
+            it.startDragAndDrop(null, View.DragShadowBuilder(it), it, 0)
+            true
         }
     }
 
@@ -447,7 +428,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 binding.console.text = output
             }
 
-                GlobalScope.launch {
+            GlobalScope.launch {
                 controller.resumeProgram()
             }
         }

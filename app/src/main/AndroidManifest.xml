@@ -13,9 +13,6 @@
             android:name=".TemplatesActivity"
             android:exported="false" />
         <activity
-            android:name=".BlocksActivity"
-            android:exported="false" />
-        <activity
             android:name=".CodingActivity"
             android:exported="false" />
         <activity
