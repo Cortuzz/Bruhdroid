@@ -84,11 +84,11 @@ class CodingActivity : AppCompatActivity(), Observer {
             buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheet.expression5.text.toString())
         }
 
-        binding.binButton.setOnDragListener { v, event ->
+        /*binding.binButton.setOnDragListener { v, event ->
             generateDropAreaForBin(v, event)
-        }
+        }*/
         bindingSheet.blockSet.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_set, Instruction.SET)
+            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheet.expression6.text.toString())
         }
     }
 
@@ -166,12 +166,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun generateDropAreaForBin(v: View, event:DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                if (event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                    v.invalidate()
                     true
-                } else {
-                    false
-                }
             }
 
             DragEvent.ACTION_DRAG_ENTERED -> {
@@ -445,6 +440,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun generateDragArea(view: View) {
         view.setOnLongClickListener {
             currentDrag = it
+            makeBlocksInvisible(it)
             it.startDragAndDrop(null, View.DragShadowBuilder(it), it, 0)
             true
         }
