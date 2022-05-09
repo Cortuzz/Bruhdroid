@@ -3,17 +3,14 @@ package com.example.bruhdroid
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
@@ -30,7 +27,6 @@ import java.util.*
 
 
 class CodingActivity : AppCompatActivity(), Observer {
-    private var currentDragIndex = 0
     private var viewToBlock = mutableMapOf<View, Block>()
     private var viewList = mutableListOf<View>()
     private var connectorsMap = mutableMapOf<View, View>()
@@ -44,8 +40,8 @@ class CodingActivity : AppCompatActivity(), Observer {
     private val interpreter = Interpreter()
     private val controller = Controller()
     private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE)
-    private val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
@@ -84,14 +80,15 @@ class CodingActivity : AppCompatActivity(), Observer {
             buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheet.expression5.text.toString())
         }
 
-        /*binding.binButton.setOnDragListener { v, event ->
+        binding.binButton.setOnDragListener { v, event ->
             generateDropAreaForBin(v, event)
-        }*/
+        }
         bindingSheet.blockSet.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheet.expression6.text.toString())
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
             Instruction.PRINT to R.layout.block_print,
@@ -185,7 +182,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             }
 
             DragEvent.ACTION_DROP -> {
-                val index = -1;
+                val index = -1
                 val instr = viewToBlock[currentDrag]!!.instruction
                 if (instr == Instruction.WHILE || instr == Instruction.IF) {
                     reBuildBlocks(index , currentDrag, true)
@@ -198,6 +195,13 @@ class CodingActivity : AppCompatActivity(), Observer {
             }
 
             DragEvent.ACTION_DRAG_ENDED -> {
+                GlobalScope.launch {
+                    runOnUiThread {
+                        if (viewToBlock[currentDrag] != null) {
+                            makeBlocksVisible(currentDrag)
+                        }
+                    }
+                }
                 v.invalidate()
                 true
             }
@@ -258,13 +262,6 @@ class CodingActivity : AppCompatActivity(), Observer {
             }
 
             DragEvent.ACTION_DRAG_ENDED -> {
-                GlobalScope.launch {
-                    runOnUiThread {
-                        if (viewToBlock[currentDrag] != null) {
-                            makeBlocksVisible(currentDrag)
-                        }
-                    }
-                }
                 v.invalidate()
                 true
             }
@@ -377,13 +374,18 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             if (untilEnd) {
                 replaceUntilEnd(viewList.indexOf(drag), index)
-
             } else {
                 viewList.remove(drag)
-                if (index > viewList.lastIndex) {
-                    viewList.add(drag)
-                } else {
-                    viewList.add(index, drag)
+                when {
+                    index == -1 -> {
+                        viewToBlock.remove(drag)
+                    }
+                    index > viewList.lastIndex -> {
+                        viewList.add(drag)
+                    }
+                    else -> {
+                        viewList.add(index, drag)
+                    }
                 }
             }
 
@@ -391,7 +393,12 @@ class CodingActivity : AppCompatActivity(), Observer {
                 set.applyTo(binding.container)
                 buildConstraints()
             }
-            prevBlock = viewList.last()
+
+            prevBlock = if (viewList.isEmpty()) {
+                null
+            } else {
+                viewList.last()
+            }
         }
     }
 
@@ -405,11 +412,11 @@ class CodingActivity : AppCompatActivity(), Observer {
             while (count != 0) {
                 viewList[index].visibility = View.INVISIBLE
                 val block = viewToBlock[viewList[index]]
-                if (block!!.instruction == Instruction.END_WHILE || block!!.instruction == Instruction.END) {
+                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
                     connectorsMap[viewList[index]]!!.visibility = View.INVISIBLE
                     count--
-                } else if (block!!.instruction == Instruction.WHILE || block!!.instruction == Instruction.IF) {
-                    count++;
+                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
+                    count++
                 }
                 index++
             }
@@ -426,17 +433,18 @@ class CodingActivity : AppCompatActivity(), Observer {
             while (count != 0) {
                 viewList[index].visibility = View.VISIBLE
                 val block = viewToBlock[viewList[index]]
-                if (block!!.instruction == Instruction.END_WHILE || block!!.instruction == Instruction.END) {
+                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
                     connectorsMap[viewList[index]]!!.visibility = View.VISIBLE
                     count--
-                } else if (block!!.instruction == Instruction.WHILE || block!!.instruction == Instruction.IF) {
-                    count++;
+                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
+                    count++
                 }
                 index++
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun generateDragArea(view: View) {
         view.setOnLongClickListener {
             currentDrag = it
@@ -446,6 +454,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, text: String) {
         val view = layoutInflater.inflate(layoutId, null)
