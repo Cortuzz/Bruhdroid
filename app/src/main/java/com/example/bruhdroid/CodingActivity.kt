@@ -4,17 +4,19 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
 import com.example.bruhdroid.databinding.ActivityCodingBinding
+import com.example.bruhdroid.databinding.BottomsheetBinBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
@@ -33,8 +35,10 @@ class CodingActivity : AppCompatActivity(), Observer {
     private var prevBlock: View? = null
 
     private lateinit var binding: ActivityCodingBinding
-    private lateinit var bindingSheet: BottomsheetFragmentBinding
-    private lateinit var bottomSheet: BottomSheetDialog
+    private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
+    private lateinit var bindingSheetBin: BottomsheetBinBinding
+    private lateinit var bottomSheetMenu: BottomSheetDialog
+    private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var currentDrag: View
 
     private val interpreter = Interpreter()
@@ -45,9 +49,13 @@ class CodingActivity : AppCompatActivity(), Observer {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
-        bindingSheet = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
-        bottomSheet = BottomSheetDialog(this@CodingActivity)
-        bottomSheet.setContentView(bindingSheet.root)
+        bindingSheetMenu = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
+        bottomSheetMenu = BottomSheetDialog(this@CodingActivity)
+        bottomSheetMenu.setContentView(bindingSheetMenu.root)
+
+        bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
+        bottomSheetBin = BottomSheetDialog(this@CodingActivity)
+        bottomSheetBin.setContentView(bindingSheetBin.root)
 
         val blocks=intent.getSerializableExtra("blocks")
         if(blocks is Array<*>){
@@ -58,33 +66,36 @@ class CodingActivity : AppCompatActivity(), Observer {
         interpreter.addObserver(this)
 
         binding.menuButton.setOnClickListener {
-            bottomSheet.show()
+            bottomSheetMenu.show()
+        }
+        binding.binButton.setOnClickListener {
+            bottomSheetBin.show()
         }
         binding.launchButton.setOnClickListener {
             controller.runProgram(interpreter, viewToBlock, viewList)
         }
 
-        bindingSheet.blockPrint.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheet.expression1.text.toString())
+        bindingSheetMenu.blockPrint.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheetMenu.expression1.text.toString())
         }
-        bindingSheet.blockInit.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheet.expression3.text.toString())
+        bindingSheetMenu.blockInit.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheetMenu.expression3.text.toString())
         }
-        bindingSheet.blockInput.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheet.expression2.text.toString())
+        bindingSheetMenu.blockInput.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheetMenu.expression2.text.toString())
         }
-        bindingSheet.blockWhile.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheet.expression4.text.toString())
+        bindingSheetMenu.blockWhile.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheetMenu.expression4.text.toString())
         }
-        bindingSheet.blockIf.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheet.expression5.text.toString())
+        bindingSheetMenu.blockIf.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheetMenu.expression5.text.toString())
         }
 
         binding.binButton.setOnDragListener { v, event ->
             generateDropAreaForBin(v, event)
         }
-        bindingSheet.blockSet.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheet.expression6.text.toString())
+        bindingSheetMenu.blockSet.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheetMenu.expression6.text.toString())
         }
     }
 
@@ -189,6 +200,12 @@ class CodingActivity : AppCompatActivity(), Observer {
                 } else {
                     reBuildBlocks(index , currentDrag)
                 }
+
+                if (currentDrag.parent != null) {
+                    (currentDrag.parent as ViewGroup).removeView(currentDrag) // <- fix
+                }
+                bindingSheetBin.deletedList.addView(currentDrag)
+                currentDrag.visibility = View.VISIBLE
 
                 v.invalidate()
                 true

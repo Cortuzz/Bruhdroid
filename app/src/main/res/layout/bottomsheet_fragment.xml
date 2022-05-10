@@ -10,7 +10,7 @@
     <ScrollView
         android:layout_width="409dp"
         android:layout_height="729dp"
-        android:background="#AD2F7C9F"
+        android:background="@color/main_background"
         tools:layout_editor_absoluteX="1dp"
         tools:layout_editor_absoluteY="1dp">
 
@@ -85,7 +85,7 @@
                         android:textColor="#546E7A"
                         android:textSize="34sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/expression"
+                        app:layout_constraintEnd_toStartOf="@+id/expression2"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.514" />
 
