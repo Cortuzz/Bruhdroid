@@ -30,9 +30,11 @@ import java.util.*
 
 class CodingActivity : AppCompatActivity(), Observer {
     private var viewToBlock = mutableMapOf<View, Block>()
-    private var viewList = mutableListOf<View>()
+    private var codingViewList = mutableListOf<View>()
+    private var binViewList = mutableListOf<View>()
     private var connectorsMap = mutableMapOf<View, View>()
     private var prevBlock: View? = null
+    private var prevBlockInBin: View? = null
 
     private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
@@ -72,7 +74,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             bottomSheetBin.show()
         }
         binding.launchButton.setOnClickListener {
-            controller.runProgram(interpreter, viewToBlock, viewList)
+            controller.runProgram(interpreter, viewToBlock, codingViewList)
         }
 
         bindingSheetMenu.blockPrint.setOnClickListener {
@@ -133,19 +135,19 @@ class CodingActivity : AppCompatActivity(), Observer {
 
                 view.id = View.generateViewId()
 
-                viewList.add(view)
+                codingViewList.add(view)
                 prevBlock = view
                 viewToBlock[view] = Block(instr, "")
             }
             runOnUiThread {
-                for (view in viewList) {
+                for (view in codingViewList) {
                     binding.container.addView(view)
                 }
             }
             delay(100)
 
             runOnUiThread {
-                buildConstraints()
+                buildConstraints(binding.container, codingViewList)
             }
         }
     }
@@ -195,17 +197,14 @@ class CodingActivity : AppCompatActivity(), Observer {
             DragEvent.ACTION_DROP -> {
                 val index = -1
                 val instr = viewToBlock[currentDrag]!!.instruction
-                if (instr == Instruction.WHILE || instr == Instruction.IF) {
-                    reBuildBlocks(index , currentDrag, true)
-                } else {
-                    reBuildBlocks(index , currentDrag)
-                }
 
-                if (currentDrag.parent != null) {
-                    (currentDrag.parent as ViewGroup).removeView(currentDrag) // <- fix
+                if (instr == Instruction.WHILE || instr == Instruction.IF) {
+                    addBlocksToBin(currentDrag, true)
+                    reBuildBlocks(index, currentDrag, true)
+                } else {
+                    addBlocksToBin(currentDrag)
+                    reBuildBlocks(index, currentDrag)
                 }
-                bindingSheetBin.deletedList.addView(currentDrag)
-                currentDrag.visibility = View.VISIBLE
 
                 v.invalidate()
                 true
@@ -214,7 +213,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             DragEvent.ACTION_DRAG_ENDED -> {
                 GlobalScope.launch {
                     runOnUiThread {
-                        if (viewToBlock[currentDrag] != null) {
+                        if (codingViewList.contains(currentDrag)) {
                             makeBlocksVisible(currentDrag)
                         }
                     }
@@ -227,6 +226,62 @@ class CodingActivity : AppCompatActivity(), Observer {
                 false
             }
         }
+    }
+
+    private fun addBlocksToBin(view: View, isConnected: Boolean = false) {
+        val addedBlocks = removeBlocksFromParent(view, isConnected)
+
+        GlobalScope.launch {
+            for (block in addedBlocks) {
+                val instr = viewToBlock[block]!!.instruction
+
+                if (instr in connectingInstructions) {
+                    runOnUiThread {
+                        bindingSheetBin.deletedList.addView(connectorsMap[block])
+                    }
+                }
+
+                binViewList.add(block)
+                prevBlockInBin = block
+            }
+            runOnUiThread {
+                for (block in addedBlocks) {
+                    bindingSheetBin.deletedList.addView(block)
+                }
+            }
+            delay(100)
+
+            runOnUiThread {
+                buildConstraints(bindingSheetBin.deletedList, binViewList)
+            }
+        }
+
+        makeBlocksVisible(view)
+    }
+
+    private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<View> {
+        val tempList = mutableListOf<View>()
+        tempList.add(view)
+        (view.parent as ViewGroup).removeView(view)
+
+        if (isConnected) {
+            var index = codingViewList.indexOf(view) + 1
+            var count = 1
+
+            while (count != 0) {
+                tempList.add(codingViewList[index])
+                (codingViewList[index].parent as ViewGroup).removeView(codingViewList[index])
+                val block = viewToBlock[codingViewList[index]]
+                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
+                    (connectorsMap[codingViewList[index]]!!.parent as ViewGroup).removeView(connectorsMap[codingViewList[index]])
+                    count--
+                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
+                    count++
+                }
+                index++
+            }
+        }
+        return tempList
     }
 
     private fun generateDropArea(v: View, event: DragEvent): Boolean {
@@ -256,9 +311,9 @@ class CodingActivity : AppCompatActivity(), Observer {
                 if (currentDrag === receiverView) {
                     return false
                 }
-                var newIndex = viewList.indexOf(receiverView)
+                var newIndex = codingViewList.indexOf(receiverView)
 
-                newIndex = when (newIndex > viewList.indexOf(currentDrag)) {
+                newIndex = when (newIndex > codingViewList.indexOf(currentDrag)) {
                     true -> newIndex - 1
                     false -> newIndex
                 }
@@ -297,14 +352,11 @@ class CodingActivity : AppCompatActivity(), Observer {
         var count = 0
 
         do {
-            val view = viewList.removeAt(indexLast)
+            val view = codingViewList.removeAt(indexLast)
             when (viewToBlock[view]!!.instruction) {
                 in endInstructions -> --count
                 in startInstructions -> ++count
                 else -> {}
-            }
-            if (indexNew == -1) {
-                viewToBlock.remove(view)
             }
 
             height += view.height + 10
@@ -315,7 +367,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         if (indexNew != -1) {
             while (tempViews.size > 0) {
-                viewList.add(indexNew, tempViews.removeLast())
+                codingViewList.add(indexNew, tempViews.removeLast())
             }
         }
 
@@ -339,9 +391,9 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun buildConstraints() {
+    private fun buildConstraints(container: ConstraintLayout, viewList: List<View>) {
         val set = ConstraintSet()
-        set.clone(binding.container)
+        set.clone(container)
         val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
         val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
 
@@ -377,7 +429,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 10)
         }
-        set.applyTo(binding.container)
+        set.applyTo(container)
     }
 
     private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
@@ -385,36 +437,34 @@ class CodingActivity : AppCompatActivity(), Observer {
             val set = ConstraintSet()
 
             set.clone(binding.container)
-            for (i in 0 until viewList.size) {
-                clearConstraints(set, viewList[i])
+            for (i in 0 until codingViewList.size) {
+                clearConstraints(set, codingViewList[i])
             }
 
             if (untilEnd) {
-                replaceUntilEnd(viewList.indexOf(drag), index)
+                replaceUntilEnd(codingViewList.indexOf(drag), index)
             } else {
-                viewList.remove(drag)
+                codingViewList.remove(drag)
                 when {
-                    index == -1 -> {
-                        viewToBlock.remove(drag)
-                    }
-                    index > viewList.lastIndex -> {
-                        viewList.add(drag)
+                    index == -1 -> {}
+                    index > codingViewList.lastIndex -> {
+                        codingViewList.add(drag)
                     }
                     else -> {
-                        viewList.add(index, drag)
+                        codingViewList.add(index, drag)
                     }
                 }
             }
 
             runOnUiThread {
                 set.applyTo(binding.container)
-                buildConstraints()
+                buildConstraints(binding.container, codingViewList)
             }
 
-            prevBlock = if (viewList.isEmpty()) {
+            prevBlock = if (codingViewList.isEmpty()) {
                 null
             } else {
-                viewList.last()
+                codingViewList.last()
             }
         }
     }
@@ -423,14 +473,14 @@ class CodingActivity : AppCompatActivity(), Observer {
         v.visibility = View.INVISIBLE
 
         if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
-            var index = viewList.indexOf(v) + 1
+            var index = codingViewList.indexOf(v) + 1
             var count = 1
 
             while (count != 0) {
-                viewList[index].visibility = View.INVISIBLE
-                val block = viewToBlock[viewList[index]]
+                codingViewList[index].visibility = View.INVISIBLE
+                val block = viewToBlock[codingViewList[index]]
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    connectorsMap[viewList[index]]!!.visibility = View.INVISIBLE
+                    connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
@@ -444,14 +494,14 @@ class CodingActivity : AppCompatActivity(), Observer {
         v.visibility = View.VISIBLE
 
         if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
-            var index = viewList.indexOf(v) + 1
+            var index = codingViewList.indexOf(v) + 1
             var count = 1
 
             while (count != 0) {
-                viewList[index].visibility = View.VISIBLE
-                val block = viewToBlock[viewList[index]]
+                codingViewList[index].visibility = View.VISIBLE
+                val block = viewToBlock[codingViewList[index]]
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    connectorsMap[viewList[index]]!!.visibility = View.VISIBLE
+                    connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
@@ -476,7 +526,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, text: String) {
         val view = layoutInflater.inflate(layoutId, null)
         view.findViewById<EditText>(R.id.expression)?.setText(text)
-        viewList.add(view)
+        codingViewList.add(view)
 
         var endBlock: View? = null
         var connector: View? = null
@@ -498,7 +548,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             binding.container.addView(connector)
             binding.container.addView(endBlock)
 
-            viewList.add(endBlock)
+            codingViewList.add(endBlock)
             viewToBlock[endBlock] = Block(endInstruction, "")
             endBlock.id = View.generateViewId()
             connector.id = View.generateViewId()
