@@ -4,6 +4,7 @@ import androidx.core.text.isDigitsOnly
 import com.example.bruhdroid.CodingActivity
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
+import java.lang.IndexOutOfBoundsException
 import java.util.*
 
 class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false) :
@@ -28,6 +29,10 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     }
 
     fun runOnce(): Boolean {
+        if (input.isNotEmpty()) {
+            parseInput()
+        }
+
         if (currentLine >= blocks!!.size - 1) {
             return false
         }
@@ -35,9 +40,6 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         val block = blocks!![++currentLine]
 
         try {
-            if (input.isNotEmpty()) {
-                parseInput()
-            }
             if (parse(block)) {
                 skipFalseBranches()
             }
@@ -46,12 +48,13 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 "${e.message}\nAt line: ${block.line}, " +
                         "At instruction: ${block.instruction}"
             )
-        } catch (e: Exception) {
-            throw RuntimeError(
-                "${e}\nAt line: ${block.line}, " +
-                        "At instruction: ${block.instruction}"
-            )
         }
+//        catch (e: Exception) {
+//            throw RuntimeError(
+//                "${e}\nAt line: ${block.line}, " +
+//                        "At instruction: ${block.instruction}"
+//            )
+//        }
         return true
     }
 
@@ -150,7 +153,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     }
 
     fun parseInput() {
-        val block = blocks!![currentLine - 1]
+        val block = blocks!![currentLine]
         val rawList = input.split(",")
         val rawCommands = block.expression.split(",")
         if (rawList.size != rawCommands.size) {
@@ -394,7 +397,12 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     operand1 as Valuable
 
                     val result: Valuable? = when (value) {
-                        "?" -> operand1.array[operand2.value.toInt()]
+                        "?" -> {
+                            try {operand1.array[operand2.value.toInt()]}
+                            catch (e:IndexOutOfBoundsException) {
+                                throw RuntimeError("${e.message}\nAt expression: $raw")
+                            }
+                        }
                         "+" -> operand1 + operand2
                         "-" -> operand1 - operand2
                         "*" -> operand1 * operand2
@@ -432,6 +440,9 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
             }
         }
 
+        if (stack.isEmpty()) {
+            throw RuntimeError("Expected expression but empty block was found\n")
+        }
         val last = stack.removeLast()
         if (last is Variable) {
             try {
