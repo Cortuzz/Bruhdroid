@@ -115,6 +115,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
             Instruction.PRINT to R.layout.block_print,
+            Instruction.INPUT to R.layout.block_input,
             Instruction.INIT to R.layout.block_init,
             Instruction.WHILE to R.layout.block_while,
             Instruction.IF to R.layout.block_if,
@@ -128,6 +129,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 block as Block
                 val instr = block.instruction
                 val view = layoutInflater.inflate(layoutMap[instr]!!, null)
+                view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
 
                 if (instr in connectingInstructions) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
