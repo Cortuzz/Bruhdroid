@@ -3,11 +3,15 @@ package com.example.bruhdroid
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.view.View.FOCUS_DOWN
+import android.view.View.FOCUS_UP
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.annotation.RequiresApi
@@ -66,6 +70,10 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         controller.addObserver(this)
         interpreter.addObserver(this)
+
+        binding.mainCode.setOnDragListener { v, event ->
+            generateDropAreaForScroll(v, event)
+        }
 
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
@@ -171,6 +179,50 @@ class CodingActivity : AppCompatActivity(), Observer {
             return
         }
         super.onBackPressed()
+    }
+
+    private fun generateDropAreaForScroll(v: View, event:DragEvent): Boolean {
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                Log.d("hhh", event.y.toString())
+                Log.d("hhh", " gg " + (v.height * 1 / 4).toString())
+                if (event.y < v.height * 1 / 4) {
+                    binding.mainCode.pageScroll(FOCUS_UP)
+                } else if (event.y > v.height * 3 / 4) {
+                    binding.mainCode.pageScroll(FOCUS_DOWN)
+                }
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_EXITED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DROP -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENDED -> {
+                v.invalidate()
+                true
+            }
+
+            else -> {
+                false
+            }
+        }
     }
 
     private fun generateDropAreaForBin(v: View, event:DragEvent): Boolean {
