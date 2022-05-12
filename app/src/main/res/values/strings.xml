@@ -29,4 +29,6 @@
     <string name="if_block">If</string>
     <string name="elif_button">Elif</string>
     <string name="else_button">Else</string>
+    <string name="dialog">Enter value</string>
+    <string name="dialog_button">Submit</string>
 </resources>

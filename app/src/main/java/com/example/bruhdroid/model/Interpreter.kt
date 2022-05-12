@@ -1,6 +1,7 @@
 package com.example.bruhdroid.model
 
 import androidx.core.text.isDigitsOnly
+import com.example.bruhdroid.CodingActivity
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
 import java.util.*
@@ -30,9 +31,13 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         if (currentLine >= blocks!!.size - 1) {
             return false
         }
+
         val block = blocks!![++currentLine]
 
         try {
+            if (input.isNotEmpty()) {
+                parseInput()
+            }
             if (parse(block)) {
                 skipFalseBranches()
             }
@@ -143,6 +148,20 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
         parsed.add(tempStr)
         return parsed
     }
+
+    fun parseInput() {
+        val block = blocks!![currentLine - 1]
+        val rawList = input.split(",")
+        val rawCommands = block.expression.split(",")
+        if (rawList.size != rawCommands.size) {
+            throw RuntimeError("At expression: ${block.expression}")
+        }
+        for (i in rawList.indices) {
+            parseRawBlock(rawCommands[i] + "=\"" + rawList[i] + "\"")
+        }
+        input = ""
+    }
+
 
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
@@ -279,7 +298,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
 
         return tryFindInMemory(memory.prevMemory, block)
     }
-    
+
     private fun getValue(data: String): Block? {
         return if (data.last() == '"' && data.first() == '"') {
             // Maybe substring is better solution
@@ -298,7 +317,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
         val data = Notation.convertToRpn(Notation.tokenizeString(raw))
         val stack = mutableListOf<Block>()
-        
+
         for (value in data) {
             val parsedValue = getValue(value)
             if (parsedValue != null) {
@@ -328,13 +347,13 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                     }
                     var operand1 = stack.removeLast()
 
-                    if (value in listOf("=","/=", "+=", "-=", "*=", "%=", "//=")) {
+                    if (value in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=")) {
                         if (operand1 is Valuable) {
                             operand1.value = operand2.value
                             operand1.type = operand2.type
                             operand1.array = operand2.array
                         } else if (operand1 is Variable) {
-                            val operand = when(value) {
+                            val operand = when (value) {
                                 "=" -> operand2
                                 "/=" -> tryFindInMemory(memory, operand1) / operand2
                                 "*=" -> tryFindInMemory(memory, operand1) * operand2
@@ -412,7 +431,7 @@ class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolea
                 }
             }
         }
-        
+
         val last = stack.removeLast()
         if (last is Variable) {
             try {

@@ -2,8 +2,8 @@ package com.example.bruhdroid
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.DialogInterface
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +13,8 @@ import android.view.View
 import android.view.View.FOCUS_DOWN
 import android.view.View.FOCUS_UP
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -169,7 +171,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             builder.setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
                 super.onBackPressed()
             }
-            builder.setNeutralButton(R.string.suppress_data_warning)  { _: DialogInterface, _: Int ->
+            builder.setNeutralButton(R.string.suppress_data_warning) { _: DialogInterface, _: Int ->
                 Controller.suppressingWarns = true
                 super.onBackPressed()
             }
@@ -181,7 +183,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         super.onBackPressed()
     }
 
-    private fun generateDropAreaForScroll(v: View, event:DragEvent): Boolean {
+    private fun generateDropAreaForScroll(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 true
@@ -225,10 +227,10 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun generateDropAreaForBin(v: View, event:DragEvent): Boolean {
+    private fun generateDropAreaForBin(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                    true
+                true
             }
 
             DragEvent.ACTION_DRAG_ENTERED -> {
@@ -653,6 +655,30 @@ class CodingActivity : AppCompatActivity(), Observer {
         builder.show()
     }
 
+    fun showCustomDialog() {
+        val dialog = Dialog(this)
+        //We have added a title in the custom layout. So let's disable the default title.
+        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        //The user will be able to cancel the dialog bu clicking anywhere outside the dialog.
+        dialog.setCancelable(true)
+        //Mention the name of the layout of your custom dialog.
+        dialog.setContentView(R.layout.input_dialog)
+
+        //Initializing the views of the dialog.
+        val inputVal: EditText = dialog.findViewById(R.id.input)
+        val submitButton: Button = dialog.findViewById(R.id.button)
+
+        submitButton.setOnClickListener(View.OnClickListener {
+            interpreter.input=inputVal.text.toString()
+            interpreter.waitingForInput = false
+            dialog.dismiss()
+            GlobalScope.launch {
+                controller.resumeProgram()
+            }
+        })
+        dialog.show()
+    }
+
     override fun update(p0: Observable?, p1: Any?) {
         val lexerErrors = controller.popLexerErrors()
         val runtimeErrors = controller.popRuntimeErrors()
@@ -661,10 +687,15 @@ class CodingActivity : AppCompatActivity(), Observer {
         runOnUiThread {
             if (runtimeErrors.isNotEmpty()) {
                 showErrorDialog("RUNTIME ERROR", runtimeErrors)
+                return@runOnUiThread
             }
 
             if (lexerErrors.isNotEmpty()) {
                 showErrorDialog("LEXER ERROR", lexerErrors)
+                return@runOnUiThread
+            }
+            if(interpreter.waitingForInput){
+                showCustomDialog()
                 return@runOnUiThread
             }
             if (output.isNotEmpty()) {
