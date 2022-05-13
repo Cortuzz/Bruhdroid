@@ -109,6 +109,8 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         binding.nextButton.setOnClickListener {
             debugType = Debug.NEXT
+            updateDebugger()
+
             GlobalScope.launch {
                 controller.resumeProgram()
             }
@@ -116,6 +118,8 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         binding.resumeButton.setOnClickListener {
             debugType = Debug.BREAKPOINT
+            updateDebugger()
+
             GlobalScope.launch {
                 controller.resumeProgram()
             }
@@ -152,6 +156,16 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
         bindingSheetMenu.blockSet.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheetMenu.expression6.text.toString())
+        }
+    }
+
+    private fun updateDebugger() {
+        val view = getViewByLine()
+        val button = view?.findViewById<ImageButton>(R.id.breakpoint)
+
+        if (button != null) {
+            val block = viewToBlock[view] ?: return
+            drawBreakpoint(button, block)
         }
     }
 
@@ -647,9 +661,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun switchBreakpoint(button: ImageButton, block: Block) {
-        block.breakpoint = !block.breakpoint
-
+    private fun drawBreakpoint(button: ImageButton, block: Block) {
         button.setBackgroundResource(
             when (block.breakpoint) {
                 true -> android.R.drawable.presence_online
@@ -662,7 +674,8 @@ class CodingActivity : AppCompatActivity(), Observer {
         val button = view.findViewById<ImageButton>(R.id.breakpoint)
         button?.setOnClickListener {
            val block = viewToBlock[view] ?: return@setOnClickListener
-           switchBreakpoint(button, block)
+           block.breakpoint = !block.breakpoint
+           drawBreakpoint(button, block)
         }
     }
 
