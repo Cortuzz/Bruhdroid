@@ -40,8 +40,8 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     private var viewToBlock = mutableMapOf<View, Block>()
-    private var codingViewList = mutableListOf<View>()
-    private var binViewList = mutableListOf<View>()
+    private var codingViewList = LinkedList<View>()
+    private var binViewList = LinkedList<View>()
     private var connectorsMap = mutableMapOf<View, View>()
     private var prevBlock: View? = null
     private var prevBlockInBin: View? = null
@@ -272,6 +272,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun generateDropAreaForScroll(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
+                v.invalidate()
                 true
             }
 
@@ -429,6 +430,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
+                v.invalidate()
                 true
             }
 
@@ -484,34 +486,29 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    private fun replaceUntilEnd(indexLast: Int, indexNew: Int): List<Int> {
+    private fun replaceUntilEnd(indexFrom: Int, indexTo: Int) {
         val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
         val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
         val tempViews = mutableListOf<View>()
-        var height = 0
         var count = 0
 
         do {
-            val view = codingViewList.removeAt(indexLast)
-            when (viewToBlock[view]!!.instruction) {
+            when (viewToBlock[codingViewList[indexFrom]]!!.instruction) {
                 in endInstructions -> --count
                 in startInstructions -> ++count
                 else -> {}
             }
-
-            height += view.height + 10
+            val view = codingViewList.removeAt(indexFrom)
             tempViews.add(view)
         } while (count > 0)
 
-        val size: Int = tempViews.size
-
-        if (indexNew != -1) {
-            while (tempViews.size > 0) {
-                codingViewList.add(indexNew, tempViews.removeLast())
+        if (indexTo != -1) {
+            if (indexTo < indexFrom) {
+                codingViewList.addAll(indexTo, tempViews)
+            } else {
+                codingViewList.addAll(indexTo + 1 - tempViews.size, tempViews)
             }
         }
-
-        return listOf(height, size)
     }
 
     private fun clearConstraints(set: ConstraintSet, view: View) {
@@ -580,7 +577,6 @@ class CodingActivity : AppCompatActivity(), Observer {
             for (i in 0 until codingViewList.size) {
                 clearConstraints(set, codingViewList[i])
             }
-
             if (untilEnd) {
                 replaceUntilEnd(codingViewList.indexOf(drag), index)
             } else {
@@ -775,7 +771,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         val submitButton: Button = dialog.findViewById(R.id.button)
 
         submitButton.setOnClickListener(View.OnClickListener {
-            interpreter.input=inputVal.text.toString()
+            interpreter.input = inputVal.text.toString()
             interpreter.waitingForInput = false
             dialog.dismiss()
             GlobalScope.launch {
@@ -799,7 +795,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 showErrorDialog("LEXER ERROR", lexerErrors)
                 return@runOnUiThread
             }
-            
+
             if (interpreter.waitingForInput) {
                 showCustomDialog()
                 return@runOnUiThread
