@@ -197,6 +197,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     @RequiresApi(Build.VERSION_CODES.N)
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
+            Instruction.PRAGMA to R.layout.pragma_block,
             Instruction.PRINT to R.layout.block_print,
             Instruction.INPUT to R.layout.block_input,
             Instruction.INIT to R.layout.block_init,
