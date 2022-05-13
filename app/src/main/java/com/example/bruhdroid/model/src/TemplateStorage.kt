@@ -11,12 +11,11 @@ class TemplateStorage {
 
         private val templates = mutableMapOf(
             Template.BUBBLE_SORT to arrayOf(
-                Block(Instruction.INIT, "n = 5, *arr[n]"),
+                Block(Instruction.INIT, "n = 10, *arr[n]"),
                 Block(Instruction.INIT, "i = 0, j = 0, t = 0"),
 
                 Block(Instruction.WHILE, "i < n"),
-                    Block(Instruction.INPUT, "t"),
-                    Block(Instruction.SET, "arr[i] = t.toFloat()"),
+                    Block(Instruction.SET, "arr[i] = (100 * rand() - 50).toInt()"),
                     Block(Instruction.SET, "i += 1"),
                 Block(Instruction.END_WHILE),
 

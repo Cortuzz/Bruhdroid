@@ -820,7 +820,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 }
 
                 GlobalScope.launch {
-                        controller.resumeProgram()
+                    controller.resumeProgram()
                 }
             }
         }

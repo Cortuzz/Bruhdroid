@@ -7,8 +7,10 @@ import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
 import java.util.*
 
-class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean = false) :
+class Interpreter(_blocks: List<Block>? = null) :
     Observable() {
+    var parseMap: MutableMap<String, List<String>> = mutableMapOf()
+    var blocks = _blocks?.toMutableList()
     var output = ""
     var input = ""
     var waitingForInput = false
@@ -309,7 +311,9 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
     }
 
     private fun getValue(data: String): Block? {
-        return if (data.last() == '"' && data.first() == '"') {
+        return if (data == "rand()") {
+            Valuable(Math.random(), Type.FLOAT)
+        } else if (data.last() == '"' && data.first() == '"') {
             // Maybe substring is better solution
             Valuable(data.replace("\"", ""), Type.STRING)
         } else if (data.contains("^[A-Za-z]+\$".toRegex())) {
@@ -317,14 +321,16 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         } else {
             when {
                 data.contains("[\\d]+\\.[\\d]+".toRegex()) -> Valuable(data, Type.FLOAT)
-                data.isDigitsOnly() -> Valuable(data, Type.INT)
+                data.contains("[\\d]+".toRegex()) -> Valuable(data, Type.INT)
                 else -> null
             }
         }
     }
 
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        val data = Notation.convertToRpn(Notation.tokenizeString(raw))
+        val data = parseMap[raw]?: Notation.convertToRpn(Notation.tokenizeString(raw))
+        parseMap[raw] = data
+
         val stack = mutableListOf<Block>()
         val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()")
 

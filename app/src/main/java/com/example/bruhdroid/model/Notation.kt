@@ -139,10 +139,11 @@ class Notation {
 
         fun tokenizeString(str: String): List<String> {
             val name = "([\\d]+\\.?[\\d]*|\\w[\\w\\d_]*|\".*\")"
+            val reserved = "(rand\\(\\))"
             val convert = "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\))"
             val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|\\*|%|/|==|=|!=|>=|<=|<|>|)"
             val bracket = "(\\(|\\)|\\[|\\])"
-            val exp = Regex("($convert|$bracket|$name|$operator)")
+            val exp = Regex("($convert|$reserved|$bracket|$name|$operator)")
             val strSeq = (exp.findAll(str).toList().map { it.destructured.toList()[0] })
 
             return strSeq

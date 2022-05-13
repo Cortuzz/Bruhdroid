@@ -179,7 +179,7 @@ class Valuable(varValue: Any, var type: Type) :
                 0
             }
             Type.INT -> valuable.value.toInt()
-            Type.FLOAT -> valuable.value.toInt()
+            Type.FLOAT -> valuable.value.toFloat().toInt()
             Type.STRING -> {
                 try {
                     valuable.value.toFloat().toInt()
