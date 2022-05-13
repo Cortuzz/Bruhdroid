@@ -7,25 +7,31 @@ import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
 import java.util.*
 
-class Interpreter(private var blocks: List<Block>? = null, val debugMode: Boolean = false) :
+class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean = false) :
     Observable() {
     var output = ""
     var input = ""
     var waitingForInput = false
     var memory = Memory(null)
+    var currentLine = -1
+
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
-    private var currentLine = -1
 
     fun initBlocks(_blocks: List<Block>) {
+        clear()
+        blocks = _blocks.toMutableList()
+    }
+
+    fun clear() {
         output = ""
         input = ""
         waitingForInput = false
         appliedConditions.clear()
         cycleLines.clear()
+        blocks?.clear()
         memory = Memory(null)
         currentLine = -1
-        blocks = _blocks
     }
 
     fun runOnce(): Boolean {

@@ -32,7 +32,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                android:id="@+id/bubble_sort"
+                android:id="@+id/bubbleSort"
                 style="@style/button"
                 android:layout_marginTop="16dp"
                 android:text="@string/bubble_sort_button"
@@ -42,13 +42,22 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/test2"
+                android:id="@+id/infinityLoop"
                 style="@style/button"
                 android:layout_marginTop="12dp"
-                android:text="@string/start_button"
+                android:text="@string/infinity_loop_button"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/bubble_sort" />
+                app:layout_constraintTop_toBottomOf="@+id/bubbleSort" />
+
+            <Button
+                android:id="@+id/ahegao"
+                style="@style/button"
+                android:layout_marginTop="12dp"
+                android:text="@string/ahegao_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/infinityLoop" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>

@@ -14,8 +14,8 @@ import android.view.View.FOCUS_DOWN
 import android.view.View.FOCUS_UP
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -35,19 +35,27 @@ import java.util.*
 
 
 class CodingActivity : AppCompatActivity(), Observer {
+    private enum class Debug {
+        NEXT, BREAKPOINT
+    }
+
     private var viewToBlock = mutableMapOf<View, Block>()
     private var codingViewList = LinkedList<View>()
     private var binViewList = LinkedList<View>()
     private var connectorsMap = mutableMapOf<View, View>()
     private var prevBlock: View? = null
     private var prevBlockInBin: View? = null
+    private var debugMode = false
+
+    private lateinit var debugType: Debug
+    private lateinit var currentDrag: View
 
     private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
+
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
-    private lateinit var currentDrag: View
 
     private val interpreter = Interpreter()
     private val controller = Controller()
@@ -84,7 +92,47 @@ class CodingActivity : AppCompatActivity(), Observer {
             bottomSheetBin.show()
         }
         binding.launchButton.setOnClickListener {
+            debugMode = false
+            binding.console.text = ""
             controller.runProgram(interpreter, viewToBlock, codingViewList)
+        }
+
+        binding.debugButton.setOnClickListener {
+            debugMode = true
+            debugType = Debug.BREAKPOINT
+            binding.console.text = ""
+            binding.debugPanel.visibility = View.VISIBLE
+            binding.mainPanel.visibility = View.INVISIBLE
+
+            controller.runProgram(interpreter, viewToBlock, codingViewList)
+        }
+
+        binding.nextButton.setOnClickListener {
+            debugType = Debug.NEXT
+            updateDebugger()
+
+            GlobalScope.launch {
+                controller.resumeProgram()
+            }
+        }
+
+        binding.resumeButton.setOnClickListener {
+            debugType = Debug.BREAKPOINT
+            updateDebugger()
+
+            GlobalScope.launch {
+                controller.resumeProgram()
+            }
+        }
+
+        binding.pauseButton.setOnClickListener {
+            debugType = Debug.NEXT
+        }
+
+        binding.stopButton.setOnClickListener {
+            binding.debugPanel.visibility = View.INVISIBLE
+            binding.mainPanel.visibility = View.VISIBLE
+            interpreter.clear()
         }
 
         bindingSheetMenu.blockPrint.setOnClickListener {
@@ -111,10 +159,46 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun updateDebugger() {
+        val view = getViewByLine()
+        val button = view?.findViewById<ImageButton>(R.id.breakpoint)
+
+        if (button != null) {
+            val block = viewToBlock[view] ?: return
+            drawBreakpoint(button, block)
+        }
+    }
+
+    private fun getDebuggerView(): View? {
+        val view = getViewByLine()
+
+        if (view == null) {
+            runOnUiThread {
+                binding.debugPanel.visibility = View.INVISIBLE
+                binding.mainPanel.visibility = View.VISIBLE
+            }
+            return null
+        }
+        return view
+    }
+
+    private fun getViewByLine(): View? {
+        fun <K, V> getKey(hashMap: Map<K, V>, target: V): K {
+            return hashMap.filter { target == it.value }.keys.first()
+        }
+
+        return try {
+            getKey(viewToBlock, interpreter.blocks?.get(interpreter.currentLine + 1))
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.N)
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
             Instruction.PRINT to R.layout.block_print,
+            Instruction.INPUT to R.layout.block_input,
             Instruction.INIT to R.layout.block_init,
             Instruction.WHILE to R.layout.block_while,
             Instruction.IF to R.layout.block_if,
@@ -128,6 +212,8 @@ class CodingActivity : AppCompatActivity(), Observer {
                 block as Block
                 val instr = block.instruction
                 val view = layoutInflater.inflate(layoutMap[instr]!!, null)
+                generateBreakpoint(view)
+                view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
 
                 if (instr in connectingInstructions) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
@@ -571,10 +657,29 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun drawBreakpoint(button: ImageButton, block: Block) {
+        button.setBackgroundResource(
+            when (block.breakpoint) {
+                true -> android.R.drawable.presence_online
+                false -> android.R.drawable.presence_invisible
+            }
+        )
+    }
+
+    private fun generateBreakpoint(view: View) {
+        val button = view.findViewById<ImageButton>(R.id.breakpoint)
+        button?.setOnClickListener {
+           val block = viewToBlock[view] ?: return@setOnClickListener
+           block.breakpoint = !block.breakpoint
+           drawBreakpoint(button, block)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, text: String) {
         val view = layoutInflater.inflate(layoutId, null)
+        generateBreakpoint(view)
         view.findViewById<EditText>(R.id.expression)?.setText(text)
         codingViewList.add(view)
 
@@ -593,6 +698,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 endInstruction = Instruction.END
             }
 
+            generateBreakpoint(endBlock)
             connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             binding.container.addView(connector)
@@ -685,11 +791,11 @@ class CodingActivity : AppCompatActivity(), Observer {
                 showErrorDialog("RUNTIME ERROR", runtimeErrors)
                 return@runOnUiThread
             }
-
             if (lexerErrors.isNotEmpty()) {
                 showErrorDialog("LEXER ERROR", lexerErrors)
                 return@runOnUiThread
             }
+
             if (interpreter.waitingForInput) {
                 showCustomDialog()
                 return@runOnUiThread
@@ -698,8 +804,24 @@ class CodingActivity : AppCompatActivity(), Observer {
                 binding.console.text = output
             }
 
-            GlobalScope.launch {
-                controller.resumeProgram()
+            if (interpreter.currentLine + 1 != interpreter.blocks?.size) {
+                val block = interpreter.blocks?.get(interpreter.currentLine + 1)
+                val breakpoint = block?.breakpoint
+
+                if (debugMode && (debugType == Debug.NEXT ||
+                            debugType == Debug.BREAKPOINT && breakpoint == true)) {
+                    val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
+
+                    button?.setBackgroundResource(when (debugType) {
+                        Debug.NEXT -> android.R.drawable.presence_away
+                        Debug.BREAKPOINT -> android.R.drawable.presence_busy
+                    })
+                    return@runOnUiThread
+                }
+
+                GlobalScope.launch {
+                        controller.resumeProgram()
+                }
             }
         }
     }
