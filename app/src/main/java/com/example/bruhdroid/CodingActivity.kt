@@ -702,6 +702,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 endInstruction = Instruction.END
             }
 
+            generateBreakpoint(endBlock)
             connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             binding.container.addView(connector)
