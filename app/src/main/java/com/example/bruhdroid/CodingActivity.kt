@@ -647,18 +647,22 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun switchBreakpoint(button: ImageButton, block: Block) {
+        block.breakpoint = !block.breakpoint
+
+        button.setBackgroundResource(
+            when (block.breakpoint) {
+                true -> android.R.drawable.presence_online
+                false -> android.R.drawable.presence_invisible
+            }
+        )
+    }
+
     private fun generateBreakpoint(view: View) {
         val button = view.findViewById<ImageButton>(R.id.breakpoint)
         button?.setOnClickListener {
-            val block = viewToBlock[view] ?: return@setOnClickListener
-            block.breakpoint = !block.breakpoint
-
-            button.setBackgroundResource(
-                when (block.breakpoint) {
-                    true -> android.R.drawable.presence_online
-                    false -> android.R.drawable.presence_invisible
-                }
-            )
+           val block = viewToBlock[view] ?: return@setOnClickListener
+           switchBreakpoint(button, block)
         }
     }
 
