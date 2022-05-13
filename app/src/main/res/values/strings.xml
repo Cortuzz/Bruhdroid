@@ -8,12 +8,14 @@
 
     <string name="templates">Templates</string>
     <string name="bubble_sort_button">Bubble sort</string>
+    <string name="infinity_loop_button">Infinity counter</string>
 
     <string name="app_name">Bruhdroid</string>
     <string name="logo">Logo</string>
     <string name="suppress_data_warning">Suppress</string>
 
     <string name="start_code">Launch</string>
+    <string name="debug">Debug</string>
     <string name="choose_block">Blocks</string>
     <string name="block">Add block</string>
     <string name="varName">Enter Name</string>
@@ -31,4 +33,9 @@
     <string name="else_button">Else</string>
     <string name="dialog">Enter value</string>
     <string name="dialog_button">Submit</string>
+
+    <string name="resume">Resume</string>
+    <string name="pause">Pause</string>
+    <string name="next">Next</string>
+    <string name="stop">Break</string>
 </resources>
