@@ -17,6 +17,10 @@ class Interpreter(_blocks: List<Block>? = null) :
     var memory = Memory(null)
     var currentLine = -1
 
+    private val pragma : MutableMap<String, Boolean> = mutableMapOf(
+        "INIT_MESSAGE" to true,
+        "IO_MESSAGE" to true,
+        )
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
 
@@ -25,8 +29,20 @@ class Interpreter(_blocks: List<Block>? = null) :
         blocks = _blocks.toMutableList()
     }
 
+    fun pragmaUpdate() {
+        output = if (pragma["INIT_MESSAGE"] == true) {
+            "⢸⣿⡟⠛⢿⣷⠀⢸⣿⡟⠛⢿⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡇⠀⢸⣿⡇⠀\n" +
+            "⢸⣿⣧⣤⣾⠿⠀⢸⣿⣇⣀⣸⡿⠃⢸⣿⡇⠀⢸⣿⡇⢸⣿⣇⣀⣸⣿⡇⠀\n" +
+            "⢸⣿⡏⠉⢹⣿⡆⢸⣿⡟⠛⢻⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡏⠉⢹⣿⡇⠀\n" +
+            "⢸⣿⣧⣤⣼⡿⠃⢸⣿⡇⠀⢸⣿⡇⠸⣿⣧⣤⣼⡿⠁⢸⣿⡇⠀⢸⣿⡇⠀\n" +
+            "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀ \n"
+        } else {
+            ""
+        }
+    }
+
     fun clear() {
-        output = ""
+        pragmaUpdate()
         input = ""
         waitingForInput = false
         appliedConditions.clear()
@@ -173,11 +189,38 @@ class Interpreter(_blocks: List<Block>? = null) :
         input = ""
     }
 
+    private fun parsePragma(raw: String) {
+        val splitted = raw.replace(" ", "").split("=")
+        if (splitted[1] !in listOf("true", "false")) {
+            TODO()
+        }
+
+        val value = splitted[1] == "true"
+        val variable = splitted[0]
+
+        if (variable !in pragma) {
+            TODO()
+        }
+        pragma[splitted[0]] = value
+    }
 
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
+            Instruction.PRAGMA -> {
+                if (currentLine != 0) {
+                    TODO()
+                }
+                val rawList = split(block.expression)
+                for (raw in rawList) {
+                    parsePragma(raw)
+                }
+                pragmaUpdate()
+            }
             Instruction.PRINT -> {
                 val rawList = split(block.expression)
+                if (pragma["IO_MESSAGE"] == true) {
+                    output += "I/O: "
+                }
 
                 for (raw in rawList) {
                     output += "${getVisibleValue(parseRawBlock(raw))} "
