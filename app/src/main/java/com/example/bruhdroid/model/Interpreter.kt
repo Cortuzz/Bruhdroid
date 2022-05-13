@@ -127,7 +127,7 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         return when (valuable.type) {
             Type.STRING -> "\"$rawValue\""
             Type.BOOL -> rawValue.uppercase()
-            Type.UNDEFINED -> "UNDEFINED"
+            Type.UNDEFINED -> "Ты еблан?"
             Type.LIST -> {
                 val str = mutableListOf<String>()
                 valuable.array.forEach { el -> str.add(getVisibleValue(el)) }
@@ -312,11 +312,11 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         return if (data.last() == '"' && data.first() == '"') {
             // Maybe substring is better solution
             Valuable(data.replace("\"", ""), Type.STRING)
-        } else if (data.contains("[A-Za-z]".toRegex())) {
+        } else if (data.contains("^[A-Za-z]+\$".toRegex())) {
             Variable(data)
         } else {
             when {
-                data.contains('.') -> Valuable(data, Type.FLOAT)
+                data.contains("[\\d]+\\.[\\d]+".toRegex()) -> Valuable(data, Type.FLOAT)
                 data.isDigitsOnly() -> Valuable(data, Type.INT)
                 else -> null
             }
@@ -326,14 +326,18 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
         val data = Notation.convertToRpn(Notation.tokenizeString(raw))
         val stack = mutableListOf<Block>()
+        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()")
 
         for (value in data) {
+            if (value.isEmpty()) {
+                continue
+            }
             val parsedValue = getValue(value)
             if (parsedValue != null) {
                 stack.add(parsedValue)
             } else {
                 try {
-                    var operand2 = stack.removeLast()
+                    var operand2 = stack.removeLast() // todo: тут хуйня
 
                     if (operand2 is Variable) {
                         try {
@@ -344,17 +348,21 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
                     }
                     operand2 as Valuable
 
-                    if (value in "∓±") {
+                    if (value in unary) {
                         stack.add(
                             when (value) {
                                 "±" -> +operand2
                                 "∓" -> -operand2
+                                ".toInt()" -> Valuable(operand2.convertToInt(operand2), Type.INT)
+                                ".toFloat()" -> Valuable(operand2.convertToFloat(operand2), Type.FLOAT)
+                                ".toString()" -> Valuable(operand2.value, Type.STRING)
+                                ".toBool()" -> Valuable(operand2.convertToBool(operand2), Type.BOOL)
                                 else -> throw Exception()
                             }
                         )
                         continue
                     }
-                    var operand1 = stack.removeLast()
+                    var operand1 = stack.removeLast() // todo: тут тоже
 
                     if (value in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=")) {
                         if (operand1 is Valuable) {
@@ -398,7 +406,11 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
                     }
 
                     if (operand1 is Variable) {
-                        operand1 = tryFindInMemory(memory, operand1)
+                        try {
+                            operand1 = tryFindInMemory(memory, operand1)
+                        } catch (e: StackCorruptionError) {
+                            throw RuntimeError("${e.message}\nAt expression: $raw")
+                        }
                     }
                     operand1 as Valuable
 
@@ -414,8 +426,8 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
                         "*" -> operand1 * operand2
                         "/" -> operand1 / operand2
 
-                        "&" -> operand1.and(operand2)
-                        "|" -> operand1.or(operand2)
+                        "&&" -> operand1.and(operand2)
+                        "||" -> operand1.or(operand2)
 
                         "==" -> Valuable(operand1 == operand2, Type.BOOL)
                         "!=" -> Valuable(operand1 != operand2, Type.BOOL)
@@ -448,6 +460,9 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
 
         if (stack.isEmpty()) {
             throw RuntimeError("Expected expression but empty block was found\n")
+        }
+        if (stack.size > 1) {
+            throw RuntimeError("Expected expression but wrong syntax was found\n")
         }
         val last = stack.removeLast()
         if (last is Variable) {

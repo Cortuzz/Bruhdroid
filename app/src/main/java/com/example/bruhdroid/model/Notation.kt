@@ -1,12 +1,12 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.SyntaxError
 
 
 class Notation {
     companion object {
         private enum class Operator(val operator: Char, val priority: Int) {
+            CONVERT('r', 10),
             UNARY_MINUS('∓', 9), UNARY_PLUS('±', 9),
             DEFINE_BY_INDEX('?', 8),
             MULTIPLY('*', 7), DIVIDE('/', 7),
@@ -31,8 +31,8 @@ class Notation {
             "∓" to Operator.UNARY_MINUS,
             "±" to Operator.UNARY_PLUS,
             "!" to Operator.NOT,
-            "&" to Operator.AND,
-            "|" to Operator.OR,
+            "&&" to Operator.AND,
+            "||" to Operator.OR,
             "<" to Operator.LESS,
             ">" to Operator.GREATER,
             "==" to Operator.EQUALS,
@@ -48,16 +48,25 @@ class Notation {
             "*=" to Operator.DEFINE,
             "/=" to Operator.DEFINE,
             "//=" to Operator.DEFINE,
-            "%=" to Operator.DEFINE
+            "%=" to Operator.DEFINE,
+            ".toInt()" to Operator.CONVERT,
+            ".toFloat()" to Operator.CONVERT,
+            ".toString()" to Operator.CONVERT,
+            ".toBool()" to Operator.CONVERT
         )
 
         fun convertToRpn(infixNotation: List<String>): List<String> {
+            val unary = listOf("+", "-", "*", ".toInt()")
+            val convertedUnary = listOf("±", "∓", "#", ".toInt()", ".toFloat()", ".toBool()", ".toString()")
             var mayUnary = true
             var arrayInit = false
             val postfixNotation = mutableListOf<String>()
             val opStack = mutableListOf<String>()
 
             for (count in infixNotation.indices) {
+                if (infixNotation[count] == "") {
+                    continue
+                }
                 if (infixNotation[count] !in operators) {
                     postfixNotation.add(infixNotation[count])
                     mayUnary = false
@@ -92,7 +101,7 @@ class Notation {
                             mayUnary = false
                         }
                         else -> {
-                            if (mayUnary && infixNotation[count] in "+-*") {
+                            if (mayUnary && infixNotation[count] in unary) {
                                 when (infixNotation[count]) {
                                     "-" -> opStack.add("∓")
                                     "+" -> opStack.add("±")
@@ -105,7 +114,7 @@ class Notation {
                                 continue
                             }
 
-                            while (opStack.size > 0 && opStack.last() in "±∓#") {
+                            while (opStack.size > 0 && opStack.last() in convertedUnary) {
                                 postfixNotation.add(opStack.removeLast())
                             }
                             if (opStack.size > 0 && operators[infixNotation[count]]!!.priority <=
@@ -130,13 +139,12 @@ class Notation {
 
         fun tokenizeString(str: String): List<String> {
             val name = "([\\d]+\\.?[\\d]*|\\w[\\w\\d_]*|\".*\")"
-            val operator = "(\\+=|-=|\\*=|/=|%=|\\+|-|\\*|%|/|==|=|!=|>=|<=|<|>)"
+            val convert = "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\))"
+            val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|\\*|%|/|==|=|!=|>=|<=|<|>|)"
             val bracket = "(\\(|\\)|\\[|\\])"
-            val exp = Regex("($bracket|$name|$operator)")
-            val strSeq=exp.findAll(str).toList().map { it.destructured.toList()[0] }
-            if ("" in strSeq) {
-                throw SyntaxError("Invalid syntax")
-            }
+            val exp = Regex("($convert|$bracket|$name|$operator)")
+            val strSeq = (exp.findAll(str).toList().map { it.destructured.toList()[0] })
+
             return strSeq
         }
     }

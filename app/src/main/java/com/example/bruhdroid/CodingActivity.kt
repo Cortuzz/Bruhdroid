@@ -788,7 +788,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         runOnUiThread {
             if (runtimeErrors.isNotEmpty()) {
-                showErrorDialog("RUNTIME ERROR", runtimeErrors)
+                showErrorDialog("ТЫ ЕБЛАН?", runtimeErrors)
                 return@runOnUiThread
             }
             if (lexerErrors.isNotEmpty()) {

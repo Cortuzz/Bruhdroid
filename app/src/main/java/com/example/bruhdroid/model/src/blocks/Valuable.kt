@@ -149,7 +149,7 @@ class Valuable(varValue: Any, var type: Type) :
         }
     }
 
-    private fun convertToFloat(valuable: Valuable): Float {
+    fun convertToFloat(valuable: Valuable): Float {
         return when (valuable.type) {
             Type.BOOL -> {
                 if (valuable.value == "true") {
@@ -170,7 +170,7 @@ class Valuable(varValue: Any, var type: Type) :
         }
     }
 
-    private fun convertToInt(valuable: Valuable): Int {
+    fun convertToInt(valuable: Valuable): Int {
         return when (valuable.type) {
             Type.BOOL -> {
                 if (valuable.value == "true") {
@@ -182,7 +182,7 @@ class Valuable(varValue: Any, var type: Type) :
             Type.FLOAT -> valuable.value.toInt()
             Type.STRING -> {
                 try {
-                    valuable.value.toInt()
+                    valuable.value.toFloat().toInt()
                 } catch (e: Exception) {
                     throw TypeError("Expected number-containing string but ${valuable.value} was found")
                 }
