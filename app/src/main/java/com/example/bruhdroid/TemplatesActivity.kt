@@ -30,5 +30,13 @@ class TemplatesActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(R.anim.alpha_reversed, R.anim.alpha)
         }
+
+        binding.ahegao.setOnClickListener {
+            val blocks = TemplateStorage.getBlocks(Template.AHEGAO)
+            val intent = Intent(this, CodingActivity::class.java)
+            intent.putExtra("blocks", blocks)
+            startActivity(intent)
+            overridePendingTransition(R.anim.alpha_reversed, R.anim.alpha)
+        }
     }
 }

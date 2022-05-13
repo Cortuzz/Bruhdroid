@@ -118,6 +118,7 @@
         android:contentDescription="@string/block"
         android:orientation="vertical"
         android:scrollbars="none"
+        app:layout_constraintBottom_toTopOf="@+id/scrollView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -150,11 +151,13 @@
         android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_marginBottom="84dp"
         android:background="#474343"
         android:contentDescription="@string/console"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/main_code">
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/console"
@@ -162,7 +165,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="#EF9A9A"
-            android:textSize="20sp" />
+            android:textSize="18.8sp" />
     </ScrollView>
 
     <ImageButton
