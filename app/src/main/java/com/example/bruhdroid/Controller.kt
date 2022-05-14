@@ -5,18 +5,80 @@ import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.Lexer
+import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.File
 import java.util.*
+
 
 class Controller: Observable() {
     companion object {
         var suppressingWarns = false
+
+        fun saveProgram(name: String, dir: File, blockMap: MutableMap<View, Block>, viewBlocks: List<View>) {
+            val file = File(dir, "$name.lapp")
+            file.setWritable(true)
+            file.appendText(parseBlocks(blockMap, viewBlocks).toString())
+        }
+
+        fun loadProgram(file: File): Array<Block> {
+            val blocksMap = mapOf(
+                "SET" to Instruction.SET,
+                "INIT" to Instruction.INIT,
+                "PRINT" to Instruction.PRINT,
+                "PRAGMA" to Instruction.PRAGMA,
+                "INPUT" to Instruction.INPUT,
+                "IF" to Instruction.IF,
+                "ELIF" to Instruction.ELIF,
+                "ELSE" to Instruction.ELSE,
+                "WHILE" to Instruction.WHILE,
+                "END" to Instruction.END,
+                "END_WHILE" to Instruction.END_WHILE,
+                "BREAK" to Instruction.BREAK,
+                "CONTINUE" to Instruction.CONTINUE,
+            )
+
+            val blocks = mutableListOf<Block>()
+            val text = file.readText()
+
+            try {
+                val jsonArray = JSONArray(text)
+                for (i in 0 until jsonArray.length()) {
+                    val jsonObject = jsonArray[i] as JSONObject
+
+                    val instruction = blocksMap[jsonObject["instruction"]]
+                    val expression = jsonObject["expression"] as String
+
+                    blocks.add(Block(instruction!!, expression))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            return blocks.toTypedArray()
+        }
+
+        private fun parseBlocks(blockMap: MutableMap<View, Block>, viewBlocks: List<View>): JSONArray {
+            val jsonArray = JSONArray()
+            for (i in viewBlocks) {
+                val jsonObject = JSONObject()
+                val expression = i.findViewById<EditText>(R.id.expression)?.text ?: ""
+
+                jsonObject.put("instruction", blockMap[i]!!.instruction)
+                jsonObject.put("expression", expression)
+                jsonArray.put(jsonObject)
+            }
+            return jsonArray
+        }
     }
+
     private var lexerErrors = ""
     private var runtimeErrors = ""
     private lateinit var interpreter: Interpreter

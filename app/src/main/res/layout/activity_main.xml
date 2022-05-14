@@ -62,7 +62,7 @@
 
         <Button
             android:id="@+id/startButton"
-            style="@style/button"
+            style="@style/custom_button"
             android:layout_marginBottom="8dp"
             android:text="@string/start_button"
             app:layout_constraintBottom_toTopOf="@+id/loadButton"
@@ -72,7 +72,7 @@
 
         <Button
             android:id="@+id/loadButton"
-            style="@style/button"
+            style="@style/custom_button"
             android:layout_marginBottom="8dp"
             android:text="@string/load_button"
             app:layout_constraintBottom_toTopOf="@+id/exitButton"
@@ -82,7 +82,7 @@
 
         <Button
             android:id="@+id/exitButton"
-            style="@style/button"
+            style="@style/custom_button"
             android:layout_marginBottom="16dp"
             android:text="@string/exit_button"
             app:layout_constraintBottom_toBottomOf="parent"

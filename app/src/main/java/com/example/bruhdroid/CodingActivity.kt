@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -95,6 +96,10 @@ class CodingActivity : AppCompatActivity(), Observer {
             debugMode = false
             binding.console.text = ""
             controller.runProgram(interpreter, viewToBlock, codingViewList)
+        }
+        binding.saveButton.setOnClickListener {
+
+            showSaveDialog()
         }
 
         binding.debugButton.setOnClickListener {
@@ -758,27 +763,39 @@ class CodingActivity : AppCompatActivity(), Observer {
         builder.show()
     }
 
-    fun showCustomDialog() {
+    private fun showCustomDialog() {
         val dialog = Dialog(this)
-        //We have added a title in the custom layout. So let's disable the default title.
-        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        //The user will be able to cancel the dialog bu clicking anywhere outside the dialog.
         dialog.setCancelable(true)
-        //Mention the name of the layout of your custom dialog.
         dialog.setContentView(R.layout.input_dialog)
 
-        //Initializing the views of the dialog.
         val inputVal: EditText = dialog.findViewById(R.id.input)
         val submitButton: Button = dialog.findViewById(R.id.button)
 
-        submitButton.setOnClickListener(View.OnClickListener {
+        submitButton.setOnClickListener {
             interpreter.input = inputVal.text.toString()
             interpreter.waitingForInput = false
             dialog.dismiss()
             GlobalScope.launch {
                 controller.resumeProgram()
             }
-        })
+        }
+        dialog.show()
+    }
+
+    private fun showSaveDialog() {
+        val dialog = Dialog(this)
+        dialog.setCancelable(true)
+        dialog.setContentView(R.layout.input_dialog)
+        dialog.findViewById<TextView>(R.id.textView).text = "Program name"
+
+        val inputVal: EditText = dialog.findViewById(R.id.input)
+        val submitButton: Button = dialog.findViewById(R.id.button)
+
+        submitButton.setOnClickListener {
+            Controller.saveProgram(inputVal.text.toString(), this.filesDir, viewToBlock, codingViewList)
+            dialog.dismiss()
+
+        }
         dialog.show()
     }
 
