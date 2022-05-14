@@ -13,10 +13,7 @@ import android.view.View
 import android.view.View.FOCUS_DOWN
 import android.view.View.FOCUS_UP
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -75,6 +72,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheetBin.setContentView(bindingSheetBin.root)
 
         val blocks = intent.getSerializableExtra("blocks")
+        val filename = intent.getSerializableExtra("filename")
         if (blocks is Array<*>) {
             parseBlocks(blocks)
         }
@@ -98,7 +96,14 @@ class CodingActivity : AppCompatActivity(), Observer {
             controller.runProgram(interpreter, viewToBlock, codingViewList)
         }
         binding.saveButton.setOnClickListener {
-
+            if (filename is String) {
+                if (Controller.saveProgram(filename, this.filesDir, viewToBlock, codingViewList)) {
+                    Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
+                }
+                return@setOnClickListener
+            }
             showSaveDialog()
         }
 
@@ -786,13 +791,17 @@ class CodingActivity : AppCompatActivity(), Observer {
         val dialog = Dialog(this)
         dialog.setCancelable(true)
         dialog.setContentView(R.layout.input_dialog)
-        dialog.findViewById<TextView>(R.id.textView).text = "Program name"
+        dialog.findViewById<TextView>(R.id.textView).text = "Program name:"
 
         val inputVal: EditText = dialog.findViewById(R.id.input)
         val submitButton: Button = dialog.findViewById(R.id.button)
 
         submitButton.setOnClickListener {
-            Controller.saveProgram(inputVal.text.toString(), this.filesDir, viewToBlock, codingViewList)
+            if (Controller.saveProgram(inputVal.text.toString(), this.filesDir, viewToBlock, codingViewList)) {
+                Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
+            }
             dialog.dismiss()
 
         }

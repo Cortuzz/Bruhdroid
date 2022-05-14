@@ -22,10 +22,13 @@ class Controller: Observable() {
     companion object {
         var suppressingWarns = false
 
-        fun saveProgram(name: String, dir: File, blockMap: MutableMap<View, Block>, viewBlocks: List<View>) {
-            val file = File(dir, "$name.lapp")
-            file.setWritable(true)
-            file.appendText(parseBlocks(blockMap, viewBlocks).toString())
+        fun saveProgram(name: String, dir: File, blockMap: MutableMap<View, Block>, viewBlocks: List<View>): Boolean {
+            return try {
+                val file = File(dir, "$name.lapp")
+                file.setWritable(true)
+                file.appendText(parseBlocks(blockMap, viewBlocks).toString())
+                true
+            } catch (e: Exception) {false}
         }
 
         fun loadProgram(file: File): Array<Block> {

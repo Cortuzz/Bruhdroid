@@ -57,16 +57,17 @@ class TemplatesActivity : AppCompatActivity() {
 
             buttonBinding.root.layoutParams = params
             button.setOnClickListener {
-                openCodingActivity(Controller.loadProgram(file))
+                openCodingActivity(Controller.loadProgram(file), file.nameWithoutExtension)
             }
 
             binding.savedPrograms.addView(buttonBinding.root)
         }
     }
 
-    private fun openCodingActivity(blocks: Array<Block>?) {
+    private fun openCodingActivity(blocks: Array<Block>?, filename: String? = null) {
         val intent = Intent(this, CodingActivity::class.java)
         intent.putExtra("blocks", blocks)
+        intent.putExtra("filename", filename)
         startActivity(intent)
         overridePendingTransition(R.anim.alpha_reversed, R.anim.alpha)
     }
