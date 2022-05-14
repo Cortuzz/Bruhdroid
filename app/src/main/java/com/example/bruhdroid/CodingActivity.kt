@@ -1,11 +1,9 @@
 package com.example.bruhdroid
 
 import android.annotation.SuppressLint
-import android.app.ActionBar
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -17,15 +15,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.LinearLayout
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.marginTop
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.window.layout.WindowMetricsCalculator
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.databinding.BottomsheetBinBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
@@ -33,6 +29,7 @@ import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,7 +66,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private val controller = Controller()
     private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE)
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -167,7 +164,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 //        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun setBindingSheetBlocks() {
         bindingSheetMenu =
             DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
@@ -241,16 +237,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     override fun onCategoryClick(position: Int) {
-        val set = ConstraintSet()
         bindingSheetMenu.blocks.removeAllViews()
 
         for (view in categoryBlocks[position]) {
-
             bindingSheetMenu.blocks.addView(view)
         }
-
-        //set.clone(bindingSheetMenu.blocks)
-        //set.connect()
     }
 
     private fun updateDebugger() {
@@ -288,7 +279,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
             Instruction.PRINT to R.layout.block_print,
@@ -408,6 +399,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun generateDropAreaForBin(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
@@ -463,6 +455,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun addBlocksToBin(view: View, isConnected: Boolean = false) {
         val addedBlocks = removeBlocksFromParent(view, isConnected)
 
@@ -663,6 +656,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         set.applyTo(container)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
         GlobalScope.launch {
             val set = ConstraintSet()
@@ -741,7 +735,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun generateDragArea(view: View) {
         view.setOnLongClickListener {
             currentDrag = it
@@ -769,7 +762,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
@@ -807,7 +799,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
         }
 
-        binding.container.addView(view)
+        val params = ConstraintLayout.LayoutParams(1000, 200)
+        binding.container.addView(view, params)
         view.id = View.generateViewId()
 
         val set = ConstraintSet()
@@ -850,7 +843,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         builder.show()
     }
 
-    fun showCustomDialog() {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun showCustomDialog() {
         val dialog = Dialog(this)
         //We have added a title in the custom layout. So let's disable the default title.
         //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -863,17 +857,18 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         val inputVal: EditText = dialog.findViewById(R.id.input)
         val submitButton: Button = dialog.findViewById(R.id.button)
 
-        submitButton.setOnClickListener(View.OnClickListener {
+        submitButton.setOnClickListener {
             interpreter.input = inputVal.text.toString()
             interpreter.waitingForInput = false
             dialog.dismiss()
             GlobalScope.launch {
                 controller.resumeProgram()
             }
-        })
+        }
         dialog.show()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun update(p0: Observable?, p1: Any?) {
         val lexerErrors = controller.popLexerErrors()
         val runtimeErrors = controller.popRuntimeErrors()
