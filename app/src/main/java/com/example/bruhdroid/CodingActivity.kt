@@ -1,6 +1,7 @@
 package com.example.bruhdroid
 
 import android.annotation.SuppressLint
+import android.app.ActionBar
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
@@ -16,11 +17,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.marginTop
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.databinding.BottomsheetBinBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
@@ -34,7 +39,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
-class CodingActivity : AppCompatActivity(), Observer {
+class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
     private enum class Debug {
         NEXT, BREAKPOINT
     }
@@ -43,6 +48,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private var codingViewList = LinkedList<View>()
     private var binViewList = LinkedList<View>()
     private var connectorsMap = mutableMapOf<View, View>()
+    private var categoryBlocks = LinkedList<LinkedList<View>>()
     private var prevBlock: View? = null
     private var prevBlockInBin: View? = null
     private var debugMode = false
@@ -53,6 +59,8 @@ class CodingActivity : AppCompatActivity(), Observer {
     private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
+    private lateinit var categoryRecycler: RecyclerView
+    private lateinit var categoryAdapter: CategoryAdapter
 
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
@@ -64,10 +72,10 @@ class CodingActivity : AppCompatActivity(), Observer {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
-        bindingSheetMenu = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
-        bottomSheetMenu = BottomSheetDialog(this@CodingActivity)
-        bottomSheetMenu.setContentView(bindingSheetMenu.root)
+
+        setBindingSheetBlocks()
 
         bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
         bottomSheetBin = BottomSheetDialog(this@CodingActivity)
@@ -135,28 +143,114 @@ class CodingActivity : AppCompatActivity(), Observer {
             interpreter.clear()
         }
 
-        bindingSheetMenu.blockPrint.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheetMenu.expression1.text.toString())
-        }
-        bindingSheetMenu.blockInit.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheetMenu.expression3.text.toString())
-        }
-        bindingSheetMenu.blockInput.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheetMenu.expression2.text.toString())
-        }
-        bindingSheetMenu.blockWhile.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheetMenu.expression4.text.toString())
-        }
-        bindingSheetMenu.blockIf.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheetMenu.expression5.text.toString())
-        }
+//        bindingSheetMenu.blockPrint.setOnClickListener {
+//            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheetMenu.expression1.text.toString())
+//        }
+//        bindingSheetMenu.blockInit.setOnClickListener {
+//            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheetMenu.expression3.text.toString())
+//        }
+//        bindingSheetMenu.blockInput.setOnClickListener {
+//            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheetMenu.expression2.text.toString())
+//        }
+//        bindingSheetMenu.blockWhile.setOnClickListener {
+//            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheetMenu.expression4.text.toString())
+//        }
+//        bindingSheetMenu.blockIf.setOnClickListener {
+//            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheetMenu.expression5.text.toString())
+//        }
 
         binding.binButton.setOnDragListener { v, event ->
             generateDropAreaForBin(v, event)
         }
-        bindingSheetMenu.blockSet.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheetMenu.expression6.text.toString())
+//        bindingSheetMenu.blockSet.setOnClickListener {
+//            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheetMenu.expression6.text.toString())
+//        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun setBindingSheetBlocks() {
+        bindingSheetMenu =
+            DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
+        bottomSheetMenu = BottomSheetDialog(this@CodingActivity)
+        bottomSheetMenu.setContentView(bindingSheetMenu.root)
+
+        val categoryList = LinkedList<Category>()
+
+        categoryList.add(Category(0, "Variables | "))
+        categoryList.add(Category(1, "Standard io | "))
+        categoryList.add(Category(2, "Cycles | "))
+        categoryList.add(Category(3, "Conditions"))
+
+        categoryRecycler(categoryList)
+
+
+        val blockInit = layoutInflater.inflate(R.layout.block_init, null)
+        val blockSet = layoutInflater.inflate(R.layout.block_set, null)
+        val blockInput = layoutInflater.inflate(R.layout.block_input, null)
+        val blockPrint = layoutInflater.inflate(R.layout.block_print, null)
+        val blockWhile = layoutInflater.inflate(R.layout.block_while, null)
+        val blockIf = layoutInflater.inflate(R.layout.block_if, null)
+
+        blockInit.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false)
         }
+        blockSet.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
+        }
+        blockInput.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false)
+        }
+        blockPrint.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false)
+        }
+        blockWhile.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
+        }
+        blockIf.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
+        }
+
+        val firstCategory = LinkedList<View>()
+        val secondCategory = LinkedList<View>()
+        val thirdCategory = LinkedList<View>()
+        val fourthCategory = LinkedList<View>()
+
+        firstCategory.add(blockInit)
+        firstCategory.add(blockSet)
+        secondCategory.add(blockInput)
+        secondCategory.add(blockPrint)
+        thirdCategory.add(blockWhile)
+        fourthCategory.add(blockIf)
+
+        categoryBlocks.add(firstCategory)
+        categoryBlocks.add(secondCategory)
+        categoryBlocks.add(thirdCategory)
+        categoryBlocks.add(fourthCategory)
+
+        for (view in categoryBlocks[0]) {
+            bindingSheetMenu.blocks.addView(view)
+        }
+    }
+
+    private fun categoryRecycler(categoryList: LinkedList<Category>) {
+        val layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
+        categoryRecycler = bindingSheetMenu.categoryRecycler
+        categoryRecycler.layoutManager = layoutManager
+        categoryAdapter = CategoryAdapter(this, categoryList, this)
+        categoryRecycler.adapter = categoryAdapter
+    }
+
+    override fun onCategoryClick(position: Int) {
+        val set = ConstraintSet()
+        bindingSheetMenu.blocks.removeAllViews()
+
+        for (view in categoryBlocks[position]) {
+
+            bindingSheetMenu.blocks.addView(view)
+        }
+
+        //set.clone(bindingSheetMenu.blocks)
+        //set.connect()
     }
 
     private fun updateDebugger() {
@@ -677,10 +771,9 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("InflateParams")
-    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, text: String) {
+    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
         generateBreakpoint(view)
-        view.findViewById<EditText>(R.id.expression)?.setText(text)
         codingViewList.add(view)
 
         var endBlock: View? = null
@@ -740,7 +833,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             prevBlock = endBlock
         }
         set.applyTo(binding.container)
-        viewToBlock[view] = Block(instruction, text)
+        viewToBlock[view] = Block(instruction)
     }
 
     private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {

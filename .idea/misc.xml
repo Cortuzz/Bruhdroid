@@ -47,13 +47,17 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.176" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.176" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_connector.xml" value="0.11927083333333334" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_if.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_init.xml" value="0.2" />
-        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_input.xml" value="0.264" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_input.xml" value="0.136" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_print.xml" value="0.2" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_set.xml" value="0.11423611111111111" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_while.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottom_sheet_fragment.xml" value="0.10130208333333333" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottomsheet_bin.xml" value="0.136" />
-        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottomsheet_fragment.xml" value="0.144" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottomsheet_fragment.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/buttomsheet_fragment.xml" value="0.16" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/category_item.xml" value="0.15902777777777777" />
       </map>
     </option>
   </component>
