@@ -26,7 +26,7 @@ class Controller: Observable() {
             return try {
                 val file = File(dir, "$name.lapp")
                 file.setWritable(true)
-                file.appendText(parseBlocks(blockMap, viewBlocks).toString())
+                file.writeText(parseBlocks(blockMap, viewBlocks).toString())
                 true
             } catch (e: Exception) {false}
         }
