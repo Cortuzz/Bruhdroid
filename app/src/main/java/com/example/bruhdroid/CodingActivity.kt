@@ -542,8 +542,8 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun buildConstraints(container: ConstraintLayout, viewList: List<View>) {
         val set = ConstraintSet()
         set.clone(container)
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE) //todo: elif / else check
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE)
 
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
@@ -554,7 +554,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             if (viewToBlock[prevView]!!.instruction in startInstructions) {
                 nestViews.add(prevView)
-                nestCount.add(prevView.height)
+                nestCount.add(prevView.height / 2)
             }
 
             if (viewToBlock[view]!!.instruction in endInstructions) {
@@ -699,6 +699,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         if (connect) {
             val endInstruction: Instruction
+            connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             if (instruction == Instruction.WHILE) {
                 endBlock = layoutInflater.inflate(R.layout.empty_block, null)
@@ -706,11 +707,43 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             } else {
                 endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
+
+                val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
+                val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
+                addElse.setOnClickListener {
+                    addElif.visibility = View.INVISIBLE
+                    addElse.visibility = View.INVISIBLE
+
+                    val elseView = layoutInflater.inflate(R.layout.block_else, null)
+                    val index = codingViewList.indexOf(endBlock)
+                    codingViewList[index] = elseView
+                    try {codingViewList.add(index + 1, endBlock)}
+                    catch (e: Exception) {codingViewList.add(endBlock)}
+
+                    viewToBlock[elseView] = Block(Instruction.ELSE, "")
+                    elseView.id = View.generateViewId()
+
+                    val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
+                    connectorsMap[elseView] = elseConnector
+                    elseConnector.id = View.generateViewId()
+                    binding.container.addView(elseConnector)
+                    binding.container.addView(elseView)
+
+                    elseView.setOnDragListener { v, event ->
+                        generateDropArea(v, event)
+                    }
+
+                    GlobalScope.launch {
+                        delay(100)
+                        runOnUiThread {
+                            buildConstraints(binding.container, codingViewList)
+                        }
+                    }
+                }
                 endInstruction = Instruction.END
             }
 
             generateBreakpoint(endBlock)
-            connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             binding.container.addView(connector)
             binding.container.addView(endBlock)
