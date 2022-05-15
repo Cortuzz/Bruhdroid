@@ -17,10 +17,12 @@ class Interpreter(_blocks: List<Block>? = null) :
     var memory = Memory(null)
     var currentLine = -1
     var debug = false
+    var ioLines = 0
 
-    private val pragma : MutableMap<String, Boolean> = mutableMapOf(
-        "INIT_MESSAGE" to true,
-        "IO_MESSAGE" to true,
+    private val pragma : MutableMap<String, String> = mutableMapOf(
+        "INIT_MESSAGE" to "true",
+        "IO_MESSAGE" to "true",
+        "IO_LINES" to "10"
         )
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
@@ -31,7 +33,8 @@ class Interpreter(_blocks: List<Block>? = null) :
     }
 
     fun pragmaUpdate() {
-        output = if (pragma["INIT_MESSAGE"] == true) {
+        output = if (pragma["INIT_MESSAGE"] == "true") {
+            ioLines = 5
             "⢸⣿⡟⠛⢿⣷⠀⢸⣿⡟⠛⢿⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡇⠀⢸⣿⡇⠀\n" +
             "⢸⣿⣧⣤⣾⠿⠀⢸⣿⣇⣀⣸⡿⠃⢸⣿⡇⠀⢸⣿⡇⢸⣿⣇⣀⣸⣿⡇⠀\n" +
             "⢸⣿⡏⠉⢹⣿⡆⢸⣿⡟⠛⢻⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡏⠉⢹⣿⡇⠀\n" +
@@ -43,7 +46,6 @@ class Interpreter(_blocks: List<Block>? = null) :
     }
 
     fun clear() {
-        pragmaUpdate()
         input = ""
         waitingForInput = false
         appliedConditions.clear()
@@ -51,6 +53,8 @@ class Interpreter(_blocks: List<Block>? = null) :
         blocks?.clear()
         memory = Memory(null)
         currentLine = -1
+        ioLines = 0
+        pragmaUpdate()
     }
 
     fun runOnce(): Boolean {
@@ -84,8 +88,15 @@ class Interpreter(_blocks: List<Block>? = null) :
     }
 
     fun run() {
-        notifyIfNotDebug()
-        while (currentLine < blocks!!.size - 1) {
+        if (input.isNotEmpty()) {
+            parseInput()
+        }
+
+        if (currentLine == -1) {
+            notifyIfNotDebug()
+        }
+
+        while (currentLine < blocks!!.size - 1 && !waitingForInput) {
             val block = blocks!![++currentLine]
 
             try {
@@ -193,17 +204,16 @@ class Interpreter(_blocks: List<Block>? = null) :
 
     private fun parsePragma(raw: String) {
         val splitted = raw.replace(" ", "").split("=")
-        if (splitted[1] !in listOf("true", "false")) {
+        if (splitted[1] !in listOf("true", "false") && splitted[0] !in listOf("IO_LINES")) {
             TODO()
         }
 
-        val value = splitted[1] == "true"
         val variable = splitted[0]
 
         if (variable !in pragma) {
             TODO()
         }
-        pragma[splitted[0]] = value
+        pragma[splitted[0]] = splitted[1]
     }
 
     private fun notifyIfNotDebug() {
@@ -228,19 +238,27 @@ class Interpreter(_blocks: List<Block>? = null) :
             }
             Instruction.PRINT -> {
                 val rawList = split(block.expression)
-                if (pragma["IO_MESSAGE"] == true) {
+                if (pragma["IO_MESSAGE"] == "true") {
                     output += "I/O: "
                 }
 
                 for (raw in rawList) {
                     output += "${getVisibleValue(parseRawBlock(raw))} "
                 }
+                ++ioLines
                 output += "\n"
+                val lines = pragma["IO_LINES"]
+                if (lines != null) {
+                    if (lines != "inf" && ioLines > lines.toInt()) {
+                        --ioLines
+                        val ind = output.indexOf("\n")
+                        output = output.substring(ind + 1)
+                    }
+                }
                 notifyIfNotDebug()
             }
             Instruction.INPUT -> {
                 waitingForInput = true
-                notifyIfNotDebug()
             }
             Instruction.INIT -> {
                 val rawList = split(block.expression)

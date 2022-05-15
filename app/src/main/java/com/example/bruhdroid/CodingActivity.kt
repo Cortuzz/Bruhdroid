@@ -814,8 +814,12 @@ class CodingActivity : AppCompatActivity(), Observer {
             interpreter.input = inputVal.text.toString()
             interpreter.waitingForInput = false
             dialog.dismiss()
-            GlobalScope.launch {
-                controller.resumeProgram()
+            if (!debugMode) {
+                controller.resumeFull()
+            } else {
+                GlobalScope.launch {
+                    controller.resumeProgram()
+                }
             }
         }
         dialog.show()
@@ -842,6 +846,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         dialog.show()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun update(p0: Observable?, p1: Any?) {
         val lexerErrors = controller.popLexerErrors()
         val runtimeErrors = controller.popRuntimeErrors()
