@@ -10,6 +10,7 @@ import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
@@ -87,7 +88,7 @@ class Controller: Observable() {
     private lateinit var interpreter: Interpreter
     private var notifying = false
 
-    fun runProgram(ip: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>) {
+    fun runProgram(ip: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>, debug: Boolean = false) {
         interpreter = ip
 
         val blocks: MutableList<Block> = mutableListOf()
@@ -100,7 +101,16 @@ class Controller: Observable() {
         try {
             //Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
+            interpreter.debug = debug
 
+            if (!debug) {
+                GlobalScope.launch {
+                    coroutineScope {
+                        resumeFull()
+                    }
+                }
+                return
+            }
             GlobalScope.launch {
                 resumeProgram()
             }
@@ -126,6 +136,12 @@ class Controller: Observable() {
             setChanged()
             notifyObservers()
         }
+    }
+
+    fun resumeFull() {
+        interpreter.run()
+        setChanged()
+        notifyObservers()
     }
 
     fun changeTheme(currentMode: Int) {

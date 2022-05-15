@@ -26,9 +26,7 @@ import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 
 
@@ -93,7 +91,8 @@ class CodingActivity : AppCompatActivity(), Observer {
         binding.launchButton.setOnClickListener {
             debugMode = false
             binding.console.text = ""
-            controller.runProgram(interpreter, viewToBlock, codingViewList)
+
+            controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
         }
         binding.saveButton.setOnClickListener {
             if (filename is String) {
@@ -114,7 +113,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             binding.debugPanel.visibility = View.VISIBLE
             binding.mainPanel.visibility = View.INVISIBLE
 
-            controller.runProgram(interpreter, viewToBlock, codingViewList)
+            controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
         }
 
         binding.nextButton.setOnClickListener {
@@ -215,7 +214,9 @@ class CodingActivity : AppCompatActivity(), Observer {
             Instruction.IF to R.layout.block_if,
             Instruction.SET to R.layout.block_set,
             Instruction.END_WHILE to R.layout.empty_block,
-            Instruction.END to R.layout.condition_block_end
+            Instruction.END to R.layout.condition_block_end,
+            Instruction.ELSE to R.layout.block_else,
+            //Instruction.CONTINUE, Instruction.BREAK Instruction.ELIF to R.layout.block_else, todo
         )
 
         GlobalScope.launch {
@@ -846,40 +847,46 @@ class CodingActivity : AppCompatActivity(), Observer {
         val runtimeErrors = controller.popRuntimeErrors()
         val output = interpreter.output
 
-        runOnUiThread {
-            if (runtimeErrors.isNotEmpty()) {
-                showErrorDialog("ТЫ ЕБЛАН?", runtimeErrors)
-                return@runOnUiThread
-            }
-            if (lexerErrors.isNotEmpty()) {
-                showErrorDialog("LEXER ERROR", lexerErrors)
-                return@runOnUiThread
-            }
+        if (runtimeErrors.isNotEmpty()) {
+            runOnUiThread {showErrorDialog("ТЫ ЕБЛАН?", runtimeErrors)}
+            return
+        }
+        if (lexerErrors.isNotEmpty()) {
+            runOnUiThread {showErrorDialog("LEXER ERROR", lexerErrors)}
+            return
+        }
 
-            if (interpreter.waitingForInput) {
-                showCustomDialog()
-                return@runOnUiThread
-            }
-            if (output.isNotEmpty()) {
-                binding.console.text = output
-            }
+        if (interpreter.waitingForInput) {
+            runOnUiThread {showCustomDialog()}
+            return
+        }
+        if (output.isNotEmpty()) {
+            runOnUiThread {binding.console.text = output}
+        }
 
-            if (interpreter.currentLine + 1 != interpreter.blocks?.size) {
-                val block = interpreter.blocks?.get(interpreter.currentLine + 1)
-                val breakpoint = block?.breakpoint
+        if (!debugMode) {
+            return
+        }
 
-                if (debugMode && (debugType == Debug.NEXT ||
-                            debugType == Debug.BREAKPOINT && breakpoint == true)) {
-                    val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
+        if (interpreter.currentLine + 1 != interpreter.blocks?.size) {
+            val block = interpreter.blocks?.get(interpreter.currentLine + 1)
+            val breakpoint = block?.breakpoint
 
+            if ((debugType == Debug.NEXT ||
+                        debugType == Debug.BREAKPOINT && breakpoint == true)) {
+                val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
+
+                runOnUiThread {
                     button?.setBackgroundResource(when (debugType) {
                         Debug.NEXT -> android.R.drawable.presence_away
                         Debug.BREAKPOINT -> android.R.drawable.presence_busy
                     })
-                    return@runOnUiThread
                 }
+                return
+            }
 
-                GlobalScope.launch {
+            GlobalScope.launch {
+                runOnUiThread {
                     controller.resumeProgram()
                 }
             }

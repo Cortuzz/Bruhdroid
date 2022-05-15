@@ -16,6 +16,7 @@ class Interpreter(_blocks: List<Block>? = null) :
     var waitingForInput = false
     var memory = Memory(null)
     var currentLine = -1
+    var debug = false
 
     private val pragma : MutableMap<String, Boolean> = mutableMapOf(
         "INIT_MESSAGE" to true,
@@ -83,6 +84,7 @@ class Interpreter(_blocks: List<Block>? = null) :
     }
 
     fun run() {
+        notifyIfNotDebug()
         while (currentLine < blocks!!.size - 1) {
             val block = blocks!![++currentLine]
 
@@ -204,6 +206,13 @@ class Interpreter(_blocks: List<Block>? = null) :
         pragma[splitted[0]] = value
     }
 
+    private fun notifyIfNotDebug() {
+        if (!debug) {
+            setChanged()
+            notifyObservers()
+        }
+    }
+
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
             Instruction.PRAGMA -> {
@@ -215,6 +224,7 @@ class Interpreter(_blocks: List<Block>? = null) :
                     parsePragma(raw)
                 }
                 pragmaUpdate()
+                notifyIfNotDebug()
             }
             Instruction.PRINT -> {
                 val rawList = split(block.expression)
@@ -226,9 +236,11 @@ class Interpreter(_blocks: List<Block>? = null) :
                     output += "${getVisibleValue(parseRawBlock(raw))} "
                 }
                 output += "\n"
+                notifyIfNotDebug()
             }
             Instruction.INPUT -> {
                 waitingForInput = true
+                notifyIfNotDebug()
             }
             Instruction.INIT -> {
                 val rawList = split(block.expression)
