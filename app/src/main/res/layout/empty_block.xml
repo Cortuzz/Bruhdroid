@@ -3,8 +3,8 @@
     android:theme="@style/Block"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="200dp"
-    android:layout_height="80dp"
-    android:background="@drawable/btn_rounded_corner"
+    android:layout_height="60dp"
+    android:background="@drawable/ic_block_while"
     >
 
     <TextView
@@ -18,13 +18,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.457" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/breakpoint"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:layout_marginStart="10dp"
         android:background="@android:drawable/presence_invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textView"

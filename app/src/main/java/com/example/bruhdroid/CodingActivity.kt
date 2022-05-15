@@ -86,7 +86,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         controller.addObserver(this)
         interpreter.addObserver(this)
 
-        binding.mainCode.setOnDragListener { v, event ->
+        binding.mainPanel.setOnDragListener { v, event ->
             generateDropAreaForScroll(v, event)
         }
 
@@ -224,7 +224,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         categoryBlocks.add(fourthCategory)
 
         for (view in categoryBlocks[0]) {
-            bindingSheetMenu.blocks.addView(view)
+            val params = ConstraintLayout.LayoutParams(1000, 300)
+            bindingSheetMenu.blocks.addView(view, params)
         }
     }
 
@@ -240,7 +241,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         bindingSheetMenu.blocks.removeAllViews()
 
         for (view in categoryBlocks[position]) {
-            bindingSheetMenu.blocks.addView(view)
+            val params = ConstraintLayout.LayoutParams(1000, 300)
+            bindingSheetMenu.blocks.addView(view, params)
         }
     }
 
@@ -367,13 +369,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             DragEvent.ACTION_DRAG_LOCATION -> {
-                Log.d("hhh", event.y.toString())
-                Log.d("hhh", " gg " + (v.height * 1 / 4).toString())
-                if (event.y < v.height * 1 / 4) {
-                    binding.mainCode.pageScroll(FOCUS_UP)
-                } else if (event.y > v.height * 3 / 4) {
-                    binding.mainCode.pageScroll(FOCUS_DOWN)
-                }
+                binding.mainCode.pageScroll(FOCUS_UP)
                 v.invalidate()
                 true
             }
@@ -641,17 +637,17 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 val ratio = (nestCount.removeLast()) / (connector.height).toFloat()
                 set.setScaleY(connectorId, ratio)
 
-                set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, 0)
+                set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, -15)
                 set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 10)
+                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 40)
             }
 
             if (nestViews.isNotEmpty()) {
-                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height + 10 }
+                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height }
                 set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 200)
             }
 
-            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 10)
+            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
         }
         set.applyTo(container)
     }
@@ -786,7 +782,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             generateBreakpoint(endBlock)
             connector = layoutInflater.inflate(R.layout.block_connector, null)
 
-            binding.container.addView(connector)
+            val params = ConstraintLayout.LayoutParams(5, 300)
+            binding.container.addView(connector, params)
             binding.container.addView(endBlock)
 
             codingViewList.add(endBlock)
@@ -799,7 +796,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
         }
 
-        val params = ConstraintLayout.LayoutParams(1000, 200)
+        val params = ConstraintLayout.LayoutParams(1000, 300)
         binding.container.addView(view, params)
         view.id = View.generateViewId()
 
@@ -812,7 +809,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (prevView != null) {
-            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 10)
+            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
         }
         prevBlock = view
 
@@ -820,7 +817,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             connectorsMap[endBlock] = connector
             set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
             set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
-            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 10)
+            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 40)
 
             set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
             prevBlock = endBlock
