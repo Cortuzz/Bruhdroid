@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.window.layout.WindowMetricsCalculator
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.databinding.BottomsheetBinBinding
+import com.example.bruhdroid.databinding.BottomsheetConsoleBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
@@ -56,11 +57,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
+    private lateinit var bindingSheetConsole: BottomsheetConsoleBinding
     private lateinit var categoryRecycler: RecyclerView
     private lateinit var categoryAdapter: CategoryAdapter
 
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
+    private lateinit var bottomSheetConsole: BottomSheetDialog
 
     private val interpreter = Interpreter()
     private val controller = Controller()
@@ -73,6 +76,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
         setBindingSheetBlocks()
+
+        bindingSheetConsole = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_console, null, false)
+        bottomSheetConsole = BottomSheetDialog(this@CodingActivity)
+        bottomSheetConsole.setContentView(bindingSheetConsole.root)
 
         bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
         bottomSheetBin = BottomSheetDialog(this@CodingActivity)
@@ -96,16 +103,19 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
         }
+        binding.consoleButton.setOnClickListener {
+            bottomSheetConsole.show()
+        }
         binding.launchButton.setOnClickListener {
             debugMode = false
-            binding.console.text = ""
+            bindingSheetConsole.console.text = ""
             controller.runProgram(interpreter, viewToBlock, codingViewList)
         }
 
         binding.debugButton.setOnClickListener {
             debugMode = true
             debugType = Debug.BREAKPOINT
-            binding.console.text = ""
+            bindingSheetConsole.console.text = ""
             binding.debugPanel.visibility = View.VISIBLE
             binding.mainPanel.visibility = View.INVISIBLE
 
@@ -639,12 +649,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
                 set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, -15)
                 set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 40)
+                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 50)
             }
 
             if (nestViews.isNotEmpty()) {
                 nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height }
-                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 200)
+                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 50)
             }
 
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
@@ -782,8 +792,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             generateBreakpoint(endBlock)
             connector = layoutInflater.inflate(R.layout.block_connector, null)
 
-            val params = ConstraintLayout.LayoutParams(5, 300)
-            binding.container.addView(connector, params)
+            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
             binding.container.addView(endBlock)
 
             codingViewList.add(endBlock)
@@ -796,8 +805,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
         }
 
-        val params = ConstraintLayout.LayoutParams(1000, 300)
-        binding.container.addView(view, params)
+        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
         view.id = View.generateViewId()
 
         val set = ConstraintSet()
@@ -886,7 +894,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 return@runOnUiThread
             }
             if (output.isNotEmpty()) {
-                binding.console.text = output
+                bindingSheetConsole.console.text = output
             }
 
             if (interpreter.currentLine + 1 != interpreter.blocks?.size) {

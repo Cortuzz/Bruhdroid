@@ -3,7 +3,7 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
-        <item name="fontFamily">@font/fira_code</item>
+        <item name="fontFamily">@font/sf_compact</item>
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
     </style>
 
@@ -16,7 +16,7 @@
     </style>
 
     <style name="Expression.Light">
-        <item name="fontFamily">@font/fira_code</item>
+        <item name="fontFamily">@font/sf_compact</item>
         <item name="fontWeight">300</item>
     </style>
 
