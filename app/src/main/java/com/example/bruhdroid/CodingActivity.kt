@@ -94,7 +94,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         interpreter.addObserver(this)
 
         binding.mainPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event)
+            generateDropAreaForMainPanel(v, event)
+        }
+        binding.buttonsPanel.setOnDragListener { v, event ->
+            generateDropAreaForbuttonsPanel(v, event)
         }
 
         binding.menuButton.setOnClickListener {
@@ -366,7 +369,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         super.onBackPressed()
     }
 
-    private fun generateDropAreaForScroll(v: View, event: DragEvent): Boolean {
+    private fun generateDropAreaForMainPanel(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 v.invalidate()
@@ -380,6 +383,45 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             DragEvent.ACTION_DRAG_LOCATION -> {
                 binding.mainCode.pageScroll(FOCUS_UP)
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_EXITED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DROP -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENDED -> {
+                v.invalidate()
+                true
+            }
+
+            else -> {
+                false
+            }
+        }
+    }
+
+    private fun generateDropAreaForbuttonsPanel(v: View, event: DragEvent): Boolean {
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                binding.mainCode.pageScroll(FOCUS_DOWN)
                 v.invalidate()
                 true
             }
