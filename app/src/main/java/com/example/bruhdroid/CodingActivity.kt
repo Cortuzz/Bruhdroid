@@ -752,7 +752,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 codingViewList[index].visibility = View.INVISIBLE
                 val block = viewToBlock[codingViewList[index]]
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+                    if (count != 1) {
+                        connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+                    }
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
@@ -817,7 +819,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         codingViewList.add(view)
 
         var endBlock: View? = null
-        var connector: View? = null
+        var nestedConnector: View? = null
+        var connector = layoutInflater.inflate(R.layout.block_connector, null)
+        connector.id = View.generateViewId()
 
         if (connect) {
             val endInstruction: Instruction
@@ -832,23 +836,33 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             generateBreakpoint(endBlock)
-            connector = layoutInflater.inflate(R.layout.block_connector, null)
-
-            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-            binding.container.addView(endBlock)
+            nestedConnector = layoutInflater.inflate(R.layout.block_connector, null)
 
             codingViewList.add(endBlock)
             viewToBlock[endBlock] = Block(endInstruction, "")
             endBlock.id = View.generateViewId()
-            connector.id = View.generateViewId()
+            nestedConnector.id = View.generateViewId()
 
             endBlock.setOnDragListener { v, event ->
                 generateDropArea(v, event)
             }
         }
 
+        if (prevView != null) {
+            if (viewToBlock[prevView]!!.instruction in connectingInstructions) {
+                binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 250))
+            } else {
+                binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+            }
+        }
+
         binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
         view.id = View.generateViewId()
+
+        if (nestedConnector != null) {
+            binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
+            binding.container.addView(endBlock)
+        }
 
         val set = ConstraintSet()
         set.clone(binding.container)
@@ -859,19 +873,31 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (prevView != null) {
+            connectorsMap[view] = connector
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
+
+            if (viewToBlock[prevView]!!.instruction in connectingInstructions) {
+                set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 30)
+            } else {
+                set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 0)
+            }
+
+            set.connect(connector.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
+            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
         }
+
         prevBlock = view
 
-        if (endBlock != null && connector != null) {
-            connectorsMap[endBlock] = connector
-            set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
-            set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
-            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 40)
+        if (nestedConnector != null) {
+            connectorsMap[endBlock!!] = nestedConnector
+            set.connect(nestedConnector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
+            set.connect(nestedConnector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
+            set.connect(nestedConnector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
 
             set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
             prevBlock = endBlock
         }
+
         set.applyTo(binding.container)
         viewToBlock[view] = Block(instruction)
     }
@@ -936,6 +962,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 return@runOnUiThread
             }
             if (output.isNotEmpty()) {
+                bottomSheetConsole.show()
                 bindingSheetConsole.console.text = output
             }
 
