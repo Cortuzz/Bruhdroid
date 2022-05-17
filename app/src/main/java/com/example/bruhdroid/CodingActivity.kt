@@ -153,28 +153,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             interpreter.clear()
         }
 
-//        bindingSheetMenu.blockPrint.setOnClickListener {
-//            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheetMenu.expression1.text.toString())
-//        }
-//        bindingSheetMenu.blockInit.setOnClickListener {
-//            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheetMenu.expression3.text.toString())
-//        }
-//        bindingSheetMenu.blockInput.setOnClickListener {
-//            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheetMenu.expression2.text.toString())
-//        }
-//        bindingSheetMenu.blockWhile.setOnClickListener {
-//            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheetMenu.expression4.text.toString())
-//        }
-//        bindingSheetMenu.blockIf.setOnClickListener {
-//            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheetMenu.expression5.text.toString())
-//        }
-
         binding.binButton.setOnDragListener { v, event ->
             generateDropAreaForBin(v, event)
         }
-//        bindingSheetMenu.blockSet.setOnClickListener {
-//            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheetMenu.expression6.text.toString())
-//        }
     }
 
     private fun setBindingSheetBlocks() {
@@ -312,34 +293,39 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 block as Block
                 val instr = block.instruction
                 val view = layoutInflater.inflate(layoutMap[instr]!!, null)
+                view.id = View.generateViewId()
                 generateBreakpoint(view)
                 view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
-
-                if (instr in connectingInstructions) {
-                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
-                    connector.id = View.generateViewId()
-                    connectorsMap[view] = connector
-                    runOnUiThread {
-                        binding.container.addView(connector)
-                    }
-                } else {
-                    generateDragArea(view)
-                }
-                view.setOnDragListener { v, event ->
-                    generateDropArea(v, event)
-                }
-
-                view.id = View.generateViewId()
 
                 codingViewList.add(view)
                 prevBlock = view
                 viewToBlock[view] = Block(instr, "")
-            }
-            runOnUiThread {
-                for (view in codingViewList) {
-                    binding.container.addView(view)
+
+                if (codingViewList.size != 1) {
+                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
+                    connector.id = View.generateViewId()
+                    connectorsMap[view] = connector
+                    runOnUiThread {
+                        binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+                    }
+                }
+
+                if (viewToBlock[view]!!.instruction !in connectingInstructions){
+                    generateDragArea(view)
+                    runOnUiThread {
+                        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+                    }
+                } else {
+                    runOnUiThread {
+                        binding.container.addView(view)
+                    }
+                }
+
+                view.setOnDragListener { v, event ->
+                    generateDropArea(v, event)
                 }
             }
+
             delay(100)
 
             runOnUiThread {
@@ -871,7 +857,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
             prevView.bringToFront()
         }
-
         binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
 
         if (nestedConnector != null) {
