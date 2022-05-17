@@ -19,7 +19,7 @@ class Interpreter(_blocks: List<Block>? = null) :
     var debug = false
     var ioLines = 0
 
-    private val pragma : MutableMap<String, String> = mutableMapOf(
+    private var pragma : MutableMap<String, String> = mutableMapOf(
         "INIT_MESSAGE" to "true",
         "IO_MESSAGE" to "true",
         "IO_LINES" to "10"
@@ -32,7 +32,15 @@ class Interpreter(_blocks: List<Block>? = null) :
         blocks = _blocks.toMutableList()
     }
 
-    fun pragmaUpdate() {
+    private fun pragmaClear() {
+        pragma = mutableMapOf(
+        "INIT_MESSAGE" to "true",
+        "IO_MESSAGE" to "true",
+        "IO_LINES" to "10"
+        )
+    }
+
+    private fun pragmaUpdate() {
         output = if (pragma["INIT_MESSAGE"] == "true") {
             ioLines = 5
             "⢸⣿⡟⠛⢿⣷⠀⢸⣿⡟⠛⢿⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡇⠀⢸⣿⡇⠀\n" +
@@ -54,6 +62,7 @@ class Interpreter(_blocks: List<Block>? = null) :
         memory = Memory(null)
         currentLine = -1
         ioLines = 0
+        pragmaClear()
         pragmaUpdate()
     }
 
