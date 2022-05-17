@@ -123,7 +123,8 @@ class Valuable(varValue: Any, var type: Type) :
     }
 
     operator fun compareTo(operand: Valuable): Int {
-        val dif = value.toFloat() - operand.value.toFloat()
+        val dif = try{value.toFloat() - operand.value.toFloat()}
+        catch (e: Exception) {throw TypeError("Expected INT or FLOAT but found $type and ${operand.type}")}
         return if (dif < 0) {
             -1
         } else if (dif > 0) {
@@ -161,7 +162,8 @@ class Valuable(varValue: Any, var type: Type) :
             Type.INT -> valuable.value.toInt() != 0
             Type.FLOAT -> valuable.value.toFloat() != 0f
             Type.STRING -> valuable.value != ""
-            else -> throw TypeError("Bad type")
+            Type.LIST -> valuable.array.isNotEmpty()
+            Type.UNDEFINED -> false
         }
     }
 
@@ -182,7 +184,7 @@ class Valuable(varValue: Any, var type: Type) :
                     throw TypeError("Expected number-containing string but ${valuable.value} was found")
                 }
             }
-            else -> throw TypeError("Bad type")
+            else -> throw TypeError("Expected convertible to FLOAT type but ${valuable.type} was found")
         }
     }
 
@@ -203,7 +205,7 @@ class Valuable(varValue: Any, var type: Type) :
                     throw TypeError("Expected number-containing string but ${valuable.value} was found")
                 }
             }
-            else -> throw TypeError("Bad type")
+            else -> throw TypeError("Expected convertible to INT type but ${valuable.type} was found")
         }
     }
 
