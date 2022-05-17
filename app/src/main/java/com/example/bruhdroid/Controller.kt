@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.Lexer
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.blocks.*
@@ -33,7 +32,6 @@ class Controller: Observable() {
         }
 
         try {
-            //Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
 
             GlobalScope.launch {

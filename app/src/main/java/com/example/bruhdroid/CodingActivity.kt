@@ -94,10 +94,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         interpreter.addObserver(this)
 
         binding.mainPanel.setOnDragListener { v, event ->
-            generateDropAreaForMainPanel(v, event)
+            generateDropAreaForScroll(v, event,-20)
         }
         binding.buttonsPanel.setOnDragListener { v, event ->
-            generateDropAreaForbuttonsPanel(v, event)
+            generateDropAreaForScroll(v, event,20)
         }
 
         binding.menuButton.setOnClickListener {
@@ -355,74 +355,15 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         super.onBackPressed()
     }
 
-    private fun generateDropAreaForMainPanel(v: View, event: DragEvent): Boolean {
+    private fun generateDropAreaForScroll(v: View, event: DragEvent,speed: Int): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 v.invalidate()
                 true
             }
 
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
             DragEvent.ACTION_DRAG_LOCATION -> {
-                binding.mainCode.pageScroll(FOCUS_UP)
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DROP -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENDED -> {
-                v.invalidate()
-                true
-            }
-
-            else -> {
-                false
-            }
-        }
-    }
-
-    private fun generateDropAreaForbuttonsPanel(v: View, event: DragEvent): Boolean {
-        return when (event.action) {
-            DragEvent.ACTION_DRAG_STARTED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                binding.mainCode.pageScroll(FOCUS_DOWN)
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DROP -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENDED -> {
+                binding.mainCode.scrollBy(0,speed)
                 v.invalidate()
                 true
             }
@@ -437,21 +378,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun generateDropAreaForBin(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
                 true
             }
 
@@ -555,21 +481,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 true
             }
 
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
-                true
-            }
-
             DragEvent.ACTION_DROP -> {
                 if (currentDrag === receiverView) {
                     return false
@@ -592,11 +503,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     reBuildBlocks(newIndex, currentDrag)
                 }
 
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENDED -> {
                 v.invalidate()
                 true
             }
