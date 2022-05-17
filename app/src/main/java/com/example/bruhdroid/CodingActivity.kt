@@ -345,7 +345,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
             }
 
-            delay(100)
+            delay(500)
 
             runOnUiThread {
                 buildConstraints(binding.container, codingViewList)
