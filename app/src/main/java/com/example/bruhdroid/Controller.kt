@@ -99,7 +99,6 @@ class Controller: Observable() {
         }
 
         try {
-            //Lexer.checkBlocks(blocks)
             interpreter.initBlocks(blocks)
             interpreter.debug = debug
 

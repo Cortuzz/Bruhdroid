@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -15,22 +14,33 @@ import android.view.View.FOCUS_UP
 import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.window.layout.WindowMetricsCalculator
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.databinding.BottomsheetBinBinding
+import com.example.bruhdroid.databinding.BottomsheetConsoleBinding
 import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import java.util.*
 
 
-class CodingActivity : AppCompatActivity(), Observer {
+class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
     private enum class Debug {
         NEXT, BREAKPOINT
     }
@@ -39,6 +49,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private var codingViewList = LinkedList<View>()
     private var binViewList = LinkedList<View>()
     private var connectorsMap = mutableMapOf<View, View>()
+    private var categoryBlocks = LinkedList<LinkedList<View>>()
     private var prevBlock: View? = null
     private var prevBlockInBin: View? = null
     private var debugMode = false
@@ -49,21 +60,29 @@ class CodingActivity : AppCompatActivity(), Observer {
     private lateinit var binding: ActivityCodingBinding
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
+    private lateinit var bindingSheetConsole: BottomsheetConsoleBinding
+    private lateinit var categoryRecycler: RecyclerView
+    private lateinit var categoryAdapter: CategoryAdapter
 
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
+    private lateinit var bottomSheetConsole: BottomSheetDialog
 
     private val interpreter = Interpreter()
     private val controller = Controller()
     private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE)
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
-        bindingSheetMenu = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
-        bottomSheetMenu = BottomSheetDialog(this@CodingActivity)
-        bottomSheetMenu.setContentView(bindingSheetMenu.root)
+
+        setBindingSheetBlocks()
+
+        bindingSheetConsole = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_console, null, false)
+        bottomSheetConsole = BottomSheetDialog(this@CodingActivity)
+        bottomSheetConsole.setContentView(bindingSheetConsole.root)
 
         bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
         bottomSheetBin = BottomSheetDialog(this@CodingActivity)
@@ -78,8 +97,11 @@ class CodingActivity : AppCompatActivity(), Observer {
         controller.addObserver(this)
         interpreter.addObserver(this)
 
-        binding.mainCode.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event)
+        binding.mainPanel.setOnDragListener { v, event ->
+            generateDropAreaForScroll(v, event,-20)
+        }
+        binding.buttonsPanel.setOnDragListener { v, event ->
+            generateDropAreaForScroll(v, event,20)
         }
 
         binding.menuButton.setOnClickListener {
@@ -88,9 +110,12 @@ class CodingActivity : AppCompatActivity(), Observer {
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
         }
+        binding.consoleButton.setOnClickListener {
+            bottomSheetConsole.show()
+        }
         binding.launchButton.setOnClickListener {
             debugMode = false
-            binding.console.text = ""
+            bindingSheetConsole.console.text = ""
 
             controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
         }
@@ -109,7 +134,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         binding.debugButton.setOnClickListener {
             debugMode = true
             debugType = Debug.BREAKPOINT
-            binding.console.text = ""
+            bindingSheetConsole.console.text = ""
             binding.debugPanel.visibility = View.VISIBLE
             binding.mainPanel.visibility = View.INVISIBLE
 
@@ -144,27 +169,90 @@ class CodingActivity : AppCompatActivity(), Observer {
             interpreter.clear()
         }
 
-        bindingSheetMenu.blockPrint.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false, bindingSheetMenu.expression1.text.toString())
-        }
-        bindingSheetMenu.blockInit.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false, bindingSheetMenu.expression3.text.toString())
-        }
-        bindingSheetMenu.blockInput.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false, bindingSheetMenu.expression2.text.toString())
-        }
-        bindingSheetMenu.blockWhile.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true, bindingSheetMenu.expression4.text.toString())
-        }
-        bindingSheetMenu.blockIf.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true, bindingSheetMenu.expression5.text.toString())
-        }
-
         binding.binButton.setOnDragListener { v, event ->
             generateDropAreaForBin(v, event)
         }
-        bindingSheetMenu.blockSet.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false, bindingSheetMenu.expression6.text.toString())
+    }
+
+    private fun setBindingSheetBlocks() {
+        bindingSheetMenu =
+            DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
+        bottomSheetMenu = BottomSheetDialog(this@CodingActivity)
+        bottomSheetMenu.setContentView(bindingSheetMenu.root)
+
+        val categoryList = LinkedList<Category>()
+
+        categoryList.add(Category(0, "Variables | "))
+        categoryList.add(Category(1, "Standard io | "))
+        categoryList.add(Category(2, "Cycles | "))
+        categoryList.add(Category(3, "Conditions"))
+
+        categoryRecycler(categoryList)
+
+
+        val blockInit = layoutInflater.inflate(R.layout.block_init, null)
+        val blockSet = layoutInflater.inflate(R.layout.block_set, null)
+        val blockInput = layoutInflater.inflate(R.layout.block_input, null)
+        val blockPrint = layoutInflater.inflate(R.layout.block_print, null)
+        val blockWhile = layoutInflater.inflate(R.layout.block_while, null)
+        val blockIf = layoutInflater.inflate(R.layout.block_if, null)
+
+        blockInit.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false)
+        }
+        blockSet.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
+        }
+        blockInput.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false)
+        }
+        blockPrint.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false)
+        }
+        blockWhile.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
+        }
+        blockIf.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
+        }
+
+        val firstCategory = LinkedList<View>()
+        val secondCategory = LinkedList<View>()
+        val thirdCategory = LinkedList<View>()
+        val fourthCategory = LinkedList<View>()
+
+        firstCategory.add(blockInit)
+        firstCategory.add(blockSet)
+        secondCategory.add(blockInput)
+        secondCategory.add(blockPrint)
+        thirdCategory.add(blockWhile)
+        fourthCategory.add(blockIf)
+
+        categoryBlocks.add(firstCategory)
+        categoryBlocks.add(secondCategory)
+        categoryBlocks.add(thirdCategory)
+        categoryBlocks.add(fourthCategory)
+
+        for (view in categoryBlocks[0]) {
+            val params = ConstraintLayout.LayoutParams(1000, 300)
+            bindingSheetMenu.blocks.addView(view, params)
+        }
+    }
+
+    private fun categoryRecycler(categoryList: LinkedList<Category>) {
+        val layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
+        categoryRecycler = bindingSheetMenu.categoryRecycler
+        categoryRecycler.layoutManager = layoutManager
+        categoryAdapter = CategoryAdapter(this, categoryList, this)
+        categoryRecycler.adapter = categoryAdapter
+    }
+
+    override fun onCategoryClick(position: Int) {
+        bindingSheetMenu.blocks.removeAllViews()
+
+        for (view in categoryBlocks[position]) {
+            val params = ConstraintLayout.LayoutParams(1000, 300)
+            bindingSheetMenu.blocks.addView(view, params)
         }
     }
 
@@ -203,7 +291,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
             Instruction.PRAGMA to R.layout.pragma_block,
@@ -224,34 +312,39 @@ class CodingActivity : AppCompatActivity(), Observer {
                 block as Block
                 val instr = block.instruction
                 val view = layoutInflater.inflate(layoutMap[instr]!!, null)
+                view.id = View.generateViewId()
                 generateBreakpoint(view)
                 view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
-
-                if (instr in connectingInstructions) {
-                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
-                    connector.id = View.generateViewId()
-                    connectorsMap[view] = connector
-                    runOnUiThread {
-                        binding.container.addView(connector)
-                    }
-                } else {
-                    generateDragArea(view)
-                }
-                view.setOnDragListener { v, event ->
-                    generateDropArea(v, event)
-                }
-
-                view.id = View.generateViewId()
 
                 codingViewList.add(view)
                 prevBlock = view
                 viewToBlock[view] = Block(instr, "")
-            }
-            runOnUiThread {
-                for (view in codingViewList) {
-                    binding.container.addView(view)
+
+                if (codingViewList.size != 1) {
+                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
+                    connector.id = View.generateViewId()
+                    connectorsMap[view] = connector
+                    runOnUiThread {
+                        binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+                    }
+                }
+
+                if (viewToBlock[view]!!.instruction !in connectingInstructions){
+                    generateDragArea(view)
+                    runOnUiThread {
+                        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+                    }
+                } else {
+                    runOnUiThread {
+                        binding.container.addView(view)
+                    }
+                }
+
+                view.setOnDragListener { v, event ->
+                    generateDropArea(v, event)
                 }
             }
+
             delay(100)
 
             runOnUiThread {
@@ -281,41 +374,15 @@ class CodingActivity : AppCompatActivity(), Observer {
         super.onBackPressed()
     }
 
-    private fun generateDropAreaForScroll(v: View, event: DragEvent): Boolean {
+    private fun generateDropAreaForScroll(v: View, event: DragEvent,speed: Int): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 v.invalidate()
                 true
             }
 
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
             DragEvent.ACTION_DRAG_LOCATION -> {
-                Log.d("hhh", event.y.toString())
-                Log.d("hhh", " gg " + (v.height * 1 / 4).toString())
-                if (event.y < v.height * 1 / 4) {
-                    binding.mainCode.pageScroll(FOCUS_UP)
-                } else if (event.y > v.height * 3 / 4) {
-                    binding.mainCode.pageScroll(FOCUS_DOWN)
-                }
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DROP -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENDED -> {
+                binding.mainCode.scrollBy(0,speed)
                 v.invalidate()
                 true
             }
@@ -326,24 +393,10 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun generateDropAreaForBin(v: View, event: DragEvent): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
                 true
             }
 
@@ -381,6 +434,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun addBlocksToBin(view: View, isConnected: Boolean = false) {
         val addedBlocks = removeBlocksFromParent(view, isConnected)
 
@@ -446,21 +500,6 @@ class CodingActivity : AppCompatActivity(), Observer {
                 true
             }
 
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_EXITED -> {
-                v.invalidate()
-                true
-            }
-
             DragEvent.ACTION_DROP -> {
                 if (currentDrag === receiverView) {
                     return false
@@ -483,11 +522,6 @@ class CodingActivity : AppCompatActivity(), Observer {
                     reBuildBlocks(newIndex, currentDrag)
                 }
 
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_ENDED -> {
                 v.invalidate()
                 true
             }
@@ -555,7 +589,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             if (viewToBlock[prevView]!!.instruction in startInstructions) {
                 nestViews.add(prevView)
-                nestCount.add(prevView.height / 2)
+                nestCount.add(prevView.height)
             }
 
             if (viewToBlock[view]!!.instruction in endInstructions) {
@@ -566,21 +600,27 @@ class CodingActivity : AppCompatActivity(), Observer {
                 val ratio = (nestCount.removeLast()) / (connector.height).toFloat()
                 set.setScaleY(connectorId, ratio)
 
-                set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, 0)
+                nest.bringToFront()
+                set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, -15)
                 set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 10)
+                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 80)
+            } else {
+                prevView.bringToFront()
+                set.connect(connectorsMap[view]!!.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
+                set.connect(connectorsMap[view]!!.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
+                set.connect(connectorsMap[view]!!.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
             }
 
             if (nestViews.isNotEmpty()) {
-                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height + 10 }
-                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 200)
+                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height -15 }
+                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 80)
             }
-
-            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 10)
+            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
         }
         set.applyTo(container)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
         GlobalScope.launch {
             val set = ConstraintSet()
@@ -589,9 +629,18 @@ class CodingActivity : AppCompatActivity(), Observer {
             for (i in 0 until codingViewList.size) {
                 clearConstraints(set, codingViewList[i])
             }
+
             if (untilEnd) {
                 replaceUntilEnd(codingViewList.indexOf(drag), index)
             } else {
+                if (codingViewList.indexOf(drag) == 0 || index == 0) {
+                    val connector = when {
+                        codingViewList.indexOf(drag) == 0 -> connectorsMap[codingViewList[1]]
+                        index == 0 -> connectorsMap[drag]
+                        else -> {}
+                    }
+                    connectorsMap[codingViewList[0]] = connector as View
+                }
                 codingViewList.remove(drag)
                 when {
                     index == -1 -> {}
@@ -603,6 +652,8 @@ class CodingActivity : AppCompatActivity(), Observer {
                     }
                 }
             }
+
+            connectorsMap.remove(codingViewList[0])
 
             runOnUiThread {
                 set.applyTo(binding.container)
@@ -627,14 +678,16 @@ class CodingActivity : AppCompatActivity(), Observer {
             while (count != 0) {
                 codingViewList[index].visibility = View.INVISIBLE
                 val block = viewToBlock[codingViewList[index]]
+                connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
                 }
                 index++
             }
+            connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
         }
     }
 
@@ -648,8 +701,9 @@ class CodingActivity : AppCompatActivity(), Observer {
             while (count != 0) {
                 codingViewList[index].visibility = View.VISIBLE
                 val block = viewToBlock[codingViewList[index]]
+                connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
+
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
@@ -659,7 +713,6 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun generateDragArea(view: View) {
         view.setOnLongClickListener {
             currentDrag = it
@@ -687,20 +740,20 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("InflateParams")
-    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false, text: String) {
+    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
-        generateBreakpoint(view)
-        view.findViewById<EditText>(R.id.expression)?.setText(text)
-        codingViewList.add(view)
-
         var endBlock: View? = null
-        var connector: View? = null
+        var nestedConnector: View? = null
+        var connector = layoutInflater.inflate(R.layout.block_connector, null)
+        view.id = View.generateViewId()
+        connector.id = View.generateViewId()
+
+        generateBreakpoint(view)
+        codingViewList.add(view)
 
         if (connect) {
             val endInstruction: Instruction
-            connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             if (instruction == Instruction.WHILE) {
                 endBlock = layoutInflater.inflate(R.layout.empty_block, null)
@@ -708,7 +761,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             } else {
                 endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
-
+                /*
                 val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
                 val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
                 addElse.setOnClickListener {
@@ -740,27 +793,34 @@ class CodingActivity : AppCompatActivity(), Observer {
                             buildConstraints(binding.container, codingViewList)
                         }
                     }
-                }
+                }*/
                 endInstruction = Instruction.END
             }
 
             generateBreakpoint(endBlock)
-
-            binding.container.addView(connector)
-            binding.container.addView(endBlock)
+            nestedConnector = layoutInflater.inflate(R.layout.block_connector, null)
 
             codingViewList.add(endBlock)
             viewToBlock[endBlock] = Block(endInstruction, "")
             endBlock.id = View.generateViewId()
-            connector.id = View.generateViewId()
+            nestedConnector.id = View.generateViewId()
 
             endBlock.setOnDragListener { v, event ->
                 generateDropArea(v, event)
             }
         }
 
-        binding.container.addView(view)
-        view.id = View.generateViewId()
+        if (prevView != null) {
+            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+            prevView.bringToFront()
+        }
+        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+
+        if (nestedConnector != null) {
+            binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
+            view.bringToFront()
+            binding.container.addView(endBlock)
+        }
 
         val set = ConstraintSet()
         set.clone(binding.container)
@@ -771,21 +831,28 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
 
         if (prevView != null) {
-            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 10)
+            connectorsMap[view] = connector
+            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
+
+            set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 0)
+            set.connect(connector.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
+            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
         }
+
         prevBlock = view
 
-        if (endBlock != null && connector != null) {
-            connectorsMap[endBlock] = connector
-            set.connect(connector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
-            set.connect(connector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
-            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 10)
+        if (nestedConnector != null) {
+            connectorsMap[endBlock!!] = nestedConnector
+            set.connect(nestedConnector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
+            set.connect(nestedConnector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
+            set.connect(nestedConnector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
 
             set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
             prevBlock = endBlock
         }
+
         set.applyTo(binding.container)
-        viewToBlock[view] = Block(instruction, text)
+        viewToBlock[view] = Block(instruction)
     }
 
     private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {
@@ -802,6 +869,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         builder.show()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun showCustomDialog() {
         val dialog = Dialog(this)
         dialog.setCancelable(true)
@@ -853,7 +921,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         val output = interpreter.output
 
         if (runtimeErrors.isNotEmpty()) {
-            runOnUiThread {showErrorDialog("ТЫ ЕБЛАН?", runtimeErrors)}
+            runOnUiThread {showErrorDialog("RUNTIME ERROR", runtimeErrors)}
             return
         }
         if (lexerErrors.isNotEmpty()) {
@@ -866,7 +934,10 @@ class CodingActivity : AppCompatActivity(), Observer {
             return
         }
         if (output.isNotEmpty()) {
-            runOnUiThread {binding.console.text = output}
+            runOnUiThread {
+                bottomSheetConsole.show()
+                bindingSheetConsole.console.text = output
+            }
         }
 
         if (!debugMode) {

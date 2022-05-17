@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -56,7 +57,6 @@
                 app:srcCompat="@android:drawable/ic_menu_save" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -121,85 +121,141 @@
                 app:layout_constraintVertical_bias="0.025" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <ScrollView
+
+        <com.otaliastudios.zoom.ZoomLayout
             android:id="@+id/main_code"
-            android:layout_width="414dp"
-            android:layout_height="424dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:contentDescription="@string/block"
             android:orientation="vertical"
             android:scrollbars="none"
+            app:minZoom="0.1"
+            app:hasClickableChildren="true"
+            app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mainPanel">
-
-            <HorizontalScrollView
-                android:id="@+id/main_code1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/block"
-                android:orientation="vertical"
-                android:scrollbars="none"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/mainPanel"
+            app:zoomEnabled="true">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_gravity="top|start"
                     android:id="@+id/container"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:showDividers="middle">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </HorizontalScrollView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </ScrollView>
+        </com.otaliastudios.zoom.ZoomLayout>
 
-        <ScrollView
-            android:id="@+id/scrollView2"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:background="#474343"
-            android:contentDescription="@string/console"
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.89" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/buttonsPanel"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/main_code">
+            app:layout_constraintTop_toBottomOf="@+id/guideline">
+
+            <Button
+                android:id="@+id/menuButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/ic_plus"
+                app:layout_constraintBottom_toTopOf="@id/addBlock"
+                app:layout_constraintEnd_toStartOf="@id/consoleButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/addBlock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add block"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/menuButton"
+                app:layout_constraintStart_toStartOf="@id/menuButton"
+                app:layout_constraintTop_toBottomOf="@+id/menuButton" />
+
+            <Button
+                android:id="@+id/consoleButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="70dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/ic_console"
+                app:layout_constraintBottom_toTopOf="@id/console"
+                app:layout_constraintEnd_toStartOf="@id/saveButton"
+                app:layout_constraintStart_toEndOf="@id/menuButton"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/console"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#EF9A9A"
-                android:textSize="18.8sp" />
-        </ScrollView>
+                android:text="Console"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/consoleButton"
+                app:layout_constraintStart_toStartOf="@id/consoleButton"
+                app:layout_constraintTop_toBottomOf="@+id/consoleButton" />
 
-        <ImageButton
-            android:id="@+id/menuButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="56dp"
-            android:layout_marginTop="14dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scrollView2"
-            app:layout_constraintVertical_bias="0.111"
-            app:srcCompat="@drawable/ic_menu" />
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="70dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/ic_save"
+                app:layout_constraintBottom_toTopOf="@id/saveCode"
+                app:layout_constraintEnd_toStartOf="@id/binButton"
+                app:layout_constraintStart_toEndOf="@+id/consoleButton"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:id="@+id/binButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="56dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scrollView2"
-            app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@drawable/ic_bin" />
+            <TextView
+                android:id="@+id/saveCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save code"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/saveButton"
+                app:layout_constraintStart_toStartOf="@+id/saveButton"
+                app:layout_constraintTop_toBottomOf="@+id/saveButton" />
+
+            <Button
+                android:id="@+id/binButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="70dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="30dp"
+                android:background="@drawable/ic_bin"
+                app:layout_constraintBottom_toTopOf="@id/removeBlock"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/saveButton"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/removeBlock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remove block"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/binButton"
+                app:layout_constraintStart_toStartOf="@+id/binButton"
+                app:layout_constraintTop_toBottomOf="@+id/binButton" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
