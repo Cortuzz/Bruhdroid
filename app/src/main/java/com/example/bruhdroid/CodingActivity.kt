@@ -689,16 +689,21 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 val ratio = (nestCount.removeLast()) / (connector.height).toFloat()
                 set.setScaleY(connectorId, ratio)
 
+                nest.bringToFront()
                 set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, -15)
                 set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 50)
+                set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 80)
+            } else {
+                prevView.bringToFront()
+                set.connect(connectorsMap[view]!!.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
+                set.connect(connectorsMap[view]!!.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
+                set.connect(connectorsMap[view]!!.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
             }
 
             if (nestViews.isNotEmpty()) {
-                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height }
-                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 50)
+                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height -15 }
+                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 80)
             }
-
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
         }
         set.applyTo(container)
@@ -713,10 +718,20 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             for (i in 0 until codingViewList.size) {
                 clearConstraints(set, codingViewList[i])
             }
+
             if (untilEnd) {
                 replaceUntilEnd(codingViewList.indexOf(drag), index)
             } else {
+                if (codingViewList.indexOf(drag) == 0 || index == 0) {
+                    val connector = when {
+                        codingViewList.indexOf(drag) == 0 -> connectorsMap[codingViewList[1]]
+                        index == 0 -> connectorsMap[drag]
+                        else -> {}
+                    }
+                    connectorsMap[codingViewList[0]] = connector as View
+                }
                 codingViewList.remove(drag)
+
                 when {
                     index == -1 -> {}
                     index > codingViewList.lastIndex -> {
@@ -727,6 +742,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     }
                 }
             }
+
+            connectorsMap.remove(codingViewList[0])
 
             runOnUiThread {
                 set.applyTo(binding.container)
@@ -751,16 +768,16 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             while (count != 0) {
                 codingViewList[index].visibility = View.INVISIBLE
                 val block = viewToBlock[codingViewList[index]]
+                connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    if (count != 1) {
-                        connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
-                    }
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
                 }
                 index++
             }
+            connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
         }
     }
 
@@ -774,8 +791,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             while (count != 0) {
                 codingViewList[index].visibility = View.VISIBLE
                 val block = viewToBlock[codingViewList[index]]
+                connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
+
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
@@ -815,13 +833,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
-        generateBreakpoint(view)
-        codingViewList.add(view)
-
         var endBlock: View? = null
         var nestedConnector: View? = null
         var connector = layoutInflater.inflate(R.layout.block_connector, null)
+        view.id = View.generateViewId()
         connector.id = View.generateViewId()
+
+        generateBreakpoint(view)
+        codingViewList.add(view)
 
         if (connect) {
             val endInstruction: Instruction
@@ -849,18 +868,15 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (prevView != null) {
-            if (viewToBlock[prevView]!!.instruction in connectingInstructions) {
-                binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 250))
-            } else {
-                binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-            }
+            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+            prevView.bringToFront()
         }
 
         binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
-        view.id = View.generateViewId()
 
         if (nestedConnector != null) {
             binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
+            view.bringToFront()
             binding.container.addView(endBlock)
         }
 
@@ -876,12 +892,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             connectorsMap[view] = connector
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
 
-            if (viewToBlock[prevView]!!.instruction in connectingInstructions) {
-                set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 30)
-            } else {
-                set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 0)
-            }
-
+            set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 0)
             set.connect(connector.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
             set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
         }
