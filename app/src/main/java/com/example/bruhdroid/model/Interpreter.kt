@@ -83,16 +83,11 @@ class Interpreter(_blocks: List<Block>? = null) :
             }
         } catch (e: RuntimeError) {
             throw RuntimeError(
-                "${e.message}\nAt line: ${block.line}, " +
+                "${e.message}\nAt line: ${currentLine + 1}, " +
                         "At instruction: ${block.instruction}"
             )
         }
-//        catch (e: Exception) {
-//            throw RuntimeError(
-//                "${e}\nAt line: ${block.line}, " +
-//                        "At instruction: ${block.instruction}"
-//            )
-//        }
+
         return true
     }
 
@@ -114,7 +109,7 @@ class Interpreter(_blocks: List<Block>? = null) :
                 }
             } catch (e: RuntimeError) {
                 throw RuntimeError(
-                    "${e.message}\nAt line: ${block.line}, " +
+                    "${e.message}\nAt line: ${currentLine + 1}, " +
                             "At instruction: ${block.instruction}"
                 )
             }
@@ -436,7 +431,7 @@ class Interpreter(_blocks: List<Block>? = null) :
                         try {
                             operand2 = tryFindInMemory(memory, operand2)
                         } catch (e: StackCorruptionError) {
-                            throw RuntimeError("${e.message}\nAt expression: $raw")
+                            throw RuntimeError("${e.message}")
                         }
                     }
                     operand2 as Valuable
@@ -456,7 +451,9 @@ class Interpreter(_blocks: List<Block>? = null) :
                                 "sorted" -> operand2.sorted()
                                 "floor" -> operand2.floor()
                                 "ceil" -> operand2.ceil()
-                                else -> throw Exception()
+                                else -> {throwOperationError("Expected correct expression but bad operation was found")
+                                    throw Exception()
+                                }
                             }
                         )
                         continue
@@ -475,7 +472,9 @@ class Interpreter(_blocks: List<Block>? = null) :
                                 "*=" -> tryFindInMemory(memory, operand1) * operand2
                                 "+=" -> tryFindInMemory(memory, operand1) + operand2
                                 "-=" -> tryFindInMemory(memory, operand1) - operand2
-                                else -> throw Exception("Bad define operator")
+                                else -> {throwOperationError("Expected correct expression but bad operation was found")
+                                    throw Exception()
+                                }
                             }
 
                             if (initialize) {
@@ -508,7 +507,7 @@ class Interpreter(_blocks: List<Block>? = null) :
                         try {
                             operand1 = tryFindInMemory(memory, operand1)
                         } catch (e: StackCorruptionError) {
-                            throw RuntimeError("${e.message}\nAt expression: $raw")
+                            throw RuntimeError("${e.message}")
                         }
                     }
                     operand1 as Valuable
@@ -516,8 +515,8 @@ class Interpreter(_blocks: List<Block>? = null) :
                     val result: Valuable? = when (value) {
                         "?" -> {
                             try {operand1.array[operand2.value.toInt()]}
-                            catch (e:IndexOutOfBoundsException) {
-                                throw RuntimeError("${e.message}\nAt expression: $raw")
+                            catch (e: IndexOutOfBoundsException) {
+                                throw IndexOutOfRangeError("${e.message}")
                             }
                         }
                         "+" -> operand1 + operand2
@@ -553,17 +552,17 @@ class Interpreter(_blocks: List<Block>? = null) :
                     }
 
                     stack.add(result!!)
-                } catch (e: TypeError) {
+                } catch (e: Exception) {
                     throw RuntimeError("${e.message}\nAt expression: $raw")
                 }
             }
         }
 
         if (stack.isEmpty()) {
-            throw RuntimeError("Expected expression but empty block was found\n")
+            throwOperationError("Expected correct expression but bad operation was found", raw)
         }
         if (stack.size > 1) {
-            throw RuntimeError("Expected expression but wrong syntax was found\n")
+            throwOperationError("Expected correct expression but bad operation was found", raw)
         }
         val last = stack.removeLast()
         if (last is Variable) {
@@ -574,5 +573,16 @@ class Interpreter(_blocks: List<Block>? = null) :
             }
         }
         return last as Valuable
+    }
+
+    private fun throwOperationError(message: String, raw: String = "") {
+        try {
+            throw OperationError(message)
+        } catch (e: Exception) {
+            if (raw.isEmpty()) {
+                throw RuntimeError("${e.message}")
+            }
+            throw RuntimeError("${e.message}\nAt expression: $raw")
+        }
     }
 }
