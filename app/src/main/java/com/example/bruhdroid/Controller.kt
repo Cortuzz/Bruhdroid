@@ -138,7 +138,11 @@ class Controller: Observable() {
     }
 
     fun resumeFull() {
-        interpreter.run()
+        try {
+            interpreter.run()
+        } catch (e: RuntimeError) {
+            runtimeErrors = e.message.toString()
+        }
         setChanged()
         notifyObservers()
     }
