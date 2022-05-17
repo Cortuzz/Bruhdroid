@@ -1,7 +1,5 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.src.SyntaxError
-
 
 class Notation {
     companion object {
