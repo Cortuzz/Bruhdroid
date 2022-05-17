@@ -13,9 +13,7 @@ import android.view.View
 import android.view.View.FOCUS_DOWN
 import android.view.View.FOCUS_UP
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -28,9 +26,7 @@ import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 
 
@@ -74,6 +70,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         bottomSheetBin.setContentView(bindingSheetBin.root)
 
         val blocks = intent.getSerializableExtra("blocks")
+        val filename = intent.getSerializableExtra("filename")
         if (blocks is Array<*>) {
             parseBlocks(blocks)
         }
@@ -94,7 +91,19 @@ class CodingActivity : AppCompatActivity(), Observer {
         binding.launchButton.setOnClickListener {
             debugMode = false
             binding.console.text = ""
-            controller.runProgram(interpreter, viewToBlock, codingViewList)
+
+            controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
+        }
+        binding.saveButton.setOnClickListener {
+            if (filename is String) {
+                if (Controller.saveProgram(filename, this.filesDir, viewToBlock, codingViewList)) {
+                    Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
+                }
+                return@setOnClickListener
+            }
+            showSaveDialog()
         }
 
         binding.debugButton.setOnClickListener {
@@ -104,7 +113,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             binding.debugPanel.visibility = View.VISIBLE
             binding.mainPanel.visibility = View.INVISIBLE
 
-            controller.runProgram(interpreter, viewToBlock, codingViewList)
+            controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
         }
 
         binding.nextButton.setOnClickListener {
@@ -197,6 +206,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     @RequiresApi(Build.VERSION_CODES.N)
     private fun parseBlocks(blocks: Array<*>) {
         val layoutMap = mapOf(
+            Instruction.PRAGMA to R.layout.pragma_block,
             Instruction.PRINT to R.layout.block_print,
             Instruction.INPUT to R.layout.block_input,
             Instruction.INIT to R.layout.block_init,
@@ -204,7 +214,9 @@ class CodingActivity : AppCompatActivity(), Observer {
             Instruction.IF to R.layout.block_if,
             Instruction.SET to R.layout.block_set,
             Instruction.END_WHILE to R.layout.empty_block,
-            Instruction.END to R.layout.condition_block_end
+            Instruction.END to R.layout.condition_block_end,
+            Instruction.ELSE to R.layout.block_else,
+            //Instruction.CONTINUE, Instruction.BREAK Instruction.ELIF to R.layout.block_else, todo
         )
 
         GlobalScope.launch {
@@ -531,8 +543,8 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun buildConstraints(container: ConstraintLayout, viewList: List<View>) {
         val set = ConstraintSet()
         set.clone(container)
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE) //todo: elif / else check
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE)
 
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
@@ -543,7 +555,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             if (viewToBlock[prevView]!!.instruction in startInstructions) {
                 nestViews.add(prevView)
-                nestCount.add(prevView.height)
+                nestCount.add(prevView.height / 2)
             }
 
             if (viewToBlock[view]!!.instruction in endInstructions) {
@@ -688,6 +700,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         if (connect) {
             val endInstruction: Instruction
+            connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             if (instruction == Instruction.WHILE) {
                 endBlock = layoutInflater.inflate(R.layout.empty_block, null)
@@ -695,11 +708,43 @@ class CodingActivity : AppCompatActivity(), Observer {
 
             } else {
                 endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
+
+                val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
+                val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
+                addElse.setOnClickListener {
+                    addElif.visibility = View.INVISIBLE
+                    addElse.visibility = View.INVISIBLE
+
+                    val elseView = layoutInflater.inflate(R.layout.block_else, null)
+                    val index = codingViewList.indexOf(endBlock)
+                    codingViewList[index] = elseView
+                    try {codingViewList.add(index + 1, endBlock)}
+                    catch (e: Exception) {codingViewList.add(endBlock)}
+
+                    viewToBlock[elseView] = Block(Instruction.ELSE, "")
+                    elseView.id = View.generateViewId()
+
+                    val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
+                    connectorsMap[elseView] = elseConnector
+                    elseConnector.id = View.generateViewId()
+                    binding.container.addView(elseConnector)
+                    binding.container.addView(elseView)
+
+                    elseView.setOnDragListener { v, event ->
+                        generateDropArea(v, event)
+                    }
+
+                    GlobalScope.launch {
+                        delay(100)
+                        runOnUiThread {
+                            buildConstraints(binding.container, codingViewList)
+                        }
+                    }
+                }
                 endInstruction = Instruction.END
             }
 
             generateBreakpoint(endBlock)
-            connector = layoutInflater.inflate(R.layout.block_connector, null)
 
             binding.container.addView(connector)
             binding.container.addView(endBlock)
@@ -757,70 +802,97 @@ class CodingActivity : AppCompatActivity(), Observer {
         builder.show()
     }
 
-    fun showCustomDialog() {
+    private fun showCustomDialog() {
         val dialog = Dialog(this)
-        //We have added a title in the custom layout. So let's disable the default title.
-        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        //The user will be able to cancel the dialog bu clicking anywhere outside the dialog.
         dialog.setCancelable(true)
-        //Mention the name of the layout of your custom dialog.
         dialog.setContentView(R.layout.input_dialog)
 
-        //Initializing the views of the dialog.
         val inputVal: EditText = dialog.findViewById(R.id.input)
         val submitButton: Button = dialog.findViewById(R.id.button)
 
-        submitButton.setOnClickListener(View.OnClickListener {
+        submitButton.setOnClickListener {
             interpreter.input = inputVal.text.toString()
             interpreter.waitingForInput = false
             dialog.dismiss()
-            GlobalScope.launch {
-                controller.resumeProgram()
+            if (!debugMode) {
+                controller.resumeFull()
+            } else {
+                GlobalScope.launch {
+                    controller.resumeProgram()
+                }
             }
-        })
+        }
         dialog.show()
     }
 
+    private fun showSaveDialog() {
+        val dialog = Dialog(this)
+        dialog.setCancelable(true)
+        dialog.setContentView(R.layout.input_dialog)
+        dialog.findViewById<TextView>(R.id.textView).text = "Program name:"
+
+        val inputVal: EditText = dialog.findViewById(R.id.input)
+        val submitButton: Button = dialog.findViewById(R.id.button)
+
+        submitButton.setOnClickListener {
+            if (Controller.saveProgram(inputVal.text.toString(), this.filesDir, viewToBlock, codingViewList)) {
+                Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+
+        }
+        dialog.show()
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
     override fun update(p0: Observable?, p1: Any?) {
         val lexerErrors = controller.popLexerErrors()
         val runtimeErrors = controller.popRuntimeErrors()
         val output = interpreter.output
 
-        runOnUiThread {
-            if (runtimeErrors.isNotEmpty()) {
-                showErrorDialog("RUNTIME ERROR", runtimeErrors)
-                return@runOnUiThread
-            }
-            if (lexerErrors.isNotEmpty()) {
-                showErrorDialog("LEXER ERROR", lexerErrors)
-                return@runOnUiThread
-            }
+        if (runtimeErrors.isNotEmpty()) {
+            runOnUiThread {showErrorDialog("ТЫ ЕБЛАН?", runtimeErrors)}
+            return
+        }
+        if (lexerErrors.isNotEmpty()) {
+            runOnUiThread {showErrorDialog("LEXER ERROR", lexerErrors)}
+            return
+        }
 
-            if (interpreter.waitingForInput) {
-                showCustomDialog()
-                return@runOnUiThread
-            }
-            if (output.isNotEmpty()) {
-                binding.console.text = output
-            }
+        if (interpreter.waitingForInput) {
+            runOnUiThread {showCustomDialog()}
+            return
+        }
+        if (output.isNotEmpty()) {
+            runOnUiThread {binding.console.text = output}
+        }
 
-            if (interpreter.currentLine + 1 != interpreter.blocks?.size) {
-                val block = interpreter.blocks?.get(interpreter.currentLine + 1)
-                val breakpoint = block?.breakpoint
+        if (!debugMode) {
+            return
+        }
 
-                if (debugMode && (debugType == Debug.NEXT ||
-                            debugType == Debug.BREAKPOINT && breakpoint == true)) {
-                    val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
+        if (interpreter.currentLine + 1 != interpreter.blocks?.size) {
+            val block = interpreter.blocks?.get(interpreter.currentLine + 1)
+            val breakpoint = block?.breakpoint
 
+            if ((debugType == Debug.NEXT ||
+                        debugType == Debug.BREAKPOINT && breakpoint == true)) {
+                val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
+
+                runOnUiThread {
                     button?.setBackgroundResource(when (debugType) {
                         Debug.NEXT -> android.R.drawable.presence_away
                         Debug.BREAKPOINT -> android.R.drawable.presence_busy
                     })
-                    return@runOnUiThread
                 }
+                return
+            }
 
-                GlobalScope.launch {
-                        controller.resumeProgram()
+            GlobalScope.launch {
+                runOnUiThread {
+                    controller.resumeProgram()
                 }
             }
         }

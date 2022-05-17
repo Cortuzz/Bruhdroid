@@ -7,6 +7,7 @@
     <string name="exit_button">Exit =(</string>
 
     <string name="templates">Templates</string>
+    <string name="saved_programs">Saved programs</string>
     <string name="bubble_sort_button">Bubble sort</string>
     <string name="infinity_loop_button">Infinity counter</string>
     <string name="ahegao_button">Ahegao</string>
@@ -30,6 +31,7 @@
     <string name="input">Input</string>
     <string name="while_cycle">While</string>
     <string name="if_block">If</string>
+    <string name="pragma">Pragma</string>
     <string name="elif_button">Elif</string>
     <string name="else_button">Else</string>
     <string name="dialog">Enter value</string>

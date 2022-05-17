@@ -7,14 +7,23 @@ import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
 import java.util.*
 
-class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean = false) :
+class Interpreter(_blocks: List<Block>? = null) :
     Observable() {
+    var parseMap: MutableMap<String, List<String>> = mutableMapOf()
+    var blocks = _blocks?.toMutableList()
     var output = ""
     var input = ""
     var waitingForInput = false
     var memory = Memory(null)
     var currentLine = -1
+    var debug = false
+    var ioLines = 0
 
+    private var pragma : MutableMap<String, String> = mutableMapOf(
+        "INIT_MESSAGE" to "true",
+        "IO_MESSAGE" to "true",
+        "IO_LINES" to "10"
+        )
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
 
@@ -23,8 +32,28 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         blocks = _blocks.toMutableList()
     }
 
+    private fun pragmaClear() {
+        pragma = mutableMapOf(
+        "INIT_MESSAGE" to "true",
+        "IO_MESSAGE" to "true",
+        "IO_LINES" to "10"
+        )
+    }
+
+    private fun pragmaUpdate() {
+        output = if (pragma["INIT_MESSAGE"] == "true") {
+            ioLines = 5
+            "⢸⣿⡟⠛⢿⣷⠀⢸⣿⡟⠛⢿⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡇⠀⢸⣿⡇⠀\n" +
+            "⢸⣿⣧⣤⣾⠿⠀⢸⣿⣇⣀⣸⡿⠃⢸⣿⡇⠀⢸⣿⡇⢸⣿⣇⣀⣸⣿⡇⠀\n" +
+            "⢸⣿⡏⠉⢹⣿⡆⢸⣿⡟⠛⢻⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡏⠉⢹⣿⡇⠀\n" +
+            "⢸⣿⣧⣤⣼⡿⠃⢸⣿⡇⠀⢸⣿⡇⠸⣿⣧⣤⣼⡿⠁⢸⣿⡇⠀⢸⣿⡇⠀\n" +
+            "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀ \n"
+        } else {
+            ""
+        }
+    }
+
     fun clear() {
-        output = ""
         input = ""
         waitingForInput = false
         appliedConditions.clear()
@@ -32,6 +61,9 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         blocks?.clear()
         memory = Memory(null)
         currentLine = -1
+        ioLines = 0
+        pragmaClear()
+        pragmaUpdate()
     }
 
     fun runOnce(): Boolean {
@@ -65,7 +97,15 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
     }
 
     fun run() {
-        while (currentLine < blocks!!.size - 1) {
+        if (input.isNotEmpty()) {
+            parseInput()
+        }
+
+        if (currentLine == -1) {
+            notifyIfNotDebug()
+        }
+
+        while (currentLine < blocks!!.size - 1 && !waitingForInput) {
             val block = blocks!![++currentLine]
 
             try {
@@ -127,7 +167,7 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         return when (valuable.type) {
             Type.STRING -> "\"$rawValue\""
             Type.BOOL -> rawValue.uppercase()
-            Type.UNDEFINED -> "UNDEFINED"
+            Type.UNDEFINED -> "Ты еблан?"
             Type.LIST -> {
                 val str = mutableListOf<String>()
                 valuable.array.forEach { el -> str.add(getVisibleValue(el)) }
@@ -171,16 +211,60 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
         input = ""
     }
 
+    private fun parsePragma(raw: String) {
+        val splitted = raw.replace(" ", "").split("=")
+        if (splitted[1] !in listOf("true", "false") && splitted[0] !in listOf("IO_LINES")) {
+            TODO()
+        }
+
+        val variable = splitted[0]
+
+        if (variable !in pragma) {
+            TODO()
+        }
+        pragma[splitted[0]] = splitted[1]
+    }
+
+    private fun notifyIfNotDebug() {
+        if (!debug) {
+            setChanged()
+            notifyObservers()
+        }
+    }
 
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
+            Instruction.PRAGMA -> {
+                if (currentLine != 0) {
+                    TODO()
+                }
+                val rawList = split(block.expression)
+                for (raw in rawList) {
+                    parsePragma(raw)
+                }
+                pragmaUpdate()
+                notifyIfNotDebug()
+            }
             Instruction.PRINT -> {
                 val rawList = split(block.expression)
+                if (pragma["IO_MESSAGE"] == "true") {
+                    output += "I/O: "
+                }
 
                 for (raw in rawList) {
                     output += "${getVisibleValue(parseRawBlock(raw))} "
                 }
+                ++ioLines
                 output += "\n"
+                val lines = pragma["IO_LINES"]
+                if (lines != null) {
+                    if (lines != "inf" && ioLines > lines.toInt()) {
+                        --ioLines
+                        val ind = output.indexOf("\n")
+                        output = output.substring(ind + 1)
+                    }
+                }
+                notifyIfNotDebug()
             }
             Instruction.INPUT -> {
                 waitingForInput = true
@@ -309,31 +393,44 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
     }
 
     private fun getValue(data: String): Block? {
-        return if (data.last() == '"' && data.first() == '"') {
+        if (data in listOf("abs", "exp", "sorted", "ceil", "floor")) {
+            return null
+        }
+
+        return if (data == "rand()") {
+            Valuable(Math.random(), Type.FLOAT)
+        } else if (data.last() == '"' && data.first() == '"') {
             // Maybe substring is better solution
             Valuable(data.replace("\"", ""), Type.STRING)
-        } else if (data.contains("[A-Za-z]".toRegex())) {
+        } else if (data.contains("^[A-Za-z]+\$".toRegex())) {
             Variable(data)
         } else {
             when {
-                data.contains('.') -> Valuable(data, Type.FLOAT)
-                data.isDigitsOnly() -> Valuable(data, Type.INT)
+                data.contains("[\\d]+\\.[\\d]+".toRegex()) -> Valuable(data, Type.FLOAT)
+                data.contains("[\\d]+".toRegex()) -> Valuable(data, Type.INT)
                 else -> null
             }
         }
     }
 
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        val data = Notation.convertToRpn(Notation.tokenizeString(raw))
+        val data = parseMap[raw]?: Notation.convertToRpn(Notation.tokenizeString(raw))
+        parseMap[raw] = data
+
         val stack = mutableListOf<Block>()
+        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()",
+            "abs", "exp", "sorted", "ceil", "floor")
 
         for (value in data) {
+            if (value.isEmpty()) {
+                continue
+            }
             val parsedValue = getValue(value)
             if (parsedValue != null) {
                 stack.add(parsedValue)
             } else {
                 try {
-                    var operand2 = stack.removeLast()
+                    var operand2 = stack.removeLast() // todo: тут хуйня
 
                     if (operand2 is Variable) {
                         try {
@@ -344,17 +441,27 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
                     }
                     operand2 as Valuable
 
-                    if (value in "∓±") {
+                    if (value in unary) {
                         stack.add(
                             when (value) {
                                 "±" -> +operand2
                                 "∓" -> -operand2
+                                ".toInt()" -> Valuable(operand2.convertToInt(operand2), Type.INT)
+                                ".toFloat()" -> Valuable(operand2.convertToFloat(operand2), Type.FLOAT)
+                                ".toString()" -> Valuable(operand2.value, Type.STRING)
+                                ".toBool()" -> Valuable(operand2.convertToBool(operand2), Type.BOOL)
+                                ".sort()" -> operand2.sort()
+                                "abs" -> operand2.absolute()
+                                "exp" -> operand2.exponent()
+                                "sorted" -> operand2.sorted()
+                                "floor" -> operand2.floor()
+                                "ceil" -> operand2.ceil()
                                 else -> throw Exception()
                             }
                         )
                         continue
                     }
-                    var operand1 = stack.removeLast()
+                    var operand1 = stack.removeLast() // todo: тут тоже
 
                     if (value in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=")) {
                         if (operand1 is Valuable) {
@@ -398,7 +505,11 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
                     }
 
                     if (operand1 is Variable) {
-                        operand1 = tryFindInMemory(memory, operand1)
+                        try {
+                            operand1 = tryFindInMemory(memory, operand1)
+                        } catch (e: StackCorruptionError) {
+                            throw RuntimeError("${e.message}\nAt expression: $raw")
+                        }
                     }
                     operand1 as Valuable
 
@@ -413,9 +524,11 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
                         "-" -> operand1 - operand2
                         "*" -> operand1 * operand2
                         "/" -> operand1 / operand2
+                        "//" -> operand1.intDiv(operand2)
+                        "%" -> operand1 % operand2
 
-                        "&" -> operand1.and(operand2)
-                        "|" -> operand1.or(operand2)
+                        "&&" -> operand1.and(operand2)
+                        "||" -> operand1.or(operand2)
 
                         "==" -> Valuable(operand1 == operand2, Type.BOOL)
                         "!=" -> Valuable(operand1 != operand2, Type.BOOL)
@@ -448,6 +561,9 @@ class Interpreter(var blocks: MutableList<Block>? = null, val debugMode: Boolean
 
         if (stack.isEmpty()) {
             throw RuntimeError("Expected expression but empty block was found\n")
+        }
+        if (stack.size > 1) {
+            throw RuntimeError("Expected expression but wrong syntax was found\n")
         }
         val last = stack.removeLast()
         if (last is Variable) {

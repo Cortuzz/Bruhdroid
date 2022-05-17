@@ -3,6 +3,9 @@ package com.example.bruhdroid.model.src.blocks
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.exp
 
 class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL,"") {
@@ -91,17 +94,30 @@ class Valuable(varValue: Any, var type: Type) :
         val types = listOf(Type.INT, Type.FLOAT)
 
         if (type in types && operand.type in types) {
-                if (checkFloating(this, operand)) {
-                    return Valuable(value.toFloat() / operand.value.toFloat(), Type.FLOAT)
-                }
-            return Valuable(value.toInt() / operand.value.toInt(), Type.INT)
+            return Valuable(value.toFloat() / operand.value.toFloat(), Type.FLOAT)
+        }
+        throw TypeError("Expected INT or FLOAT but found ${operand.type}")
+    }
+
+    fun intDiv(operand: Valuable): Valuable {
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types && operand.type in types) {
+            return Valuable((value.toFloat() / operand.value.toFloat()).toInt(), Type.INT)
         }
         throw TypeError("Expected INT or FLOAT but found ${operand.type}")
     }
 
     operator fun rem(operand: Valuable): Valuable {
-        if (type == Type.INT && operand.type == Type.INT) {
-            return Valuable(value.toInt() % operand.value.toInt(), type)
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types && operand.type in types) {
+            val value = value.toFloat() / operand.value.toFloat()
+            return if (value - floor(value) == 0f) {
+                Valuable(value.toInt(), Type.INT)
+            } else {
+                Valuable(value, Type.FLOAT)
+            }
         }
         throw TypeError("Expected INT or FLOAT but found ${operand.type}")
     }
@@ -149,7 +165,7 @@ class Valuable(varValue: Any, var type: Type) :
         }
     }
 
-    private fun convertToFloat(valuable: Valuable): Float {
+    fun convertToFloat(valuable: Valuable): Float {
         return when (valuable.type) {
             Type.BOOL -> {
                 if (valuable.value == "true") {
@@ -170,7 +186,7 @@ class Valuable(varValue: Any, var type: Type) :
         }
     }
 
-    private fun convertToInt(valuable: Valuable): Int {
+    fun convertToInt(valuable: Valuable): Int {
         return when (valuable.type) {
             Type.BOOL -> {
                 if (valuable.value == "true") {
@@ -179,16 +195,83 @@ class Valuable(varValue: Any, var type: Type) :
                 0
             }
             Type.INT -> valuable.value.toInt()
-            Type.FLOAT -> valuable.value.toInt()
+            Type.FLOAT -> valuable.value.toFloat().toInt()
             Type.STRING -> {
                 try {
-                    valuable.value.toInt()
+                    valuable.value.toFloat().toInt()
                 } catch (e: Exception) {
                     throw TypeError("Expected number-containing string but ${valuable.value} was found")
                 }
             }
             else -> throw TypeError("Bad type")
         }
+    }
+
+    fun absolute(): Valuable {
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types) {
+            return if (type == Type.INT) {
+                Valuable(abs(value.toInt()), type)
+            } else {
+                Valuable(abs(value.toFloat()), type)
+            }
+        }
+        throw TypeError("Expected INT or FLOAT but found $type")
+    }
+
+    fun exponent(): Valuable {
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types) {
+            return Valuable(exp(value.toFloat()), Type.FLOAT)
+        }
+        throw TypeError("Expected INT or FLOAT but found $type")
+    }
+
+    fun ceil(): Valuable {
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types) {
+            return Valuable(kotlin.math.ceil(value.toFloat()), Type.INT)
+        }
+        throw TypeError("Expected INT or FLOAT but found $type")
+    }
+
+    fun floor(): Valuable {
+        val types = listOf(Type.INT, Type.FLOAT)
+
+        if (type in types) {
+            return Valuable(floor(value.toFloat()), Type.INT)
+        }
+        throw TypeError("Expected INT or FLOAT but found $type")
+    }
+
+    private fun srt(): MutableList<Valuable> {
+        return array.sortedBy { i ->
+            try {
+                i.value.toFloat()
+            } catch (e: Exception) {
+                throw TypeError("Expected INT or FLOAT but found ${i.type}")
+            }
+        }.toMutableList()
+    }
+
+    fun sorted(): Valuable {
+        if (type == Type.LIST) {
+            val valuable = Valuable(value, type)
+            valuable.array = srt()
+            return valuable
+        }
+        throw TypeError("Expected LIST but found $type")
+    }
+
+    fun sort(): Valuable {
+        if (type == Type.LIST) {
+            array = srt()
+            return this
+        }
+        throw TypeError("Expected LIST but found $type")
     }
 
     private fun checkFloating(val1: Valuable, val2: Valuable): Boolean {
