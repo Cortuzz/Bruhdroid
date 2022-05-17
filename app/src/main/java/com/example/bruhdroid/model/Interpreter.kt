@@ -393,6 +393,10 @@ class Interpreter(_blocks: List<Block>? = null) :
     }
 
     private fun getValue(data: String): Block? {
+        if (data in listOf("abs", "exp", "sorted", "ceil", "floor")) {
+            return null
+        }
+
         return if (data == "rand()") {
             Valuable(Math.random(), Type.FLOAT)
         } else if (data.last() == '"' && data.first() == '"') {
@@ -414,7 +418,8 @@ class Interpreter(_blocks: List<Block>? = null) :
         parseMap[raw] = data
 
         val stack = mutableListOf<Block>()
-        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()")
+        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()",
+            "abs", "exp", "sorted", "ceil", "floor")
 
         for (value in data) {
             if (value.isEmpty()) {
@@ -445,6 +450,12 @@ class Interpreter(_blocks: List<Block>? = null) :
                                 ".toFloat()" -> Valuable(operand2.convertToFloat(operand2), Type.FLOAT)
                                 ".toString()" -> Valuable(operand2.value, Type.STRING)
                                 ".toBool()" -> Valuable(operand2.convertToBool(operand2), Type.BOOL)
+                                ".sort()" -> operand2.sort()
+                                "abs" -> operand2.absolute()
+                                "exp" -> operand2.exponent()
+                                "sorted" -> operand2.sorted()
+                                "floor" -> operand2.floor()
+                                "ceil" -> operand2.ceil()
                                 else -> throw Exception()
                             }
                         )
@@ -513,6 +524,8 @@ class Interpreter(_blocks: List<Block>? = null) :
                         "-" -> operand1 - operand2
                         "*" -> operand1 * operand2
                         "/" -> operand1 / operand2
+                        "//" -> operand1.intDiv(operand2)
+                        "%" -> operand1 % operand2
 
                         "&&" -> operand1.and(operand2)
                         "||" -> operand1.or(operand2)
