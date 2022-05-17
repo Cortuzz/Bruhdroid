@@ -15,6 +15,7 @@ class Notation {
             LESS('<', 5), GREATER('>', 5),
             LESS_OR_EQUALS('≤', 5), GREATER_OR_EQUALS('≥', 5),
             NOT('!', 4), AND('&', 3), OR('|', 2),
+            MATH('m', 10),
             OPEN_BRACKET('(', 0), CLOSE_BRACKET(')', 0),
             OPEN_INDEX('[', 0), CLOSE_INDEX(']', 0),
             INIT_ARRAY('#', -1), DEFINE('≈', -2)
@@ -25,6 +26,8 @@ class Notation {
             "+" to Operator.ADD,
             "*" to Operator.MULTIPLY,
             "/" to Operator.DIVIDE,
+            "//" to Operator.DIVIDE,
+            "%" to Operator.DIVIDE,
             "(" to Operator.OPEN_BRACKET,
             ")" to Operator.CLOSE_BRACKET,
             "=" to Operator.DEFINE,
@@ -52,12 +55,17 @@ class Notation {
             ".toInt()" to Operator.CONVERT,
             ".toFloat()" to Operator.CONVERT,
             ".toString()" to Operator.CONVERT,
-            ".toBool()" to Operator.CONVERT
+            ".toBool()" to Operator.CONVERT,
+            "abs" to Operator.MATH,
+            "exp" to Operator.MATH,
+            "floor" to Operator.MATH,
+            "ceil" to Operator.MATH,
+            "sorted" to Operator.MATH,
         )
 
         fun convertToRpn(infixNotation: List<String>): List<String> {
-            val unary = listOf("+", "-", "*", ".toInt()")
-            val convertedUnary = listOf("±", "∓", "#", ".toInt()", ".toFloat()", ".toBool()", ".toString()")
+            val unary = listOf("+", "-", "*")
+            val convertedUnary = listOf("±", "∓", "#", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()")
             var mayUnary = true
             var arrayInit = false
             val postfixNotation = mutableListOf<String>()
@@ -138,10 +146,10 @@ class Notation {
         }
 
         fun tokenizeString(str: String): List<String> {
-            val name = "([\\d]+\\.?[\\d]*|\\w[\\w\\d_]*|\".*\")"
-            val reserved = "(rand\\(\\))"
-            val convert = "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\))"
-            val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|\\*|%|/|==|=|!=|>=|<=|<|>|)"
+            val name = "([\\d]+\\.?[\\d]+|\\w[\\w\\d_]*|\".*\")"
+            val reserved = "(rand\\(\\)|abs|exp|floor|ceil|sorted)"
+            val convert = "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\)|\\.sort\\(\\))"
+            val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|//|\\*|%|/|==|=|!=|>=|<=|<|>|)"
             val bracket = "(\\(|\\)|\\[|\\])"
             val exp = Regex("($convert|$reserved|$bracket|$name|$operator)")
             val strSeq = (exp.findAll(str).toList().map { it.destructured.toList()[0] })
