@@ -761,7 +761,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             } else {
                 endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
-                /*
+
                 val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
                 val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
                 addElse.setOnClickListener {
@@ -793,7 +793,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                             buildConstraints(binding.container, codingViewList)
                         }
                     }
-                }*/
+                }
                 endInstruction = Instruction.END
             }
 
