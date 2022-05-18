@@ -119,7 +119,6 @@
             android:layout_height="0dp"
             android:contentDescription="@string/block"
             android:orientation="vertical"
-            android:scrollbars="none"
             app:minZoom="0.1"
             app:hasClickableChildren="true"
             app:layout_constraintBottom_toTopOf="@+id/guideline"

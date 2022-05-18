@@ -42,6 +42,7 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_bin.xml" value="0.177" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_if.xml" value="0.209" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_set.xml" value="0.211" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_while.xml" value="0.1555" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_init_block.xml" value="0.2285" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_input_block.xml" value="0.177" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2165" />
@@ -54,8 +55,9 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/rounded_dialog.xml" value="0.224" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/font/fira_code.xml" value="0.1" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/font/fn_compact.xml" value="0.16666666666666666" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/font/sf_compact.xml" value="0.4" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_blocks.xml" value="0.2" />
-        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.264" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.176" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_templates.xml" value="0.12986111111111112" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_connector.xml" value="0.536" />

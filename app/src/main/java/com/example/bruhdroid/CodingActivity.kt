@@ -469,24 +469,35 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<View> {
         val tempList = mutableListOf<View>()
         tempList.add(view)
-        (view.parent as ViewGroup).removeView(view)
+        binding.container.removeView(view)
+        if (connectorsMap[view] != null) {
+            binding.container.removeView(connectorsMap[view])
+            connectorsMap.remove(view)
+        }
+
+        var index = codingViewList.indexOf(view) + 1
 
         if (isConnected) {
-            var index = codingViewList.indexOf(view) + 1
             var count = 1
 
             while (count != 0) {
                 tempList.add(codingViewList[index])
-                (codingViewList[index].parent as ViewGroup).removeView(codingViewList[index])
+                binding.container.removeView(codingViewList[index])
+                binding.container.removeView(connectorsMap[codingViewList[index]])
+
                 val block = viewToBlock[codingViewList[index]]
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
-                    (connectorsMap[codingViewList[index]]!!.parent as ViewGroup).removeView(connectorsMap[codingViewList[index]])
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
                     count++
                 }
                 index++
             }
+        }
+
+        if (index <= codingViewList.lastIndex) {
+            binding.container.removeView(connectorsMap[codingViewList[index]])
+            connectorsMap.remove(codingViewList[index])
         }
         return tempList
     }
@@ -549,7 +560,20 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         } while (count > 0)
 
         if (indexTo != -1) {
-            if (indexTo < indexFrom) {
+            if (indexFrom == 0 || indexTo == 0) {
+                when {
+                    indexFrom == 0 -> {
+                        val connector  = connectorsMap[codingViewList[0]]
+                        connectorsMap[tempViews[0]] = connector as View
+                    }
+                    indexTo == 0 -> {
+                        val connector = connectorsMap[tempViews[0]]
+                        connectorsMap[codingViewList[0]] = connector as View
+                    }
+                    else -> {}
+                }
+            }
+            if (indexTo <= indexFrom) {
                 codingViewList.addAll(indexTo, tempViews)
             } else {
                 codingViewList.addAll(indexTo + 1 - tempViews.size, tempViews)
@@ -604,7 +628,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, -15)
                 set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
                 set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 80)
-            } else {
+            } else if (connectorsMap[view] != null) {
                 prevView.bringToFront()
                 set.connect(connectorsMap[view]!!.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
                 set.connect(connectorsMap[view]!!.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
@@ -622,6 +646,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
+        Log.d("hh", index.toString())
         GlobalScope.launch {
             val set = ConstraintSet()
 
@@ -633,7 +658,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if (untilEnd) {
                 replaceUntilEnd(codingViewList.indexOf(drag), index)
             } else {
-                if (codingViewList.indexOf(drag) == 0 || index == 0) {
+                if (index != -1 && (codingViewList.indexOf(drag) == 0 || index == 0)) {
                     val connector = when {
                         codingViewList.indexOf(drag) == 0 -> connectorsMap[codingViewList[1]]
                         index == 0 -> connectorsMap[drag]
@@ -641,6 +666,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     }
                     connectorsMap[codingViewList[0]] = connector as View
                 }
+
                 codingViewList.remove(drag)
                 when {
                     index == -1 -> {}
@@ -653,7 +679,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
             }
 
-            connectorsMap.remove(codingViewList[0])
+            if (!codingViewList.isEmpty()) {
+                connectorsMap.remove(codingViewList[0])
+            }
 
             runOnUiThread {
                 set.applyTo(binding.container)
@@ -678,7 +706,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             while (count != 0) {
                 codingViewList[index].visibility = View.INVISIBLE
                 val block = viewToBlock[codingViewList[index]]
-                connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+                if (connectorsMap[codingViewList[index]] != null) {
+                    connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+                }
 
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
                     count--
@@ -701,7 +731,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             while (count != 0) {
                 codingViewList[index].visibility = View.VISIBLE
                 val block = viewToBlock[codingViewList[index]]
-                connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
+                if (connectorsMap[codingViewList[index]] != null) {
+                    connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
+                }
 
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
                     count--
