@@ -104,6 +104,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
         }
+        binding.binButton.setOnDragListener { v, event ->
+            generateDropAreaForBin(v, event)
+        }
         binding.consoleButton.setOnClickListener {
             bottomSheetConsole.show()
         }
@@ -162,10 +165,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             binding.mainPanel.visibility = View.VISIBLE
             interpreter.clear()
         }
-
-        binding.binButton.setOnDragListener { v, event ->
-            generateDropAreaForBin(v, event)
-        }
     }
 
     private fun setBindingSheetBlocks() {
@@ -186,9 +185,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         val blockInit = layoutInflater.inflate(R.layout.block_init, null)
         val blockSet = layoutInflater.inflate(R.layout.block_set, null)
+        val blockPragma = layoutInflater.inflate(R.layout.pragma_block, null)
         val blockInput = layoutInflater.inflate(R.layout.block_input, null)
         val blockPrint = layoutInflater.inflate(R.layout.block_print, null)
         val blockWhile = layoutInflater.inflate(R.layout.block_while, null)
+        val blockBreak = layoutInflater.inflate(R.layout.block_break, null)
+        val blockContinue = layoutInflater.inflate(R.layout.block_continue, null)
         val blockIf = layoutInflater.inflate(R.layout.block_if, null)
 
         blockInit.setOnClickListener {
@@ -196,6 +198,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
         blockSet.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
+        }
+        blockPragma.setOnClickListener {
+            buildBlock(prevBlock, R.layout.pragma_block, Instruction.PRAGMA, false)
         }
         blockInput.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false)
@@ -205,6 +210,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
         blockWhile.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
+        }
+        blockBreak.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_break, Instruction.BREAK, false)
+        }
+        blockContinue.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_continue, Instruction.CONTINUE, false)
         }
         blockIf.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
@@ -217,9 +228,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         firstCategory.add(blockInit)
         firstCategory.add(blockSet)
+        secondCategory.add(blockPragma)
         secondCategory.add(blockInput)
         secondCategory.add(blockPrint)
         thirdCategory.add(blockWhile)
+        thirdCategory.add(blockBreak)
+        thirdCategory.add(blockContinue)
         fourthCategory.add(blockIf)
 
         categoryBlocks.add(firstCategory)
@@ -298,6 +312,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.END_WHILE to R.layout.empty_block,
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
+            Instruction.BREAK to R.layout.block_break,
             //Instruction.CONTINUE, Instruction.BREAK Instruction.ELIF to R.layout.block_else, todo
         )
 
@@ -647,6 +662,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             if (viewToBlock[view]!!.instruction in endInstructions) {
+                Log.d("hh", viewToBlock[view]!!.instruction.toString() + " " + i.toString())
                 val nest = nestViews.removeLast()
                 val nestId = nest.id
                 val connector = connectorsMap[view]!!
@@ -897,7 +913,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
             prevView.bringToFront()
         }
-        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+
+        if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
+            binding.container.addView(view)
+        } else {
+            binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+        }
 
         if (nestedConnector != null) {
             binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
