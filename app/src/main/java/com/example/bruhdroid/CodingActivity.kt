@@ -9,11 +9,7 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
-import android.view.View.FOCUS_DOWN
-import android.view.View.FOCUS_UP
-import android.view.ViewGroup
 import android.widget.*
-import androidx.annotation.RequiresApi
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -23,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.window.layout.WindowMetricsCalculator
 import com.example.bruhdroid.databinding.ActivityCodingBinding
 import com.example.bruhdroid.databinding.BottomsheetBinBinding
 import com.example.bruhdroid.databinding.BottomsheetConsoleBinding
@@ -36,7 +31,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.*
 import java.util.*
 
 
@@ -437,6 +431,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @OptIn(DelicateCoroutinesApi::class)
     private fun addBlocksToBin(view: View, isConnected: Boolean = false) {
         val addedBlocks = removeBlocksFromParent(view, isConnected)
+        val set = ConstraintSet()
+        set.clone(binding.container)
 
         GlobalScope.launch {
             for (block in addedBlocks) {
@@ -464,6 +460,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<View> {
         val tempList = mutableListOf<View>()
+        view.setOnLongClickListener(null)
         tempList.add(view)
         binding.container.removeView(view)
         if (connectorsMap[view] != null) {
@@ -477,11 +474,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             var count = 1
 
             do {
-                tempList.add(codingViewList[index])
-                binding.container.removeView(codingViewList[index])
-                binding.container.removeView(connectorsMap[codingViewList[index]])
+                val currView = codingViewList[index]
+                currView.setOnLongClickListener(null)
+                tempList.add(currView)
+                binding.container.removeView(currView)
+                binding.container.removeView(connectorsMap[currView])
 
-                val block = viewToBlock[codingViewList[index]]
+                val block = viewToBlock[currView]
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
                     count--
                 } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
@@ -495,6 +494,35 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             binding.container.removeView(connectorsMap[codingViewList[index]])
             connectorsMap.remove(codingViewList[index])
         }
+
+        view.setOnClickListener {
+            for (view in tempList) {
+                bindingSheetBin.deletedList.removeView(view)
+                if (connectorsMap[view] != null) {
+                    bindingSheetBin.deletedList.removeView(connectorsMap[view])
+                }
+                binViewList.remove(view)
+
+                binding.container.addView(view)
+                if (connectorsMap[view] != null) {
+                    binding.container.addView(connectorsMap[view])
+                } else if (!codingViewList.isEmpty()) {
+                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
+                    connector.id = View.generateViewId()
+                    binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+                    connectorsMap[view] = connector
+                }
+
+                view.bringToFront()
+                codingViewList.add(view)
+                generateDragArea(view)
+            }
+            buildConstraints(bindingSheetBin.deletedList, binViewList)
+            buildConstraints(binding.container, codingViewList)
+
+            prevBlock = codingViewList.last
+        }
+
         return tempList
     }
 
@@ -597,9 +625,15 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun buildConstraints(container: ConstraintLayout, viewList: List<View>) {
         val set = ConstraintSet()
         set.clone(container)
+        for (view in viewList) {
+            if (container == binding.container) {
+                view.setOnClickListener(null)
+            }
+            clearConstraints(set, view)
+        }
+
         val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE) //todo: elif / else check
         val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE)
-
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -643,13 +677,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @OptIn(DelicateCoroutinesApi::class)
     private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
         GlobalScope.launch {
-            val set = ConstraintSet()
-
-            set.clone(binding.container)
-            for (i in 0 until codingViewList.size) {
-                clearConstraints(set, codingViewList[i])
-            }
-
             if (untilEnd) {
                 replaceUntilEnd(codingViewList.indexOf(drag), index)
             } else {
@@ -679,7 +706,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             runOnUiThread {
-                set.applyTo(binding.container)
                 buildConstraints(binding.container, codingViewList)
             }
 
@@ -733,9 +759,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
                 }
 
-                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
+                if ((block!!.instruction == Instruction.END_WHILE) || (block.instruction == Instruction.END)) {
                     count--
-                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
+                } else if ((block.instruction == Instruction.WHILE) || (block.instruction == Instruction.IF)) {
                     count++
                 }
                 index++
@@ -770,12 +796,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
         var endBlock: View? = null
         var nestedConnector: View? = null
-        var connector = layoutInflater.inflate(R.layout.block_connector, null)
+        val connector = layoutInflater.inflate(R.layout.block_connector, null)
         view.id = View.generateViewId()
         connector.id = View.generateViewId()
 
