@@ -837,8 +837,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
                     connectorsMap[elseView] = elseConnector
                     elseConnector.id = View.generateViewId()
-                    binding.container.addView(elseConnector)
-                    binding.container.addView(elseView)
+                    binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
+                    binding.container.addView(elseView,ConstraintLayout.LayoutParams(900, 300))
 
                     elseView.setOnDragListener { v, event ->
                         generateDropArea(v, event)
