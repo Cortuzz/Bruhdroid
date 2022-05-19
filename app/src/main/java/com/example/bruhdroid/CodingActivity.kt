@@ -723,12 +723,35 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
             var index = codingViewList.indexOf(v) + 1
             var count = 1
+            var ifCount = -1
+            if (viewToBlock[v]!!.instruction == Instruction.IF) {
+                ifCount = 1
+            }
+            var elseConnector: View? = null
 
             while (count != 0) {
-                codingViewList[index].visibility = View.INVISIBLE
-                val block = viewToBlock[codingViewList[index]]
-                if (connectorsMap[codingViewList[index]] != null) {
-                    connectorsMap[codingViewList[index]]!!.visibility = View.INVISIBLE
+                val currentView = codingViewList[index]
+                currentView.visibility = View.INVISIBLE
+                val block = viewToBlock[currentView]
+
+                if (ifCount != -1) {
+                    when (block!!.instruction) {
+                        Instruction.IF -> {
+                            ifCount++
+                        }
+                        Instruction.ELSE -> {
+                            ifCount--
+                        }
+                    }
+                }
+
+                if (ifCount == 0) {
+                    ifCount = -1
+                    elseConnector = connectorsMap[currentView]
+                }
+
+                if (connectorsMap[currentView] != null) {
+                    connectorsMap[currentView]!!.visibility = View.INVISIBLE
                 }
 
                 if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
@@ -741,6 +764,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             if ((codingViewList.indexOf(v) != 0) && (index <= codingViewList.lastIndex)) {
                 connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
+                if (elseConnector != null) {
+                    elseConnector.visibility = View.VISIBLE
+                }
             }
         }
     }
@@ -838,7 +864,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     connectorsMap[elseView] = elseConnector
                     elseConnector.id = View.generateViewId()
                     binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
-                    binding.container.addView(elseView,ConstraintLayout.LayoutParams(900, 300))
+                    binding.container.addView(elseView)
 
                     elseView.setOnDragListener { v, event ->
                         generateDropArea(v, event)
