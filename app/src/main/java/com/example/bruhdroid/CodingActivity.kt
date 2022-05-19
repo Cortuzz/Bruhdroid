@@ -440,21 +440,17 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         GlobalScope.launch {
             for (block in addedBlocks) {
-                val instr = viewToBlock[block]!!.instruction
-
-                if (instr in connectingInstructions) {
+                if (connectorsMap[block] != null) {
                     runOnUiThread {
                         bindingSheetBin.deletedList.addView(connectorsMap[block])
                     }
                 }
 
-                binViewList.add(block)
-                prevBlockInBin = block
-            }
-            runOnUiThread {
-                for (block in addedBlocks) {
+                runOnUiThread {
                     bindingSheetBin.deletedList.addView(block)
                 }
+                binViewList.add(block)
+                prevBlockInBin = block
             }
             delay(100)
 
@@ -480,7 +476,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (isConnected) {
             var count = 1
 
-            while (count != 0) {
+            do {
                 tempList.add(codingViewList[index])
                 binding.container.removeView(codingViewList[index])
                 binding.container.removeView(connectorsMap[codingViewList[index]])
@@ -492,10 +488,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     count++
                 }
                 index++
-            }
+            } while (count > 0)
         }
 
-        if (index <= codingViewList.lastIndex) {
+        if (codingViewList.indexOf(view) == 0 && index <= codingViewList.lastIndex) {
             binding.container.removeView(connectorsMap[codingViewList[index]])
             connectorsMap.remove(codingViewList[index])
         }
@@ -636,7 +632,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             if (nestViews.isNotEmpty()) {
-                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height -15 }
+                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height -15}
                 set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 80)
             }
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
@@ -646,7 +642,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
-        Log.d("hh", index.toString())
         GlobalScope.launch {
             val set = ConstraintSet()
 
@@ -717,7 +712,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
                 index++
             }
-            connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
+
+            if ((codingViewList.indexOf(v) != 0) && (index <= codingViewList.lastIndex)) {
+                connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
+            }
         }
     }
 
