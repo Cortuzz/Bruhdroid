@@ -190,6 +190,19 @@
                 app:layout_constraintStart_toEndOf="@id/menuButton"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <Button
+                android:id="@+id/memoryButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="21dp"
+                android:background="@drawable/ic_console"
+                app:layout_constraintEnd_toStartOf="@+id/consoleButton"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/menuButton"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/console"
                 android:layout_width="wrap_content"

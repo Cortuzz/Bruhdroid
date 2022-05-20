@@ -38,7 +38,7 @@ class Interpreter(_blocks: List<Block>? = null) :
         if (mem.prevMemory == null) {
             return "${mem.scope}: $data"
         }
-        return "${mem.scope}: $data\n${getMemoryData(mem.prevMemory)}"
+        return "${mem.scope}: $data\n\n${getMemoryData(mem.prevMemory)}"
     }
 
     private fun parseStack(stack: MutableMap<String, Valuable>): String {
@@ -104,6 +104,11 @@ class Interpreter(_blocks: List<Block>? = null) :
                 "${e.message}\nAt line: ${currentLine + 1}, " +
                         "At instruction: ${block.instruction}"
             )
+        } catch (e: Exception) {
+            throw UnhandledError(
+                "${e.message}\nAt line: ${currentLine + 1}, " +
+                        "At instruction: ${block.instruction}"
+            )
         }
 
         return true
@@ -127,6 +132,11 @@ class Interpreter(_blocks: List<Block>? = null) :
                 }
             } catch (e: RuntimeError) {
                 throw RuntimeError(
+                    "${e.message}\nAt line: ${currentLine + 1}, " +
+                            "At instruction: ${block.instruction}"
+                )
+            } catch (e: Exception) {
+                throw UnhandledError(
                     "${e.message}\nAt line: ${currentLine + 1}, " +
                             "At instruction: ${block.instruction}"
                 )
@@ -443,7 +453,9 @@ class Interpreter(_blocks: List<Block>? = null) :
                 stack.add(parsedValue)
             } else {
                 try {
-                    var operand2 = stack.removeLast() // todo: тут хуйня
+                    var operand2 = try{stack.removeLast()}
+                    catch (e: Exception)
+                    {throwOperationError("Expected correct expression but bad operation was found")}
 
                     if (operand2 is Variable) {
                         try {
@@ -476,7 +488,9 @@ class Interpreter(_blocks: List<Block>? = null) :
                         )
                         continue
                     }
-                    var operand1 = stack.removeLast() // todo: тут тоже
+                    var operand1 = try{stack.removeLast()}
+                    catch (e: Exception)
+                    {throwOperationError("Expected correct expression but bad operation was found")}
 
                     if (value in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=")) {
                         if (operand1 is Valuable) {

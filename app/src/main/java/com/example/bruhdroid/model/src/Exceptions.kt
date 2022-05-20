@@ -2,6 +2,8 @@ package com.example.bruhdroid.model.src
 
 class RuntimeError(message: String = ""): Exception(message)
 
+class UnhandledError(message: String = ""): Exception(message)
+
 class LexerError(message: String = ""): Exception(message)
 
 class TypeError(message: String = ""):
