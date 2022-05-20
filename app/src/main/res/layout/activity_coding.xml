@@ -5,7 +5,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF">
+        android:background="@color/activity_background">
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline1"
@@ -51,7 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/start_code"
-                    android:textColor="@color/coral"
+                    android:textColor="@color/accent_button"
                     android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/run"
@@ -84,7 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="7dp"
-                    android:textColor="@color/coral"
+                    android:textColor="@color/accent_button"
                     android:text="@string/debug"
                     android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -139,7 +139,7 @@
                         android:id="@+id/resumeText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/coral"
+                        android:textColor="@color/accent_button"
                         android:text="@string/resume"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -171,7 +171,7 @@
                         android:id="@+id/pauseText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/coral"
+                        android:textColor="@color/accent_button"
                         android:text="@string/pause"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -204,7 +204,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
-                        android:textColor="@color/coral"
+                        android:textColor="@color/accent_button"
                         android:text="@string/next"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -236,7 +236,7 @@
                         android:id="@+id/stopText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/coral"
+                        android:textColor="@color/accent_button"
                         android:text="@string/stop"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
