@@ -5,13 +5,10 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ClipData
 import android.content.DialogInterface
-import android.graphics.Paint
 import android.os.Bundle
-import android.text.Layout
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
-import android.view.Gravity
 import android.view.View
 import android.view.View.DragShadowBuilder
 import android.widget.*
@@ -32,7 +29,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 import java.util.*
 
 
@@ -566,7 +562,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
                 tempView.bringToFront()
                 codingViewList.add(tempView)
-                if (viewToBlock[tempView]!!.instruction !in connectingInstructions) {
+                if (viewToBlock[tempView]!!.instruction !in connectingInstructions &&
+                    viewToBlock[tempView]!!.instruction !in listOf(Instruction.ELSE, Instruction.ELIF)) {
                     generateDragArea(tempView)
                 }
             }
@@ -776,28 +773,25 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             var index = codingViewList.indexOf(v) + 1
             var count = 1
-            var ifCount = -1
+            var ifList = mutableListOf<View>()
             if (viewToBlock[v]!!.instruction == Instruction.IF) {
-                ifCount = 1
+                ifList.add(v)
             }
-            var elseConnector: View? = null
+            var connector: View? = null
 
             while (count != 0) {
                 val currentView = codingViewList[index]
                 currentView.visibility = View.INVISIBLE
                 val block = viewToBlock[currentView]
 
-                if (ifCount != -1) {
-                    when (block!!.instruction) {
-                        Instruction.IF -> ifCount++
-                        Instruction.ELSE -> ifCount--
-                        else -> {}
+                when (block!!.instruction) {
+                    Instruction.IF -> ifList.add(currentView)
+                    in listOf(Instruction.ELSE, Instruction.ELIF) -> {
+                        val checkIf = ifList.removeLast()
+                        if (checkIf == v) {
+                            connector = connectorsMap[currentView]
+                        }
                     }
-                }
-
-                if (ifCount == 0) {
-                    ifCount = -1
-                    elseConnector = connectorsMap[currentView]
                 }
 
                 if (connectorsMap[currentView] != null) {
@@ -814,8 +808,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             if ((codingViewList.indexOf(v) != 0) && (index <= codingViewList.lastIndex)) {
                 connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
-                if (elseConnector != null) {
-                    elseConnector.visibility = View.VISIBLE
+                if (connector != null) {
+                    connector.visibility = View.VISIBLE
                 }
             }
         }
@@ -1010,12 +1004,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         viewToBlock[view] = Block(instruction)
     }
 
-    private fun buildAlertDialog(label: String, message: String?): AlertDialog.Builder {
+    private fun buildAlertDialog(label: String?, message: String?): AlertDialog.Builder {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
         if (message != null) {
             builder.setMessage(message)
         }
-        builder.setTitle(label)
+        if (label != null) {
+            builder.setTitle(label)
+        }
         return builder
     }
 
@@ -1027,43 +1023,44 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun showCustomDialog() {
-        val builder = buildAlertDialog("Enter value", null)
 
-        val input = EditText(this)
-        //input.textAlignment =
-        //builder.setView(input)
+        val dialog = buildAlertDialog(null, null)
+        val layoutView: View = layoutInflater.inflate(R.layout.input_dialog, null)
+        dialog.setView(layoutView)
 
-        //builder.show()
-//        val dialog = Dialog(this)
-//        dialog.setCancelable(true)
-//        dialog.setContentView(R.layout.input_dialog)
-//
-//        val inputVal: EditText = dialog.findViewById(R.id.input)
-//        val submitButton: Button = dialog.findViewById(R.id.button)
-//
-//        submitButton.setOnClickListener {
-//            interpreter.input = inputVal.text.toString()
-//            interpreter.waitingForInput = false
-//            dialog.dismiss()
-//            if (!debugMode) {
-//                controller.resumeFull()
-//            } else {
-//                GlobalScope.launch {
-//                    controller.resumeProgram()
-//                }
-//            }
-//        }
-//        dialog.show()
+        val inputVal: EditText = layoutView.findViewById(R.id.input)
+        val submitButton: Button = layoutView.findViewById(R.id.button)
+
+        val alertDialog = dialog.create()
+        alertDialog.show()
+
+        submitButton.setOnClickListener {
+            interpreter.input = inputVal.text.toString()
+            interpreter.waitingForInput = false
+            alertDialog.dismiss()
+            if (!debugMode) {
+                controller.resumeFull()
+            } else {
+                GlobalScope.launch {
+                    controller.resumeProgram()
+                }
+            }
+        }
     }
 
     private fun showSaveDialog() {
-        val dialog = Dialog(this)
-        dialog.setCancelable(true)
-        dialog.setContentView(R.layout.input_dialog)
-        dialog.findViewById<TextView>(R.id.textView).text = getString(R.string.save_dialog_title)
 
-        val inputVal: EditText = dialog.findViewById(R.id.input)
-        val submitButton: Button = dialog.findViewById(R.id.button)
+        val dialog = buildAlertDialog(null, null)
+        val layoutView: View = layoutInflater.inflate(R.layout.input_dialog, null)
+        dialog.setView(layoutView)
+
+        val title: TextView = layoutView.findViewById(R.id.textView)
+        val inputVal: EditText = layoutView.findViewById(R.id.input)
+        val submitButton: Button = layoutView.findViewById(R.id.button)
+
+        title.text = getString(R.string.save_dialog_title)
+        val alertDialog = dialog.create()
+        alertDialog.show()
 
         submitButton.setOnClickListener {
             if (Controller.saveProgram(inputVal.text.toString(), this.filesDir, viewToBlock, codingViewList)) {
@@ -1071,10 +1068,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             } else {
                 Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
             }
-            dialog.dismiss()
+            alertDialog.dismiss()
 
         }
-        dialog.show()
     }
 
     private fun showMemoryInfo(info: String) {
