@@ -440,7 +440,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 return false
             }
             Instruction.WHILE -> {
-                memory = Memory(memory, "WHILE SCOPE")
+                memory = Memory(memory, "WHILE ITERATION SCOPE")
                 if (checkStatement(block.expression)) {
                     cycleLines.add(currentLine)
                 } else {

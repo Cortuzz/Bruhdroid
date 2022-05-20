@@ -47,4 +47,6 @@
     <string name="delete">Delete</string>
     <string name="add_block">add_block</string>
     <string name="change_theme">Change theme</string>
+    <string name="factorial">Factorial</string>
+    <string name="fibonacci">Fibonacci</string>
 </resources>
