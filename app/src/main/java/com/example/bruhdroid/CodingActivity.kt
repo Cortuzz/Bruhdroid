@@ -390,7 +390,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             DragEvent.ACTION_DRAG_LOCATION -> {
-                println("FUCK")
                 binding.mainCode.panBy(0.0F,speed.toFloat(),false)
                 v.invalidate()
                 true
