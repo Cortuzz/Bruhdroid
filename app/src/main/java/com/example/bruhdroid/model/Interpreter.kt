@@ -382,8 +382,15 @@ class Interpreter(_blocks: List<Block>? = null) :
 
     private fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Block) {
         valueBlock as Valuable
-        valueBlock.type = type
 
+        if (type == Type.LIST) {
+            val block = valueBlock.clone()
+            block.type = type
+            memory.push(name, block)
+            return
+        }
+
+        valueBlock.type = type
         memory.push(name, valueBlock)
     }
 
