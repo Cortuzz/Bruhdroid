@@ -49,7 +49,6 @@ class Interpreter(_blocks: List<Block>? = null) :
         return data
     }
 
-
     private fun pragmaClear() {
         pragma = mutableMapOf(
         "INIT_MESSAGE" to "true",
@@ -440,6 +439,8 @@ class Interpreter(_blocks: List<Block>? = null) :
 
         return if (data == "rand()") {
             Valuable(Math.random(), Type.FLOAT)
+        } else if (data in listOf("true", "false")) {
+            Valuable(data, Type.BOOL)
         } else if (data.last() == '"' && data.first() == '"') {
             // Maybe substring is better solution
             Valuable(data.replace("\"", ""), Type.STRING)
