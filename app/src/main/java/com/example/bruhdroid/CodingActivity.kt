@@ -2,7 +2,6 @@ package com.example.bruhdroid
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.ClipData
 import android.content.DialogInterface
 import android.os.Bundle
@@ -741,7 +740,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             var index = codingViewList.indexOf(v) + 1
             var count = 1
-            var ifList = mutableListOf<View>()
+            val ifList = mutableListOf<View>()
             if (viewToBlock[v]!!.instruction == Instruction.IF) {
                 ifList.add(v)
             }
@@ -760,13 +759,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                             connector = connectorsMap[currentView]
                         }
                     }
+                    else -> {}
                 }
 
                 if (connectorsMap[currentView] != null) {
                     connectorsMap[currentView]!!.visibility = View.INVISIBLE
                 }
 
-                if (block!!.instruction in connectingInstructions) {
+                if (block.instruction in connectingInstructions) {
                     count--
                 } else if (block.instruction in startConnectingInstructions) {
                     count++

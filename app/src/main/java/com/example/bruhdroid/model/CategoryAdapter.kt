@@ -10,9 +10,9 @@ import com.example.bruhdroid.R
 import com.example.bruhdroid.model.CategoryAdapter.CategoryViewHolder
 
 class CategoryAdapter(
-    var context: Context,
-    var categories: List<Category>,
-    var onCategoryListener: OnCategoryListener
+    private var context: Context,
+    private var categories: List<Category>,
+    private var onCategoryListener: OnCategoryListener
 ) :
     RecyclerView.Adapter<CategoryViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
@@ -29,10 +29,9 @@ class CategoryAdapter(
         return categories.size
     }
 
-    class CategoryViewHolder(itemView: View, onCategoryListener: OnCategoryListener) :
+    class CategoryViewHolder(itemView: View, private var onCategoryListener: OnCategoryListener) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         var categoryTitle: TextView = itemView.findViewById(R.id.category_title)
-        var onCategoryListener: OnCategoryListener = onCategoryListener
         override fun onClick(view: View) {
             onCategoryListener.onCategoryClick(adapterPosition)
         }

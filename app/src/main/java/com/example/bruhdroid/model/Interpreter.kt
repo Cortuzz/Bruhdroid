@@ -5,9 +5,7 @@ import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
 import java.util.*
 
-class Interpreter(_blocks: List<Block>? = null) :
-    Observable() {
-    var parseMap: MutableMap<String, List<String>> = mutableMapOf()
+class Interpreter(_blocks: List<Block>? = null) : Observable() {
     var blocks = _blocks?.toMutableList()
     var output = ""
     var input = ""
@@ -15,13 +13,16 @@ class Interpreter(_blocks: List<Block>? = null) :
     var memory = Memory(null, "GLOBAL SCOPE")
     var currentLine = -1
     var debug = false
-    var ioLines = 0
+
 
     private var pragma : MutableMap<String, String> = mutableMapOf(
         "INIT_MESSAGE" to "true",
         "IO_MESSAGE" to "true",
         "IO_LINES" to "10"
         )
+
+    private var parseMap: MutableMap<String, List<String>> = mutableMapOf()
+    private var ioLines = 0
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
     private var functionLines = mutableMapOf<String, MutableList<Int>>()
@@ -242,17 +243,17 @@ class Interpreter(_blocks: List<Block>? = null) :
     }
 
     private fun parsePragma(raw: String) {
-        val splitted = raw.replace(" ", "").split("=")
-        if (splitted[1] !in listOf("true", "false") && splitted[0] !in listOf("IO_LINES")) {
-            TODO()
+        val split = raw.replace(" ", "").split("=")
+        if (split[1] !in listOf("true", "false") && split[0] !in listOf("IO_LINES")) {
+            throw RuntimeError("Bad preprocessor directive value")
         }
 
-        val variable = splitted[0]
+        val variable = split[0]
 
         if (variable !in pragma) {
-            TODO()
+            throw RuntimeError("No such preprocessor directive found")
         }
-        pragma[splitted[0]] = splitted[1]
+        pragma[split[0]] = split[1]
     }
 
     private fun notifyIfNotDebug() {
@@ -307,9 +308,6 @@ class Interpreter(_blocks: List<Block>? = null) :
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
             Instruction.PRAGMA -> {
-                if (currentLine != 0) {
-                    TODO()
-                }
                 val rawList = split(block.expression)
                 for (raw in rawList) {
                     parsePragma(raw)
