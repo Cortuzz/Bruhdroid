@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:text="TextView"
         android:textSize="20dp"
+        android:textColor="@color/default_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
