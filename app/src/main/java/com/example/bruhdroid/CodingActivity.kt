@@ -87,9 +87,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.SET to ViewBlock("Set", R.drawable.ic_block_set),
             Instruction.BREAK to ViewBlock("Break", R.drawable.ic_block_break, false),
             Instruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
-            Instruction.FUNC to ViewBlock("Method", R.drawable.ic_block_if), // todo
-            Instruction.RETURN to ViewBlock("Return", R.drawable.ic_block_break),
-            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_if)
+            Instruction.FUNC to ViewBlock("Method", R.drawable.ic_block_func),
+            Instruction.RETURN to ViewBlock("Return", R.drawable.ic_block_return),
+            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_call)
         )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
@@ -939,7 +939,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
-            binding.container.addView(view, ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt()))
+            binding.container.addView(view, ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt()))
         } else {
             binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         }
