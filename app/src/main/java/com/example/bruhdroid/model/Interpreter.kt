@@ -30,7 +30,6 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     private var functionsVarsMap = mutableMapOf<String, MutableList<String>>()
     private var funcVarsLines = mutableListOf<Int>()
     private var args = mutableListOf<List<String>>()
-    private var forList = mutableListOf<List<String>>()
     private var forLines = mutableListOf<Int>()
 
     fun initBlocks(_blocks: List<Block>) {
@@ -450,11 +449,20 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
             }
             Instruction.FOR -> {
                 val raw = block.expression.split(",")
-                forList.add(raw)
-                memory = Memory(memory, "FOR SCOPE")
+                if (currentLine !in forLines) {
+                    memory = Memory(memory, "FOR SCOPE")
+                    parseRawBlock(raw[0], true)
+                    forLines.add(currentLine)
+                } else {
+                    parseRawBlock(raw[2])
+                }
+
+                memory = Memory(memory, "FOR ITERATION SCOPE")
                 if (checkStatement(raw[1])) {
                     cycleLines.add(currentLine)
                 } else {
+                    memory = memory.prevMemory!!
+                    forLines.remove(currentLine)
                     skipCycle()
                 }
             }
