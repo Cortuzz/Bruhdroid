@@ -93,6 +93,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         controller.addObserver(this)
         interpreter.addObserver(this)
 
+        binding.mainPanel.setOnDragListener { v, event ->
+            generateDropAreaForScroll(v, event,30)
+        }
+        binding.buttonsPanel.setOnDragListener { v, event ->
+            generateDropAreaForScroll(v, event,-30)
+        }
 
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
@@ -383,6 +389,25 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         super.onBackPressed()
     }
 
+    private fun generateDropAreaForScroll(v: View, event: DragEvent,speed: Int): Boolean {
+        return when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                v.invalidate()
+                true
+            }
+
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                println("FUCK")
+                binding.mainCode.panBy(0.0F,speed.toFloat(),false)
+                v.invalidate()
+                true
+            }
+
+            else -> {
+                false
+            }
+        }
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun generateDropAreaForBin(v: View, event: DragEvent): Boolean {
