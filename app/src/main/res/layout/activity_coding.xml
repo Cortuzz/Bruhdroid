@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -44,13 +43,14 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.545"
-                    app:srcCompat="@drawable/ic_run" />
+                    app:srcCompat="@drawable/ic_run"
+                    android:contentDescription="@string/start_code" />
 
                 <TextView
                     android:id="@+id/runText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Run"
+                    android:text="@string/start_code"
                     android:textColor="@color/coral"
                     android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -76,7 +76,8 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_debug" />
+                    app:srcCompat="@drawable/ic_debug"
+                    android:contentDescription="@string/debug" />
 
                 <TextView
                     android:id="@+id/debugText"
@@ -84,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="7dp"
                     android:textColor="@color/coral"
-                    android:text="Debug"
+                    android:text="@string/debug"
                     android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/debug"
@@ -101,7 +102,8 @@
                 android:layout_marginEnd="30dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                android:contentDescription="@string/change_theme" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -130,14 +132,15 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_resume" />
+                        app:srcCompat="@drawable/ic_resume"
+                        android:contentDescription="@string/resume" />
 
                     <TextView
                         android:id="@+id/resumeText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/coral"
-                        android:text="Resume"
+                        android:text="@string/resume"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/resume"
@@ -161,14 +164,15 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_pause" />
+                        app:srcCompat="@drawable/ic_pause"
+                        android:contentDescription="@string/pause" />
 
                     <TextView
                         android:id="@+id/pauseText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/coral"
-                        android:text="Pause"
+                        android:text="@string/pause"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/pause"
@@ -192,7 +196,8 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_next" />
+                        app:srcCompat="@drawable/ic_next"
+                        android:contentDescription="@string/next" />
 
                     <TextView
                         android:id="@+id/nextText"
@@ -200,7 +205,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:textColor="@color/coral"
-                        android:text="Next"
+                        android:text="@string/next"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/next"
@@ -224,14 +229,15 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_stop" />
+                        app:srcCompat="@drawable/ic_stop"
+                        android:contentDescription="@string/stop" />
 
                     <TextView
                         android:id="@+id/stopText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/coral"
-                        android:text="Break"
+                        android:text="@string/stop"
                         android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/stop"
@@ -301,7 +307,7 @@
                 android:id="@+id/addBlock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add block"
+                android:text="@string/block"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@id/menuButton"
                 app:layout_constraintStart_toStartOf="@id/menuButton"
@@ -319,24 +325,11 @@
                 app:layout_constraintStart_toEndOf="@id/menuButton"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <Button
-                android:id="@+id/memoryButton"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginStart="14dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="21dp"
-                android:background="@drawable/ic_console"
-                app:layout_constraintEnd_toStartOf="@+id/consoleButton"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/menuButton"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <TextView
                 android:id="@+id/console"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Console"
+                android:text="@string/console"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@id/consoleButton"
                 app:layout_constraintStart_toStartOf="@id/consoleButton"
@@ -358,7 +351,7 @@
                 android:id="@+id/saveCode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save code"
+                android:text="@string/save_program"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@id/saveButton"
                 app:layout_constraintStart_toStartOf="@+id/saveButton"
@@ -381,7 +374,7 @@
                 android:id="@+id/removeBlock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete"
+                android:text="@string/delete"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@id/binButton"
                 app:layout_constraintStart_toStartOf="@+id/binButton"

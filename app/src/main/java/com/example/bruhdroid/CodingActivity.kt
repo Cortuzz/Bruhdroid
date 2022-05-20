@@ -127,9 +127,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
         }
-        binding.memoryButton.setOnClickListener {
-            bottomSheetMemory.show()
-        }
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
         }
