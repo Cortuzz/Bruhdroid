@@ -320,7 +320,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.ELSE to R.layout.block_else,
             Instruction.BREAK to R.layout.block_break,
             Instruction.CONTINUE to R.layout.block_continue,
-            //ELIF to R.layout.block_else, todo
+            Instruction.ELIF to R.layout.block_elif
         )
 
         GlobalScope.launch {
@@ -590,7 +590,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private fun replaceUntilEnd(indexFrom: Int, indexTo: Int) {
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE) //todo: elif / else check
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE)
         val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
         val tempViews = mutableListOf<View>()
         var count = 0
@@ -654,8 +654,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             clearConstraints(set, view)
         }
 
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE) //todo: elif / else check
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE)
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE, Instruction.ELIF)
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE, Instruction.ELIF)
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -845,6 +845,38 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
+        val elseView = layoutInflater.inflate(blockId, null)
+        val index = codingViewList.indexOf(endBlock)
+        codingViewList[index] = elseView
+        try {codingViewList.add(index + 1, endBlock)}
+        catch (e: Exception) {codingViewList.add(endBlock)}
+
+        viewToBlock[elseView] = Block(instr, "")
+        elseView.id = View.generateViewId()
+
+        val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
+        connectorsMap[elseView] = elseConnector
+        elseConnector.id = View.generateViewId()
+        binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
+        if (full) {
+            binding.container.addView(elseView, ConstraintLayout.LayoutParams(900, 300))
+        } else {
+            binding.container.addView(elseView)
+        }
+
+        elseView.setOnDragListener { v, event ->
+            generateDropArea(v, event)
+        }
+
+        GlobalScope.launch {
+            delay(100)
+            runOnUiThread {
+                buildConstraints(binding.container, codingViewList)
+            }
+        }
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
@@ -874,31 +906,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     addElif.visibility = View.INVISIBLE
                     addElse.visibility = View.INVISIBLE
 
-                    val elseView = layoutInflater.inflate(R.layout.block_else, null)
-                    val index = codingViewList.indexOf(endBlock)
-                    codingViewList[index] = elseView
-                    try {codingViewList.add(index + 1, endBlock)}
-                    catch (e: Exception) {codingViewList.add(endBlock)}
-
-                    viewToBlock[elseView] = Block(Instruction.ELSE, "")
-                    elseView.id = View.generateViewId()
-
-                    val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
-                    connectorsMap[elseView] = elseConnector
-                    elseConnector.id = View.generateViewId()
-                    binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
-                    binding.container.addView(elseView)
-
-                    elseView.setOnDragListener { v, event ->
-                        generateDropArea(v, event)
-                    }
-
-                    GlobalScope.launch {
-                        delay(100)
-                        runOnUiThread {
-                            buildConstraints(binding.container, codingViewList)
-                        }
-                    }
+                    addStatementBlock(endBlock, Instruction.ELSE, R.layout.block_else, false)
+                }
+                addElif.setOnClickListener {
+                    addStatementBlock(endBlock, Instruction.ELIF, R.layout.block_elif, true)
                 }
                 endInstruction = Instruction.END
             }
@@ -1027,7 +1038,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private fun showMemoryInfo(info: String) {
         bindingSheetMemory.memory.text = info
-
     }
 
     @OptIn(DelicateCoroutinesApi::class)
