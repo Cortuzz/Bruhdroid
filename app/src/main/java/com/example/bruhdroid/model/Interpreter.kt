@@ -24,9 +24,9 @@ class Interpreter(_blocks: List<Block>? = null) :
         )
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
-    private var functionLines = mutableMapOf<String, Int>()
+    private var functionLines = mutableMapOf<String, MutableList<Int>>()
     private var currentFunction = mutableListOf("GLOBAL")
-    private var functionsVarsMap = mutableMapOf<String, String>()
+    private var functionsVarsMap = mutableMapOf<String, MutableList<String>>()
     private var funcVarsLines = mutableListOf<Int>()
     private var args = mutableListOf<List<String>>()
 
@@ -79,6 +79,13 @@ class Interpreter(_blocks: List<Block>? = null) :
         appliedConditions.clear()
         cycleLines.clear()
         blocks?.clear()
+
+        functionLines.clear()
+        currentFunction = mutableListOf("GLOBAL")
+        functionsVarsMap.clear()
+        funcVarsLines.clear()
+        args.clear()
+
         memory = Memory(null, "GLOBAL SCOPE")
         currentLine = -1
         ioLines = 0
@@ -268,10 +275,6 @@ class Interpreter(_blocks: List<Block>? = null) :
         return mapOf("name" to name, "args" to args)
     }
 
-    private fun funcCall() {
-
-    }
-
     private fun skipFunc() {
         var count = 1
         memory = memory.prevMemory!!
@@ -289,6 +292,16 @@ class Interpreter(_blocks: List<Block>? = null) :
                 return
             }
         }
+    }
+
+    private fun removeFunctionMemory() {
+        while (true) {
+            if (memory.scope.contains("METHOD")) {
+                break
+            }
+            memory = memory.prevMemory!!
+        }
+        memory = memory.prevMemory!!
     }
 
     private fun parse(block: Block): Boolean {
@@ -328,8 +341,14 @@ class Interpreter(_blocks: List<Block>? = null) :
             Instruction.FUNC -> {
                 val name = parseFunc(block.expression)["name"]?.get(0)
                 val argNames = parseFunc(block.expression)["args"]!!
-                memory = Memory(memory, "FUNCTION $name SCOPE")
-                functionLines[name!!] = currentLine
+                memory = Memory(memory, "METHOD $name SCOPE")
+
+                if (name in functionLines) {
+                    functionLines[name]!!.add(currentLine)
+                } else {
+                    functionLines[name!!] = mutableListOf(currentLine)
+                }
+
                 if (currentFunction.last() != name) {
                     skipFunc()
                     return false
@@ -354,25 +373,30 @@ class Interpreter(_blocks: List<Block>? = null) :
 
                     funcVarsLines.add(currentLine)
                     currentFunction.add(parsedName)
-                    currentLine = functionLines[parsedName]!! - 1
+                    currentLine = functionLines[parsedName]!!.removeLast() - 1
                 } else {
                     val funcName = data["name"]!![0]
                     args.add(data["args"]!!)
 
                     funcVarsLines.add(currentLine)
-                    functionsVarsMap[funcName] = name
+                    if (funcName in functionsVarsMap) {
+                        functionsVarsMap[funcName]!!.add(name)
+                    } else {
+                        functionsVarsMap[funcName] = mutableListOf(name)
+                    }
+
                     currentFunction.add(funcName)
-                    currentLine = functionLines[funcName]!! - 1
+                    currentLine = functionLines[funcName]!!.removeLast() - 1
                 }
             }
             Instruction.FUNC_END -> {}
             Instruction.RETURN -> {
                 val value = parseRawBlock(block.expression)
                 val funcName = currentFunction.removeLast()
-                val varName = functionsVarsMap[funcName]!!
+                val varName = functionsVarsMap[funcName]!!.removeLast()
                 currentLine = funcVarsLines.removeLast()
 
-                memory = memory.prevMemory!!
+                removeFunctionMemory()
                 tryPushToAnyMemory(memory, varName, value.type, value)
             }
             Instruction.INPUT -> {

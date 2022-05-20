@@ -15,6 +15,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +24,7 @@ import com.example.bruhdroid.model.Category
 import com.example.bruhdroid.model.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.src.Instruction
+import com.example.bruhdroid.model.src.ViewBlock
 import com.example.bruhdroid.model.src.blocks.Block
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -30,6 +32,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.properties.Delegates
 
 
 class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
@@ -61,16 +64,33 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
     private lateinit var bottomSheetMemory: BottomSheetDialog
+    private var dp by Delegates.notNull<Float>()
 
+    private var layoutMap = mapOf<Instruction, ViewBlock>()
     private val interpreter = Interpreter()
     private val controller = Controller()
     private val startConnectingInstructions = listOf(Instruction.WHILE, Instruction.IF, Instruction.FUNC)
     private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
 
+
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        dp = this.resources.displayMetrics.density
+        layoutMap = mapOf(
+            Instruction.PRAGMA to ViewBlock("Pragma", R.drawable.ic_block_pragma),
+            Instruction.PRINT to  ViewBlock("Print", R.drawable.ic_block_print),
+            Instruction.INPUT to  ViewBlock("Input", R.drawable.ic_block_input),
+            Instruction.INIT to  ViewBlock("Init", R.drawable.ic_block_init),
+            Instruction.WHILE to  ViewBlock("While", R.drawable.ic_block_while),
+            Instruction.IF to  ViewBlock("If", R.drawable.ic_block_if),
+            Instruction.SET to ViewBlock("Set", R.drawable.ic_block_set),
+            Instruction.BREAK to ViewBlock("Break", R.drawable.ic_block_break, false),
+            Instruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
+            Instruction.FUNC to ViewBlock("Method", R.drawable.ic_block_func),
+            Instruction.RETURN to ViewBlock("Return", R.drawable.ic_block_return),
+            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_call)
+        )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
         setBindingSheetBlocks()
@@ -93,6 +113,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             parseBlocks(blocks)
         }
 
+
         controller.addObserver(this)
         interpreter.addObserver(this)
 
@@ -105,9 +126,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
-        }
-        binding.memoryButton.setOnClickListener {
-            bottomSheetMemory.show()
         }
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
@@ -175,6 +193,19 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @SuppressLint("InflateParams")
+    private fun makeBlockView(viewBlock: ViewBlock): View {
+            val block = when(viewBlock.hasText) {
+                true -> layoutInflater.inflate(R.layout.block, null)
+                false -> layoutInflater.inflate(R.layout.block_non_text, null)
+            }
+
+        block.findViewById<TextView>(R.id.textView).text = viewBlock.label
+        block.background = ContextCompat.getDrawable(this, viewBlock.drawable)
+        return block
+    }
+
+
     private fun setBindingSheetBlocks() {
         bindingSheetMenu =
             DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
@@ -191,79 +222,28 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         categoryRecycler(categoryList)
 
-        val blockInit = layoutInflater.inflate(R.layout.block_init, null)
-        val blockSet = layoutInflater.inflate(R.layout.block_set, null)
-        val blockPragma = layoutInflater.inflate(R.layout.pragma_block, null)
-        val blockInput = layoutInflater.inflate(R.layout.block_input, null)
-        val blockPrint = layoutInflater.inflate(R.layout.block_print, null)
-        val blockWhile = layoutInflater.inflate(R.layout.block_while, null)
-        val blockBreak = layoutInflater.inflate(R.layout.block_break, null)
-        val blockContinue = layoutInflater.inflate(R.layout.block_continue, null)
-        val blockIf = layoutInflater.inflate(R.layout.block_if, null)
-
-        val blockReturn = layoutInflater.inflate(R.layout.block_return, null)
-        val blockFunc = layoutInflater.inflate(R.layout.block_func, null)
-        val blockFuncCall = layoutInflater.inflate(R.layout.block_func_call, null)
-
-        blockInit.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false)
-        }
-        blockSet.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_set, Instruction.SET, false)
-        }
-        blockPragma.setOnClickListener {
-            buildBlock(prevBlock, R.layout.pragma_block, Instruction.PRAGMA, false)
-        }
-        blockInput.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_input, Instruction.INPUT, false)
-        }
-        blockPrint.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_print, Instruction.PRINT, false)
-        }
-        blockWhile.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_while, Instruction.WHILE, true)
-        }
-        blockBreak.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_break, Instruction.BREAK, false)
-        }
-        blockContinue.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_continue, Instruction.CONTINUE, false)
-        }
-        blockIf.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
-        }
-        blockReturn.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_return, Instruction.RETURN, false)
-        }
-        blockFunc.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_func, Instruction.FUNC, true)
-        }
-        blockFuncCall.setOnClickListener {
-            buildBlock(prevBlock, R.layout.block_func_call, Instruction.FUNC_CALL, false)
-        }
-
         val firstCategory = LinkedList<View>()
         val secondCategory = LinkedList<View>()
         val thirdCategory = LinkedList<View>()
         val fourthCategory = LinkedList<View>()
         val fifthCategory = LinkedList<View>()
 
-        firstCategory.add(blockInit)
-        firstCategory.add(blockSet)
+        for (instr in layoutMap.keys) {
+            val view = makeBlockView(layoutMap[instr]!!)
 
-        secondCategory.add(blockPragma)
-        secondCategory.add(blockInput)
-        secondCategory.add(blockPrint)
-
-        thirdCategory.add(blockWhile)
-        thirdCategory.add(blockBreak)
-        thirdCategory.add(blockContinue)
-
-        fourthCategory.add(blockIf)
-
-        fifthCategory.add(blockReturn)
-        fifthCategory.add(blockFunc)
-        fifthCategory.add(blockFuncCall)
+            view.setOnClickListener {
+                buildBlock(prevBlock, makeBlockView(layoutMap[instr]!!), instr,
+                    instr in startConnectingInstructions)
+            }
+            when (instr) {
+                in listOf(Instruction.INIT,Instruction.SET) -> firstCategory.add(view)
+                in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT) -> secondCategory.add(view)
+                in listOf(Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE) -> thirdCategory.add(view)
+                in listOf(Instruction.IF) -> fourthCategory.add(view)
+                in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)-> fifthCategory.add(view)
+                else -> {}
+            }
+        }
 
         categoryBlocks.add(firstCategory)
         categoryBlocks.add(secondCategory)
@@ -271,10 +251,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         categoryBlocks.add(fourthCategory)
         categoryBlocks.add(fifthCategory)
 
-        for (view in categoryBlocks[0]) {
-            val params = ConstraintLayout.LayoutParams(1000, 300)
-            bindingSheetMenu.blocks.addView(view, params)
-        }
+        onCategoryClick(0)
     }
 
     private fun categoryRecycler(categoryList: LinkedList<Category>) {
@@ -287,10 +264,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     override fun onCategoryClick(position: Int) {
         bindingSheetMenu.blocks.removeAllViews()
+        val blockMenuParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            (110 * dp).toInt())
 
         for (view in categoryBlocks[position]) {
-            val params = ConstraintLayout.LayoutParams(1000, 300)
-            bindingSheetMenu.blocks.addView(view, params)
+            bindingSheetMenu.blocks.addView(view, blockMenuParams)
         }
     }
 
@@ -329,29 +307,23 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
-        val layoutMap = mapOf(
-            Instruction.PRAGMA to R.layout.pragma_block,
-            Instruction.PRINT to R.layout.block_print,
-            Instruction.INPUT to R.layout.block_input,
-            Instruction.INIT to R.layout.block_init,
-            Instruction.WHILE to R.layout.block_while,
-            Instruction.IF to R.layout.block_if,
-            Instruction.SET to R.layout.block_set,
+        val map2=mapOf(
             Instruction.END_WHILE to R.layout.empty_block,
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
-            Instruction.BREAK to R.layout.block_break,
-            Instruction.CONTINUE to R.layout.block_continue,
-            Instruction.ELIF to R.layout.block_elif
-        )
+            Instruction.ELIF to R.layout.block_elif,
+            Instruction.FUNC_END to R.layout.block_func_end)
 
         GlobalScope.launch {
             for (block in blocks) {
                 block as Block
                 val instr = block.instruction
-                val view = layoutInflater.inflate(layoutMap[instr]!!, null)
+                val view = if(instr in layoutMap) { makeBlockView(layoutMap[instr]!!) }
+                else { layoutInflater.inflate(map2[instr]!!, null) }
+
                 view.id = View.generateViewId()
                 generateBreakpoint(view)
                 view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
@@ -369,10 +341,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     }
                 }
 
-                if (viewToBlock[view]!!.instruction !in connectingInstructions){
+                if (viewToBlock[view]!!.instruction !in connectingInstructions) {
                     generateDragArea(view)
                     runOnUiThread {
-                        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+                        binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
                     }
                 } else {
                     runOnUiThread {
@@ -394,7 +366,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     override fun onBackPressed() {
-        if (!Controller.suppressingWarns) { // todo: Save check
+        if (!Controller.suppressingWarns) {
             val builder = buildAlertDialog(
                 "DATA WARNING", "There are unsaved changes.\n\n" +
                         "This action will wipe all unsaved changes."
@@ -505,6 +477,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         makeBlocksVisible(view)
     }
 
+    @SuppressLint("InflateParams")
     private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<View> {
         val tempList = mutableListOf<View>()
         view.setOnLongClickListener(null)
@@ -868,6 +841,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
         val elseView = layoutInflater.inflate(blockId, null)
@@ -885,9 +859,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         elseConnector.id = View.generateViewId()
         binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
         if (full) {
-            binding.container.addView(elseView, ConstraintLayout.LayoutParams(900, 300))
+            binding.container.addView(elseView, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         } else {
-            binding.container.addView(elseView)
+            binding.container.addView(elseView, ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt()))
         }
 
         elseView.setOnDragListener { v, event ->
@@ -904,8 +878,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InflateParams")
-    private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
-        val view = layoutInflater.inflate(layoutId, null)
+    private fun buildBlock(prevView: View?, view: View, instruction: Instruction, connect: Boolean = false) {
         var endBlock: View? = null
         var nestedConnector: View? = null
         val connector = layoutInflater.inflate(R.layout.block_connector, null)
@@ -918,27 +891,31 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (connect) {
             val endInstruction: Instruction
 
-            if (instruction == Instruction.WHILE) {
-                endBlock = layoutInflater.inflate(R.layout.empty_block, null)
-                endInstruction = Instruction.END_WHILE
-            } else if (instruction == Instruction.FUNC) {
-                endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
-                endInstruction = Instruction.FUNC_END
-            } else {
-                endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
-
-                val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
-                val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
-                addElse.setOnClickListener {
-                    addElif.visibility = View.INVISIBLE
-                    addElse.visibility = View.INVISIBLE
-
-                    addStatementBlock(endBlock, Instruction.ELSE, R.layout.block_else, false)
+            when (instruction) {
+                Instruction.WHILE -> {
+                    endBlock = layoutInflater.inflate(R.layout.empty_block, null)
+                    endInstruction = Instruction.END_WHILE
                 }
-                addElif.setOnClickListener {
-                    addStatementBlock(endBlock, Instruction.ELIF, R.layout.block_elif, true)
+                Instruction.FUNC -> {
+                    endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
+                    endInstruction = Instruction.FUNC_END
                 }
-                endInstruction = Instruction.END
+                else -> {
+                    endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
+
+                    val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
+                    val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
+                    addElse.setOnClickListener {
+                        addElif.visibility = View.INVISIBLE
+                        addElse.visibility = View.INVISIBLE
+
+                        addStatementBlock(endBlock, Instruction.ELSE, R.layout.block_else, false)
+                    }
+                    addElif.setOnClickListener {
+                        addStatementBlock(endBlock, Instruction.ELIF, R.layout.block_elif, true)
+                    }
+                    endInstruction = Instruction.END
+                }
             }
 
             generateBreakpoint(endBlock)
@@ -960,9 +937,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
-            binding.container.addView(view)
+            binding.container.addView(view, ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt()))
         } else {
-            binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+            binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         }
 
         if (nestedConnector != null) {
@@ -1074,7 +1051,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private fun showMemoryInfo(info: String) {
-        bindingSheetMemory.memory.text = info
+        val text = bindingSheetConsole.console.text.toString() +
+                "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀\nDEBUGGER:\n" + info + "" +
+                "\n⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀"
+        bindingSheetConsole.console.text = text
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -1113,9 +1093,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if ((debugType == Debug.NEXT ||
                         debugType == Debug.BREAKPOINT && breakpoint == true)) {
                 val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
-                showMemoryInfo(interpreter.getMemoryData())
 
                 runOnUiThread {
+                    showMemoryInfo(interpreter.getMemoryData())
                     button?.setBackgroundResource(when (debugType) {
                         Debug.NEXT -> android.R.drawable.presence_away
                         Debug.BREAKPOINT -> android.R.drawable.presence_busy

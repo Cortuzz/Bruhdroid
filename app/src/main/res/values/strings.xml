@@ -18,7 +18,7 @@
     <string name="logo">Logo</string>
     <string name="suppress_data_warning">Suppress</string>
 
-    <string name="start_code">Launch</string>
+    <string name="start_code">Run</string>
     <string name="debug">Debug</string>
     <string name="choose_block">Blocks</string>
     <string name="block">Add block</string>
@@ -43,4 +43,8 @@
     <string name="pause">Pause</string>
     <string name="next">Next</string>
     <string name="stop">Break</string>
+    <string name="save_program">Save code</string>
+    <string name="delete">Delete</string>
+    <string name="add_block">add_block</string>
+    <string name="change_theme">Change theme</string>
 </resources>
