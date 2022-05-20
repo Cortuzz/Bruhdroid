@@ -21,20 +21,18 @@
     <color name="secondary">#E0D9D9</color>
     <color name="error_color">#E91E63</color>
 
-    <color name="accent_button">#E91E63</color>
+    <color name="accent_button">#C7275D</color>
     <color name="default_button">#CECECE</color>
     <color name="connector">#7A7272</color>
     <color name="expression_color">#373737</color>
-    <color name="accent_button">#C7275D</color>
-    <color name="default_button">#FFFFFF</color>
 
     <color name="input_block">#625868</color>
     <color name="output_block">#3B4540</color>
     <color name="set_block">#563434</color>
     <color name="init_block">#716565</color>
     <color name="statement_block">#374140</color>
-    <color name="cycle_block">6D5E5E</color>
-    <color name="method_block">677175</color>
+    <color name="cycle_block">#6D5E5E</color>
+    <color name="method_block">#677175</color>
     <color name="continue_block">#333341</color>
     <color name="break_block">#444855</color>
     <color name="return_block">#485150</color>

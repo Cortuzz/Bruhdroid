@@ -3,6 +3,7 @@ package com.example.bruhdroid
 import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
@@ -40,15 +41,15 @@ class TemplatesActivity : AppCompatActivity() {
 
             val buttonBinding: ButtonBinding = DataBindingUtil.inflate(layoutInflater, R.layout.button, null, false)
             val dp: Float = this.resources.displayMetrics.density
-            val button = buttonBinding.button
+            var button = buttonBinding.text
 
             button.text = file.nameWithoutExtension
             buttonBinding.deleteButton.setOnClickListener{
                 file.delete()
                 binding.savedPrograms.removeView(buttonBinding.root)
             }
-            button.height = 50 * dp.toInt()
-            button.width = 300 * dp.toInt()
+
+            button.width = 400 * dp.toInt()
 
             val params = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
