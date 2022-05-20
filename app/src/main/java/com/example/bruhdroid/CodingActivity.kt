@@ -1046,7 +1046,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private fun showMemoryInfo(info: String) {
-        bindingSheetMemory.memory.text = info
+        val text = bindingSheetConsole.console.text.toString() +
+                "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀\nDEBUGGER:\n" + info + "" +
+                "\n⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀"
+        bindingSheetConsole.console.text = text
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -1085,9 +1088,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if ((debugType == Debug.NEXT ||
                         debugType == Debug.BREAKPOINT && breakpoint == true)) {
                 val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
-                showMemoryInfo(interpreter.getMemoryData())
 
                 runOnUiThread {
+                    showMemoryInfo(interpreter.getMemoryData())
                     button?.setBackgroundResource(when (debugType) {
                         Debug.NEXT -> android.R.drawable.presence_away
                         Debug.BREAKPOINT -> android.R.drawable.presence_busy
