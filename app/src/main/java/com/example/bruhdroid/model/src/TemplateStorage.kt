@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.src.blocks.Block
 class TemplateStorage {
     companion object {
         enum class Template {
-            BUBBLE_SORT, INFINITY_LOOP, AHEGAO
+            BUBBLE_SORT, INFINITY_LOOP, AHEGAO, FACTORIAL
         }
 
         private val templates = mutableMapOf(
@@ -58,6 +58,13 @@ class TemplateStorage {
             Block(Instruction.PRINT, "\"⠄⠄⠄⠄⠈⠛⢿⣿⣿⣿⠁⠞⢿⣿⣿⡄⢿⣿⡇⣸⣿⣿⠿⠛⠁⠄⠄⠄⠄⠄\""),
             Block(Instruction.PRINT, "\"⠄⠄⠄⠄⠄⠄⠄⠉⠻⣿⣿⣾⣦⡙⠻⣷⣾⣿⠃⠿⠋⠁⠄⠄⠄⠄⠄⢀⣠⣴\""),
             Block(Instruction.PRINT, "\"⣿⣿⣿⣶⣶⣮⣥⣒⠲⢮⣝⡿⣿⣿⡆⣿⡿⠃⠄⠄⠄⠄⠄⠄⠄⣠⣴⣿⣿⣿\""),
+        ),
+        Template.FACTORIAL to arrayOf(
+            Block(Instruction.FUNC, "fact(x)"),
+                Block(Instruction.IF, "x <= 1"),
+                    Block(Instruction.RETURN, "1"),
+                Block(Instruction.END),
+
         ))
 
         fun getBlocks(template: Template): Array<Block>? {
