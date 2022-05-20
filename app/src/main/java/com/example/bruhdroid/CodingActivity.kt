@@ -62,6 +62,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private val interpreter = Interpreter()
     private val controller = Controller()
+    private val startConnectingInstructions = listOf(Instruction.WHILE, Instruction.IF, Instruction.FUNC)
     private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -442,7 +443,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 val index = -1
                 val instr = viewToBlock[currentDrag]!!.instruction
 
-                if (instr == Instruction.WHILE || instr == Instruction.IF || instr == Instruction.FUNC) {
+                if (instr in startConnectingInstructions) {
                     addBlocksToBin(currentDrag, true)
                     reBuildBlocks(index, currentDrag, true)
                 } else {
@@ -525,9 +526,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 binding.container.removeView(connectorsMap[currView])
 
                 val block = viewToBlock[currView]
-                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END || block.instruction == Instruction.FUNC_END) {
+                if (block!!.instruction in connectingInstructions) {
                     count--
-                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF || block.instruction == Instruction.FUNC) {
+                } else if (block.instruction in startConnectingInstructions) {
                     count++
                 }
                 index++
@@ -595,7 +596,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
 
                 val instr = viewToBlock[currentDrag]!!.instruction
-                if (instr == Instruction.WHILE || instr == Instruction.IF) {
+                if (instr in  startConnectingInstructions) {
                     reBuildBlocks(newIndex, currentDrag, true)
                 } else {
                     reBuildBlocks(newIndex, currentDrag)
@@ -612,15 +613,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private fun replaceUntilEnd(indexFrom: Int, indexTo: Int) {
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.FUNC)
         val tempViews = mutableListOf<View>()
         var count = 0
 
         do {
             when (viewToBlock[codingViewList[indexFrom]]!!.instruction) {
-                in endInstructions -> --count
-                in startInstructions -> ++count
+                in connectingInstructions -> --count
+                in startConnectingInstructions -> ++count
                 else -> {}
             }
             val view = codingViewList.removeAt(indexFrom)
@@ -765,9 +764,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun makeBlocksInvisible(v: View) {
         v.visibility = View.INVISIBLE
 
-        if (viewToBlock[v]!!.instruction == Instruction.WHILE ||
-            viewToBlock[v]!!.instruction == Instruction.IF ||
-            viewToBlock[v]!!.instruction == Instruction.FUNC ) {
+        if (viewToBlock[v]!!.instruction in startConnectingInstructions) {
 
             var index = codingViewList.indexOf(v) + 1
             var count = 1
@@ -802,11 +799,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     connectorsMap[currentView]!!.visibility = View.INVISIBLE
                 }
 
-                if (block!!.instruction == Instruction.END_WHILE ||
-                    block.instruction == Instruction.END || block.instruction == Instruction.FUNC_END) {
+                if (block!!.instruction in connectingInstructions) {
                     count--
-                } else if (block.instruction == Instruction.WHILE ||
-                    block.instruction == Instruction.IF || block.instruction == Instruction.FUNC) {
+                } else if (block.instruction in startConnectingInstructions) {
                     count++
                 }
                 index++
@@ -824,8 +819,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun makeBlocksVisible(v: View) {
         v.visibility = View.VISIBLE
 
-        if (viewToBlock[v]!!.instruction == Instruction.WHILE ||
-            viewToBlock[v]!!.instruction == Instruction.IF || viewToBlock[v]!!.instruction == Instruction.FUNC) {
+        if (viewToBlock[v]!!.instruction in startConnectingInstructions) {
             var index = codingViewList.indexOf(v) + 1
             var count = 1
 
@@ -836,11 +830,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
                 }
 
-                if ((block!!.instruction == Instruction.END_WHILE) ||
-                    (block.instruction == Instruction.END) || (block.instruction == Instruction.FUNC_END)) {
+                if (block!!.instruction in connectingInstructions) {
                     count--
-                } else if ((block.instruction == Instruction.WHILE) ||
-                    (block.instruction == Instruction.IF) || (block.instruction == Instruction.FUNC)) {
+                } else if (block.instruction in startConnectingInstructions) {
                     count++
                 }
                 index++
