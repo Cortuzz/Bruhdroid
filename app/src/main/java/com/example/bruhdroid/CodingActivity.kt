@@ -547,28 +547,27 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         view.setOnClickListener {
-            for (view in tempList) {
-                bindingSheetBin.deletedList.removeView(view)
-                if (connectorsMap[view] != null) {
-                    bindingSheetBin.deletedList.removeView(connectorsMap[view])
+            for (tempView in tempList) {
+                bindingSheetBin.deletedList.removeView(tempView)
+                if (connectorsMap[tempView] != null) {
+                    bindingSheetBin.deletedList.removeView(connectorsMap[tempView])
                 }
-                binViewList.remove(view)
+                binViewList.remove(tempView)
 
-                binding.container.addView(view)
-                if (connectorsMap[view] != null) {
-                    binding.container.addView(connectorsMap[view])
+                binding.container.addView(tempView)
+                if (connectorsMap[tempView] != null) {
+                    binding.container.addView(connectorsMap[tempView])
                 } else if (!codingViewList.isEmpty()) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
                     connector.id = View.generateViewId()
                     binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-                    connectorsMap[view] = connector
+                    connectorsMap[tempView] = connector
                 }
 
-                view.bringToFront()
-                codingViewList.add(view)
-
-                if (viewToBlock[view]!!.instruction !in connectingInstructions) {
-                    generateDragArea(view)
+                tempView.bringToFront()
+                codingViewList.add(tempView)
+                if (viewToBlock[tempView]!!.instruction !in connectingInstructions) {
+                    generateDragArea(tempView)
                 }
             }
             buildConstraints(bindingSheetBin.deletedList, binViewList)
@@ -737,7 +736,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     val connector = when {
                         codingViewList.indexOf(drag) == 0 -> connectorsMap[codingViewList[1]]
                         index == 0 -> connectorsMap[drag]
-                        else -> {}
+                        else -> {throw Exception()}
                     }
                     connectorsMap[codingViewList[0]] = connector as View
                 }
@@ -790,12 +789,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
                 if (ifCount != -1) {
                     when (block!!.instruction) {
-                        Instruction.IF -> {
-                            ifCount++
-                        }
-                        Instruction.ELSE -> {
-                            ifCount--
-                        }
+                        Instruction.IF -> ifCount++
+                        Instruction.ELSE -> ifCount--
+                        else -> {}
                     }
                 }
 
@@ -878,6 +874,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
         val elseView = layoutInflater.inflate(blockId, null)
         generateBreakpoint(elseView)
@@ -911,6 +908,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
@@ -1062,7 +1060,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         val dialog = Dialog(this)
         dialog.setCancelable(true)
         dialog.setContentView(R.layout.input_dialog)
-        dialog.findViewById<TextView>(R.id.textView).text = "Program name:"
+        dialog.findViewById<TextView>(R.id.textView).text = getString(R.string.save_dialog_title)
 
         val inputVal: EditText = dialog.findViewById(R.id.input)
         val submitButton: Button = dialog.findViewById(R.id.button)
