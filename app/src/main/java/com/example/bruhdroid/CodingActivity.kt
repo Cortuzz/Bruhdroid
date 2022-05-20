@@ -193,6 +193,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @SuppressLint("InflateParams")
     private fun makeBlockView(viewBlock: ViewBlock): View {
             val block = when(viewBlock.hasText) {
                 true -> layoutInflater.inflate(R.layout.block, null)
@@ -232,17 +233,17 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             view.setOnClickListener {
                 buildBlock(prevBlock, makeBlockView(layoutMap[instr]!!), instr,
-                    instr == Instruction.WHILE || instr == Instruction.IF || instr == Instruction.FUNC)
+                    instr in startConnectingInstructions)
             }
             when (instr) {
-                in listOf(Instruction.INIT,Instruction.SET)->firstCategory.add(view)
-                in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT)->secondCategory.add(view)
-                in listOf(Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE)->thirdCategory.add(view)
-                in listOf(Instruction.IF)->fourthCategory.add(view)
-                in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)->fifthCategory.add(view)
+                in listOf(Instruction.INIT,Instruction.SET) -> firstCategory.add(view)
+                in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT) -> secondCategory.add(view)
+                in listOf(Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE) -> thirdCategory.add(view)
+                in listOf(Instruction.IF) -> fourthCategory.add(view)
+                in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)-> fifthCategory.add(view)
+                else -> {}
             }
         }
-
 
         categoryBlocks.add(firstCategory)
         categoryBlocks.add(secondCategory)
@@ -306,6 +307,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
         val map2=mapOf(
@@ -346,7 +348,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     }
                 } else {
                     runOnUiThread {
-                        binding.container.addView(view) // todo
+                        binding.container.addView(view)
                     }
                 }
 
@@ -475,6 +477,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         makeBlocksVisible(view)
     }
 
+    @SuppressLint("InflateParams")
     private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<View> {
         val tempList = mutableListOf<View>()
         view.setOnLongClickListener(null)
@@ -840,6 +843,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
+    @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
         val elseView = layoutInflater.inflate(blockId, null)
@@ -889,27 +893,31 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (connect) {
             val endInstruction: Instruction
 
-            if (instruction == Instruction.WHILE) {
-                endBlock = layoutInflater.inflate(R.layout.empty_block, null)
-                endInstruction = Instruction.END_WHILE
-            } else if (instruction == Instruction.FUNC) {
-                endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
-                endInstruction = Instruction.FUNC_END
-            } else {
-                endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
-
-                val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
-                val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
-                addElse.setOnClickListener {
-                    addElif.visibility = View.INVISIBLE
-                    addElse.visibility = View.INVISIBLE
-
-                    addStatementBlock(endBlock, Instruction.ELSE, R.layout.block_else, false)
+            when (instruction) {
+                Instruction.WHILE -> {
+                    endBlock = layoutInflater.inflate(R.layout.empty_block, null)
+                    endInstruction = Instruction.END_WHILE
                 }
-                addElif.setOnClickListener {
-                    addStatementBlock(endBlock, Instruction.ELIF, R.layout.block_elif, true)
+                Instruction.FUNC -> {
+                    endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
+                    endInstruction = Instruction.FUNC_END
                 }
-                endInstruction = Instruction.END
+                else -> {
+                    endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
+
+                    val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
+                    val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
+                    addElse.setOnClickListener {
+                        addElif.visibility = View.INVISIBLE
+                        addElse.visibility = View.INVISIBLE
+
+                        addStatementBlock(endBlock, Instruction.ELSE, R.layout.block_else, false)
+                    }
+                    addElif.setOnClickListener {
+                        addStatementBlock(endBlock, Instruction.ELIF, R.layout.block_elif, true)
+                    }
+                    endInstruction = Instruction.END
+                }
             }
 
             generateBreakpoint(endBlock)
