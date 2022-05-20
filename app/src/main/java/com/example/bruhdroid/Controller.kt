@@ -115,7 +115,7 @@ class Controller: Observable() {
                 resumeProgram()
             }
         } catch (e: UnhandledError) {
-            internalErrors = e.message.toString().dropLast(2)
+            internalErrors = e.message.toString()
             setChanged()
             notifyObservers()
         } catch (e: RuntimeError) {
@@ -131,6 +131,9 @@ class Controller: Observable() {
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
             notifying = true
+        } catch (e: UnhandledError) {
+            internalErrors = e.message.toString()
+            notifying = true
         }
         if (notifying) {
             setChanged()
@@ -143,6 +146,8 @@ class Controller: Observable() {
             interpreter.run()
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
+        } catch (e: UnhandledError) {
+            internalErrors = e.message.toString()
         }
         setChanged()
         notifyObservers()
