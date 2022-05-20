@@ -5,13 +5,10 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ClipData
 import android.content.DialogInterface
-import android.graphics.Paint
 import android.os.Bundle
-import android.text.Layout
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
-import android.view.Gravity
 import android.view.View
 import android.view.View.DragShadowBuilder
 import android.widget.*
@@ -27,17 +24,15 @@ import com.example.bruhdroid.model.Category
 import com.example.bruhdroid.model.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.src.Instruction
+import com.example.bruhdroid.model.src.ViewBlock
 import com.example.bruhdroid.model.src.blocks.Block
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 import java.util.*
-
-
-data class ViewBlock(val label: String, val drawable: Int, val hasText: Boolean = true)
+import kotlin.properties.Delegates
 
 
 class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
@@ -69,6 +64,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
     private lateinit var bottomSheetMemory: BottomSheetDialog
+    private var dp by Delegates.notNull<Float>()
 
     private var layoutMap = mapOf<Instruction, ViewBlock>()
     private val interpreter = Interpreter()
@@ -80,6 +76,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dp = this.resources.displayMetrics.density
         layoutMap = mapOf(
             Instruction.PRAGMA to ViewBlock("Pragma", R.drawable.ic_block_pragma),
             Instruction.PRINT to  ViewBlock("Print", R.drawable.ic_block_print),
@@ -235,6 +232,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         for (instr in layoutMap.keys) {
             val view = makeBlockView(layoutMap[instr]!!)
+
             view.setOnClickListener {
                 buildBlock(prevBlock, makeBlockView(layoutMap[instr]!!), instr,
                     instr == Instruction.WHILE || instr == Instruction.IF || instr == Instruction.FUNC)
@@ -255,10 +253,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         categoryBlocks.add(fourthCategory)
         categoryBlocks.add(fifthCategory)
 
-        for (view in categoryBlocks[0]) {
-            val params = ConstraintLayout.LayoutParams(1000, 300)
-            bindingSheetMenu.blocks.addView(view, params)
-        }
+        onCategoryClick(0)
     }
 
     private fun categoryRecycler(categoryList: LinkedList<Category>) {
@@ -271,10 +266,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     override fun onCategoryClick(position: Int) {
         bindingSheetMenu.blocks.removeAllViews()
+        val blockMenuParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            (120 * dp).toInt())
 
         for (view in categoryBlocks[position]) {
-            val params = ConstraintLayout.LayoutParams(1000, 300)
-            bindingSheetMenu.blocks.addView(view, params)
+            bindingSheetMenu.blocks.addView(view, blockMenuParams)
         }
     }
 
@@ -321,7 +317,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.ELSE to R.layout.block_else,
             Instruction.ELIF to R.layout.block_elif)
 
-
         GlobalScope.launch {
             for (block in blocks) {
                 block as Block
@@ -349,7 +344,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 if (viewToBlock[view]!!.instruction !in connectingInstructions){
                     generateDragArea(view)
                     runOnUiThread {
-                        binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+                        binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
                     }
                 } else {
                     runOnUiThread {
@@ -371,7 +366,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     override fun onBackPressed() {
-        if (!Controller.suppressingWarns) { // todo: Save check
+        if (!Controller.suppressingWarns) {
             val builder = buildAlertDialog(
                 "DATA WARNING", "There are unsaved changes.\n\n" +
                         "This action will wipe all unsaved changes."
@@ -864,7 +859,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         elseConnector.id = View.generateViewId()
         binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
         if (full) {
-            binding.container.addView(elseView, ConstraintLayout.LayoutParams(900, 300))
+            binding.container.addView(elseView, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         } else {
             binding.container.addView(elseView)
         }
@@ -940,7 +935,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
             binding.container.addView(view)
         } else {
-            binding.container.addView(view, ConstraintLayout.LayoutParams(900, 300))
+            binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         }
 
         if (nestedConnector != null) {
