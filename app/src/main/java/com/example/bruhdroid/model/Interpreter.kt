@@ -30,6 +30,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     private var functionsVarsMap = mutableMapOf<String, MutableList<String>>()
     private var funcVarsLines = mutableListOf<Int>()
     private var args = mutableListOf<List<String>>()
+    private var forLines = mutableListOf<Int>()
 
     fun initBlocks(_blocks: List<Block>) {
         clear()
@@ -179,10 +180,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         while (currentLine < blocks!!.size - 1) {
             val block = blocks!![++currentLine]
 
-            if (block.instruction == Instruction.WHILE) {
+            if (block.instruction in listOf(Instruction.WHILE, Instruction.FOR)) {
                 count++
             }
-            if (block.instruction == Instruction.END_WHILE) {
+            if (block.instruction in listOf(Instruction.END_WHILE, Instruction.END_FOR)) {
                 count--
             }
 
@@ -395,7 +396,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 currentLine = funcVarsLines.removeLast()
 
                 removeFunctionMemory()
-                tryPushToAnyMemory(memory, varName, value.type, value)
+                pushToLocalMemory(varName, value.type, value)
             }
             Instruction.INPUT -> {
                 waitingForInput = true
@@ -439,10 +440,29 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 return false
             }
             Instruction.WHILE -> {
-                memory = Memory(memory, "WHILE SCOPE")
+                memory = Memory(memory, "WHILE ITERATION SCOPE")
                 if (checkStatement(block.expression)) {
                     cycleLines.add(currentLine)
                 } else {
+                    skipCycle()
+                }
+            }
+            Instruction.FOR -> {
+                val raw = block.expression.split(",")
+                if (currentLine !in forLines) {
+                    memory = Memory(memory, "FOR SCOPE")
+                    parseRawBlock(raw[0], true)
+                    forLines.add(currentLine)
+                } else {
+                    parseRawBlock(raw[2])
+                }
+
+                memory = Memory(memory, "FOR ITERATION SCOPE")
+                if (checkStatement(raw[1])) {
+                    cycleLines.add(currentLine)
+                } else {
+                    memory = memory.prevMemory!!
+                    forLines.remove(currentLine)
                     skipCycle()
                 }
             }
@@ -451,6 +471,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 memory = memory.prevMemory!!
             }
             Instruction.END_WHILE -> {
+                currentLine = cycleLines.removeLast() - 1
+                memory = memory.prevMemory!!
+            }
+            Instruction.END_FOR -> {
                 currentLine = cycleLines.removeLast() - 1
                 memory = memory.prevMemory!!
             }

@@ -23,6 +23,12 @@ class TemplatesActivity : AppCompatActivity() {
         binding.bubbleSort.setOnClickListener {
             openCodingActivity(TemplateStorage.getBlocks(Template.BUBBLE_SORT))
         }
+        binding.factorial.setOnClickListener {
+            openCodingActivity(TemplateStorage.getBlocks(Template.FACTORIAL))
+        }
+        binding.fibonacci.setOnClickListener {
+            openCodingActivity(TemplateStorage.getBlocks(Template.FIBONACCI))
+        }
         binding.infinityLoop.setOnClickListener {
             openCodingActivity(TemplateStorage.getBlocks(Template.INFINITY_LOOP))
         }

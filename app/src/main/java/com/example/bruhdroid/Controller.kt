@@ -51,6 +51,8 @@ class Controller: Observable() {
                 "FUNC_END" to Instruction.FUNC_END,
                 "FUNC_CALL" to Instruction.FUNC_CALL,
                 "RETURN" to Instruction.RETURN,
+                "FOR" to Instruction.FOR,
+                "END_FOR" to Instruction.END_FOR
             )
 
             val blocks = mutableListOf<Block>()
