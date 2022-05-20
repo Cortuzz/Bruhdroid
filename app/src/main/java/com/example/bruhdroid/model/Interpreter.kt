@@ -1,7 +1,5 @@
 package com.example.bruhdroid.model
 
-import androidx.core.text.isDigitsOnly
-import com.example.bruhdroid.CodingActivity
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
@@ -26,6 +24,11 @@ class Interpreter(_blocks: List<Block>? = null) :
         )
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
+    private var functionLines = mutableMapOf<String, Int>()
+    private var currentFunction = mutableListOf("GLOBAL")
+    private var functionsVarsMap = mutableMapOf<String, String>()
+    private var funcVarsLines = mutableListOf<Int>()
+    private var args = mutableListOf<List<String>>()
 
     fun initBlocks(_blocks: List<Block>) {
         clear()
@@ -252,6 +255,42 @@ class Interpreter(_blocks: List<Block>? = null) :
         }
     }
 
+    private fun parseFunc(expression: String): Map<String, List<String>> {
+        val split = expression.replace(")", "").replace(" ","").
+        split("(").toMutableList()
+
+        val name = listOf(split.removeFirst())
+        val args = split.joinToString().split(",")
+        if (args.firstOrNull() == "") {
+            return mapOf("name" to name, "args" to listOf())
+        }
+
+        return mapOf("name" to name, "args" to args)
+    }
+
+    private fun funcCall() {
+
+    }
+
+    private fun skipFunc() {
+        var count = 1
+        memory = memory.prevMemory!!
+        while (currentLine < blocks!!.size - 1) {
+            val block = blocks!![++currentLine]
+
+            if (block.instruction == Instruction.FUNC) {
+                count++
+            }
+            if (block.instruction == Instruction.FUNC_END) {
+                count--
+            }
+
+            if (count == 0) {
+                return
+            }
+        }
+    }
+
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
             Instruction.PRAGMA -> {
@@ -285,6 +324,56 @@ class Interpreter(_blocks: List<Block>? = null) :
                     }
                 }
                 notifyIfNotDebug()
+            }
+            Instruction.FUNC -> {
+                val name = parseFunc(block.expression)["name"]?.get(0)
+                val argNames = parseFunc(block.expression)["args"]!!
+                memory = Memory(memory, "FUNCTION $name SCOPE")
+                functionLines[name!!] = currentLine
+                if (currentFunction.last() != name) {
+                    skipFunc()
+                    return false
+                }
+                val args = args.removeLast()
+                for (i in args.indices) {
+                    val value = args[i]
+                    val arg = argNames[i]
+                    parseRawBlock("$arg = $value", true)
+                }
+            }
+            Instruction.FUNC_CALL -> {
+                val exp = block.expression.split("=").toMutableList()
+
+                val name = exp.removeFirst().replace(" ", "")
+                val data = parseFunc(exp.joinToString())
+
+                if (exp.isEmpty()) {
+                    val parsed = parseFunc(name)
+                    val parsedName = parsed["name"]!![0]
+                    args.add(parsed["args"]!!)
+
+                    funcVarsLines.add(currentLine)
+                    currentFunction.add(parsedName)
+                    currentLine = functionLines[parsedName]!! - 1
+                } else {
+                    val funcName = data["name"]!![0]
+                    args.add(data["args"]!!)
+
+                    funcVarsLines.add(currentLine)
+                    functionsVarsMap[funcName] = name
+                    currentFunction.add(funcName)
+                    currentLine = functionLines[funcName]!! - 1
+                }
+            }
+            Instruction.FUNC_END -> {}
+            Instruction.RETURN -> {
+                val value = parseRawBlock(block.expression)
+                val funcName = currentFunction.removeLast()
+                val varName = functionsVarsMap[funcName]!!
+                currentLine = funcVarsLines.removeLast()
+
+                memory = memory.prevMemory!!
+                tryPushToAnyMemory(memory, varName, value.type, value)
             }
             Instruction.INPUT -> {
                 waitingForInput = true
