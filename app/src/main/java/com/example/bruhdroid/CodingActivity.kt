@@ -824,6 +824,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
         val elseView = layoutInflater.inflate(blockId, null)
+        generateBreakpoint(elseView)
         val index = codingViewList.indexOf(endBlock)
         codingViewList[index] = elseView
         try {codingViewList.add(index + 1, endBlock)}
