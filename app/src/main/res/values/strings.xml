@@ -6,6 +6,8 @@
     <string name="load_button">Load templates</string>
     <string name="exit_button">Exit =(</string>
 
+    <string name="save_dialog_title">Program name:</string>
+
     <string name="templates">Templates</string>
     <string name="saved_programs">Saved programs</string>
     <string name="bubble_sort_button">Bubble sort</string>
