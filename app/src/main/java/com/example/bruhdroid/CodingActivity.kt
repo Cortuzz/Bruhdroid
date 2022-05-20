@@ -32,6 +32,9 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
+data class ViewBlock(val label: String, val drawable: Int, val hasText: Boolean = true)
+
+
 class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
     private enum class Debug {
         NEXT, BREAKPOINT
@@ -62,7 +65,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bottomSheetConsole: BottomSheetDialog
     private lateinit var bottomSheetMemory: BottomSheetDialog
 
-    private var layoutMap = mapOf<Instruction,View>()
+    private var layoutMap = mapOf<Instruction, ViewBlock>()
     private val interpreter = Interpreter()
     private val controller = Controller()
     private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
@@ -72,18 +75,18 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         layoutMap = mapOf(
-            Instruction.PRAGMA to MakeBlockView("pragma", ContextCompat.getDrawable(this, R.drawable.ic_block_pragma)),
-            Instruction.PRINT to  MakeBlockView("print", ContextCompat.getDrawable(this, R.drawable.ic_block_print)),
-            Instruction.INPUT to  MakeBlockView("input", ContextCompat.getDrawable(this, R.drawable.ic_block_input)),
-            Instruction.INIT to  MakeBlockView("init", ContextCompat.getDrawable(this, R.drawable.ic_block_init)),
-            Instruction.WHILE to  MakeBlockView("while", ContextCompat.getDrawable(this, R.drawable.ic_block_while)),
-            Instruction.IF to  MakeBlockView("if", ContextCompat.getDrawable(this, R.drawable.ic_block_if)),
-            Instruction.SET to  MakeBlockView("set", ContextCompat.getDrawable(this, R.drawable.ic_block_set)),
-            Instruction.BREAK to MakeBlockView("break", ContextCompat.getDrawable(this, R.drawable.ic_block_break),false),
-            Instruction.CONTINUE to MakeBlockView("continue", ContextCompat.getDrawable(this, R.drawable.ic_block_continue),false),
-            Instruction.FUNC to MakeBlockView("method", ContextCompat.getDrawable(this, R.drawable.ic_block_while)),
-            Instruction.RETURN to MakeBlockView("return", ContextCompat.getDrawable(this, R.drawable.ic_block_while)),
-            Instruction.FUNC_CALL to MakeBlockView("call", ContextCompat.getDrawable(this, R.drawable.ic_block_while))
+            Instruction.PRAGMA to ViewBlock("Pragma", R.drawable.ic_block_pragma),
+            Instruction.PRINT to  ViewBlock("Print", R.drawable.ic_block_print),
+            Instruction.INPUT to  ViewBlock("Input", R.drawable.ic_block_input),
+            Instruction.INIT to  ViewBlock("Init", R.drawable.ic_block_init),
+            Instruction.WHILE to  ViewBlock("While", R.drawable.ic_block_while),
+            Instruction.IF to  ViewBlock("If", R.drawable.ic_block_if),
+            Instruction.SET to ViewBlock("Set", R.drawable.ic_block_set),
+            Instruction.BREAK to ViewBlock("Break", R.drawable.ic_block_break, false),
+            Instruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
+            Instruction.FUNC to ViewBlock("Method", R.drawable.ic_block_if), // todo
+            Instruction.RETURN to ViewBlock("Return", R.drawable.ic_block_break),
+            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_if)
         )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
@@ -190,15 +193,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    private fun MakeBlockView(type: String,color:Drawable?, hasTextField:Boolean=true):View{
-
-            val block =when(hasTextField){
-                true-> layoutInflater.inflate(R.layout.block, null)
-                false-> layoutInflater.inflate(R.layout.block_non_text, null)
+    private fun makeBlockView(viewBlock: ViewBlock): View {
+            val block = when(viewBlock.hasText) {
+                true -> layoutInflater.inflate(R.layout.block, null)
+                false -> layoutInflater.inflate(R.layout.block_non_text, null)
             }
 
-        block.findViewById<TextView>(R.id.textView).text = type
-        block.background=color
+        block.findViewById<TextView>(R.id.textView).text = viewBlock.label
+        block.background = ContextCompat.getDrawable(this, viewBlock.drawable)
         return block
     }
 
@@ -219,29 +221,27 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         categoryRecycler(categoryList)
 
-        for(instr in layoutMap.keys)
-        {
-            layoutMap[instr]!!.setOnClickListener {
-                buildBlock(prevBlock, layoutMap[instr]!!, instr,
-                    instr == Instruction.WHILE || instr == Instruction.IF || instr == Instruction.FUNC)
-            }
-        }
-
         val firstCategory = LinkedList<View>()
         val secondCategory = LinkedList<View>()
         val thirdCategory = LinkedList<View>()
         val fourthCategory = LinkedList<View>()
         val fifthCategory = LinkedList<View>()
 
-        for(instr in layoutMap.keys){
-            when(instr){
-                in listOf(Instruction.INIT,Instruction.SET)->firstCategory.add(layoutMap[instr]!!)
-                in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT)->secondCategory.add(layoutMap[instr]!!)
-                in listOf(Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE)->thirdCategory.add(layoutMap[instr]!!)
-                in listOf(Instruction.IF)->fourthCategory.add(layoutMap[instr]!!)
-                in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)->fifthCategory.add(layoutMap[instr]!!)
+        for (instr in layoutMap.keys) {
+            val view = makeBlockView(layoutMap[instr]!!)
+            view.setOnClickListener {
+                buildBlock(prevBlock, makeBlockView(layoutMap[instr]!!), instr,
+                    instr == Instruction.WHILE || instr == Instruction.IF || instr == Instruction.FUNC)
+            }
+            when (instr) {
+                in listOf(Instruction.INIT,Instruction.SET)->firstCategory.add(view)
+                in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT)->secondCategory.add(view)
+                in listOf(Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE)->thirdCategory.add(view)
+                in listOf(Instruction.IF)->fourthCategory.add(view)
+                in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)->fifthCategory.add(view)
             }
         }
+
 
         categoryBlocks.add(firstCategory)
         categoryBlocks.add(secondCategory)
@@ -310,22 +310,19 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
         val map2=mapOf(
-            Instruction.END_WHILE to layoutInflater.inflate(R.layout.empty_block,null),
-            Instruction.END to layoutInflater.inflate(R.layout.condition_block_end,null),
-            Instruction.ELSE to layoutInflater.inflate(R.layout.block_else,null),
-            Instruction.ELIF to layoutInflater.inflate(R.layout.block_elif,null))
+            Instruction.END_WHILE to R.layout.empty_block,
+            Instruction.END to R.layout.condition_block_end,
+            Instruction.ELSE to R.layout.block_else,
+            Instruction.ELIF to R.layout.block_elif)
 
 
         GlobalScope.launch {
             for (block in blocks) {
                 block as Block
                 val instr = block.instruction
-                val view = if(instr in layoutMap){
-                    layoutMap[instr]
-                }
-                else{
-                    map2[instr]
-                }!!
+                val view = if(instr in layoutMap) { makeBlockView(layoutMap[instr]!!) }
+                else { layoutInflater.inflate(map2[instr]!!, null) }
+
                 view.id = View.generateViewId()
                 generateBreakpoint(view)
                 view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
