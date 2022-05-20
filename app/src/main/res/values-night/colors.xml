@@ -14,11 +14,14 @@
     <color name="primary_background">#373737</color>
     <color name="secondary_background">#979696</color>
     <color name="activity_background">#373737</color>
+    <color name="main_activity_1">#979696</color>
+    <color name="main_activity_2">#373737</color>
+
     <color name="primary">#29B3B0</color>
     <color name="secondary">#E0D9D9</color>
     <color name="error_color">#E91E63</color>
 
-    <color name="accent_button">#E91E63</color>
+    <color name="accent_button">#C7275D</color>
     <color name="default_button">#FFFFFF</color>
 
     <color name="input_block">#C4D5D0</color>
