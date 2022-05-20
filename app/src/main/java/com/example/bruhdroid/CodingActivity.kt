@@ -62,7 +62,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private val interpreter = Interpreter()
     private val controller = Controller()
-    private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE)
+    private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -183,10 +183,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         categoryList.add(Category(0, "Variables | "))
         categoryList.add(Category(1, "Standard io | "))
         categoryList.add(Category(2, "Cycles | "))
-        categoryList.add(Category(3, "Conditions"))
+        categoryList.add(Category(3, "Conditions | "))
+        categoryList.add(Category(4, "Functions"))
 
         categoryRecycler(categoryList)
-
 
         val blockInit = layoutInflater.inflate(R.layout.block_init, null)
         val blockSet = layoutInflater.inflate(R.layout.block_set, null)
@@ -197,6 +197,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         val blockBreak = layoutInflater.inflate(R.layout.block_break, null)
         val blockContinue = layoutInflater.inflate(R.layout.block_continue, null)
         val blockIf = layoutInflater.inflate(R.layout.block_if, null)
+
+        val blockReturn = layoutInflater.inflate(R.layout.block_return, null)
+        val blockFunc = layoutInflater.inflate(R.layout.block_func, null)
+        val blockFuncCall = layoutInflater.inflate(R.layout.block_func_call, null)
 
         blockInit.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_init, Instruction.INIT, false)
@@ -225,26 +229,44 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         blockIf.setOnClickListener {
             buildBlock(prevBlock, R.layout.block_if, Instruction.IF, true)
         }
+        blockReturn.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_return, Instruction.RETURN, false)
+        }
+        blockFunc.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_func, Instruction.FUNC, true)
+        }
+        blockFuncCall.setOnClickListener {
+            buildBlock(prevBlock, R.layout.block_func_call, Instruction.FUNC_CALL, false)
+        }
 
         val firstCategory = LinkedList<View>()
         val secondCategory = LinkedList<View>()
         val thirdCategory = LinkedList<View>()
         val fourthCategory = LinkedList<View>()
+        val fifthCategory = LinkedList<View>()
 
         firstCategory.add(blockInit)
         firstCategory.add(blockSet)
+
         secondCategory.add(blockPragma)
         secondCategory.add(blockInput)
         secondCategory.add(blockPrint)
+
         thirdCategory.add(blockWhile)
         thirdCategory.add(blockBreak)
         thirdCategory.add(blockContinue)
+
         fourthCategory.add(blockIf)
+
+        fifthCategory.add(blockReturn)
+        fifthCategory.add(blockFunc)
+        fifthCategory.add(blockFuncCall)
 
         categoryBlocks.add(firstCategory)
         categoryBlocks.add(secondCategory)
         categoryBlocks.add(thirdCategory)
         categoryBlocks.add(fourthCategory)
+        categoryBlocks.add(fifthCategory)
 
         for (view in categoryBlocks[0]) {
             val params = ConstraintLayout.LayoutParams(1000, 300)
@@ -420,7 +442,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 val index = -1
                 val instr = viewToBlock[currentDrag]!!.instruction
 
-                if (instr == Instruction.WHILE || instr == Instruction.IF) {
+                if (instr == Instruction.WHILE || instr == Instruction.IF || instr == Instruction.FUNC) {
                     addBlocksToBin(currentDrag, true)
                     reBuildBlocks(index, currentDrag, true)
                 } else {
@@ -503,9 +525,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 binding.container.removeView(connectorsMap[currView])
 
                 val block = viewToBlock[currView]
-                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
+                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END || block.instruction == Instruction.FUNC_END) {
                     count--
-                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
+                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF || block.instruction == Instruction.FUNC) {
                     count++
                 }
                 index++
@@ -590,8 +612,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private fun replaceUntilEnd(indexFrom: Int, indexTo: Int) {
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE)
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE)
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.FUNC)
         val tempViews = mutableListOf<View>()
         var count = 0
 
@@ -654,8 +676,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             clearConstraints(set, view)
         }
 
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE, Instruction.ELIF)
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE, Instruction.ELIF)
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE, Instruction.ELIF, Instruction.FUNC_END)
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE, Instruction.ELIF, Instruction.FUNC)
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -743,7 +765,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun makeBlocksInvisible(v: View) {
         v.visibility = View.INVISIBLE
 
-        if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
+        if (viewToBlock[v]!!.instruction == Instruction.WHILE ||
+            viewToBlock[v]!!.instruction == Instruction.IF ||
+            viewToBlock[v]!!.instruction == Instruction.FUNC ) {
+
             var index = codingViewList.indexOf(v) + 1
             var count = 1
             var ifCount = -1
@@ -777,9 +802,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     connectorsMap[currentView]!!.visibility = View.INVISIBLE
                 }
 
-                if (block!!.instruction == Instruction.END_WHILE || block.instruction == Instruction.END) {
+                if (block!!.instruction == Instruction.END_WHILE ||
+                    block.instruction == Instruction.END || block.instruction == Instruction.FUNC_END) {
                     count--
-                } else if (block.instruction == Instruction.WHILE || block.instruction == Instruction.IF) {
+                } else if (block.instruction == Instruction.WHILE ||
+                    block.instruction == Instruction.IF || block.instruction == Instruction.FUNC) {
                     count++
                 }
                 index++
@@ -797,7 +824,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun makeBlocksVisible(v: View) {
         v.visibility = View.VISIBLE
 
-        if (viewToBlock[v]!!.instruction == Instruction.WHILE || viewToBlock[v]!!.instruction == Instruction.IF) {
+        if (viewToBlock[v]!!.instruction == Instruction.WHILE ||
+            viewToBlock[v]!!.instruction == Instruction.IF || viewToBlock[v]!!.instruction == Instruction.FUNC) {
             var index = codingViewList.indexOf(v) + 1
             var count = 1
 
@@ -808,9 +836,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
                 }
 
-                if ((block!!.instruction == Instruction.END_WHILE) || (block.instruction == Instruction.END)) {
+                if ((block!!.instruction == Instruction.END_WHILE) ||
+                    (block.instruction == Instruction.END) || (block.instruction == Instruction.FUNC_END)) {
                     count--
-                } else if ((block.instruction == Instruction.WHILE) || (block.instruction == Instruction.IF)) {
+                } else if ((block.instruction == Instruction.WHILE) ||
+                    (block.instruction == Instruction.IF) || (block.instruction == Instruction.FUNC)) {
                     count++
                 }
                 index++
@@ -899,7 +929,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if (instruction == Instruction.WHILE) {
                 endBlock = layoutInflater.inflate(R.layout.empty_block, null)
                 endInstruction = Instruction.END_WHILE
-
+            } else if (instruction == Instruction.FUNC) {
+                endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
+                endInstruction = Instruction.FUNC_END
             } else {
                 endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
 
