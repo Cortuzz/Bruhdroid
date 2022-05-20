@@ -319,7 +319,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
             Instruction.BREAK to R.layout.block_break,
-            //Instruction.CONTINUE, Instruction.BREAK Instruction.ELIF to R.layout.block_else, todo
+            Instruction.CONTINUE to R.layout.block_continue,
+            //ELIF to R.layout.block_else, todo
         )
 
         GlobalScope.launch {
