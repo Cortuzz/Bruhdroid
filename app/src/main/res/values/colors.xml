@@ -22,7 +22,9 @@
     <color name="error_color">#9A1140</color>
 
     <color name="accent_button">#FF5F54</color>
-    <color name="default_button">#000000</color>
+    <color name="default_button">#5A5757</color>
+    <color name="connector">#7A7272</color>
+    <color name="expression_color">#FFFFFF</color>
 
     <color name="input_block">#C4D5D0</color>
     <color name="output_block">#C7CEE0</color>
