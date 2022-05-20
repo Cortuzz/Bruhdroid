@@ -38,5 +38,5 @@
     <color name="return_block">#485150</color>
     <color name="call_block">#757460</color>
     <color name="pragma_block">#4D3F55</color>
-    <color name="for_block">#4D3F55</color>
+    <color name="for_block">#BABDBC</color>
 </resources>

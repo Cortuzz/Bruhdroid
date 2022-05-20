@@ -55,7 +55,7 @@ class TemplatesActivity : AppCompatActivity() {
                 binding.savedPrograms.removeView(buttonBinding.root)
             }
 
-            button.width = 400 * dp.toInt()
+            button.width = 320 * dp.toInt()
 
             val params = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
