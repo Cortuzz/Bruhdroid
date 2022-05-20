@@ -17,3 +17,6 @@ class StackCorruptionError(message: String = ""):
 
 class IndexOutOfRangeError(message: String = ""):
     Exception("FATAL ERROR:\nIndexOutOfRangeError: $message\n\nStack traceback:")
+
+class BlockOutOfCycleContextError(message: String = ""):
+    Exception("FATAL ERROR:\nBlockOutOfCycleContextError: $message\n\nStack traceback:")

@@ -106,8 +106,7 @@ class Interpreter(_blocks: List<Block>? = null) :
             )
         } catch (e: Exception) {
             throw UnhandledError(
-                "${e.message}\nAt line: ${currentLine + 1}, " +
-                        "At instruction: ${block.instruction}"
+                "At line: ${currentLine + 1}, At instruction: ${block.instruction}\n\n${e.stackTraceToString()}"
             )
         }
 
@@ -137,8 +136,7 @@ class Interpreter(_blocks: List<Block>? = null) :
                 )
             } catch (e: Exception) {
                 throw UnhandledError(
-                    "${e.message}\nAt line: ${currentLine + 1}, " +
-                            "At instruction: ${block.instruction}"
+                    "At line: ${currentLine + 1}, At instruction: ${block.instruction}\n\n${e.stackTraceToString()}"
                 )
             }
         }
@@ -347,16 +345,29 @@ class Interpreter(_blocks: List<Block>? = null) :
                 memory = memory.prevMemory!!
             }
             Instruction.BREAK -> {
-                skipCycle()
+                try{skipCycle()}
+                catch (e: Exception) {
+                    throwOutOfCycleError("It is not possible to use BREAK outside the context of a loop")}
             }
             Instruction.CONTINUE -> {
-                currentLine = cycleLines.removeLast() - 1
-                memory = memory.prevMemory!!
+                try {
+                    currentLine = cycleLines.removeLast() - 1
+                    memory = memory.prevMemory!!
+                } catch (e: Exception) {
+                    throwOutOfCycleError("It is not possible to use CONTINUE block outside the context of a loop")}
             }
             else -> parseRawBlock(block.expression)
         }
 
         return false
+    }
+
+    private fun throwOutOfCycleError(message: String) {
+        try {
+            throw BlockOutOfCycleContextError(message)
+        } catch (e: BlockOutOfCycleContextError) {
+            throw RuntimeError(e.message.toString())
+        }
     }
 
     private fun checkStatement(statement: String): Boolean {
