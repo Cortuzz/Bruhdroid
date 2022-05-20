@@ -48,6 +48,10 @@ class Controller: Observable() {
                 "END_WHILE" to Instruction.END_WHILE,
                 "BREAK" to Instruction.BREAK,
                 "CONTINUE" to Instruction.CONTINUE,
+                "FUNC" to Instruction.FUNC,
+                "FUNC_END" to Instruction.FUNC_END,
+                "FUNC_CALL" to Instruction.FUNC_CALL,
+                "RETURN" to Instruction.RETURN,
             )
 
             val blocks = mutableListOf<Block>()

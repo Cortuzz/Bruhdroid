@@ -267,7 +267,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     override fun onCategoryClick(position: Int) {
         bindingSheetMenu.blocks.removeAllViews()
         val blockMenuParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-            (120 * dp).toInt())
+            (110 * dp).toInt())
 
         for (view in categoryBlocks[position]) {
             bindingSheetMenu.blocks.addView(view, blockMenuParams)
@@ -315,7 +315,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.END_WHILE to R.layout.empty_block,
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
-            Instruction.ELIF to R.layout.block_elif)
+            Instruction.ELIF to R.layout.block_elif,
+            Instruction.FUNC_END to R.layout.block_func_end)
 
         GlobalScope.launch {
             for (block in blocks) {
@@ -341,14 +342,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     }
                 }
 
-                if (viewToBlock[view]!!.instruction !in connectingInstructions){
+                if (viewToBlock[view]!!.instruction !in connectingInstructions) {
                     generateDragArea(view)
                     runOnUiThread {
                         binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
                     }
                 } else {
                     runOnUiThread {
-                        binding.container.addView(view)
+                        binding.container.addView(view) // todo
                     }
                 }
 
@@ -861,7 +862,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (full) {
             binding.container.addView(elseView, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         } else {
-            binding.container.addView(elseView)
+            binding.container.addView(elseView, ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt()))
         }
 
         elseView.setOnDragListener { v, event ->
@@ -933,7 +934,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
-            binding.container.addView(view)
+            binding.container.addView(view, ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt()))
         } else {
             binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
         }
