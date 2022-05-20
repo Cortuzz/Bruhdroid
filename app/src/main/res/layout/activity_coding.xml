@@ -304,6 +304,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:textColor="@color/default_button"
                 android:id="@+id/addBlock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -326,6 +327,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:textColor="@color/default_button"
                 android:id="@+id/console"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -348,6 +350,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:textColor="@color/default_button"
                 android:id="@+id/saveCode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -371,6 +374,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:textColor="@color/default_button"
                 android:id="@+id/removeBlock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
