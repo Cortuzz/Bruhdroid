@@ -3,16 +3,15 @@ package com.example.bruhdroid
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.ClipData
 import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.view.View.DragShadowBuilder
 import android.widget.*
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -94,12 +93,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         controller.addObserver(this)
         interpreter.addObserver(this)
 
-        binding.mainPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event,-20)
-        }
-        binding.buttonsPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event,20)
-        }
 
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
@@ -390,24 +383,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         super.onBackPressed()
     }
 
-    private fun generateDropAreaForScroll(v: View, event: DragEvent,speed: Int): Boolean {
-        return when (event.action) {
-            DragEvent.ACTION_DRAG_STARTED -> {
-                v.invalidate()
-                true
-            }
-
-            DragEvent.ACTION_DRAG_LOCATION -> {
-                binding.mainCode.scrollBy(0,speed)
-                v.invalidate()
-                true
-            }
-
-            else -> {
-                false
-            }
-        }
-    }
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun generateDropAreaForBin(v: View, event: DragEvent): Boolean {
@@ -822,7 +797,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         view.setOnLongClickListener {
             currentDrag = it
             makeBlocksInvisible(it)
-            it.startDragAndDrop(null, View.DragShadowBuilder(it), it, 0)
+            val dummyData = ClipData.newPlainText("dummyData", null)
+            val shadowBuilder = DragShadowBuilder(it)
+            it.startDragAndDrop(dummyData, shadowBuilder, it, 0)
             true
         }
     }
