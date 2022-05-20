@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
 
-class Memory(val prevMemory: Memory?) {
+class Memory(val prevMemory: Memory?, val scope: String) {
     val stack: MutableMap<String, Valuable> = mutableMapOf()
 
     fun push(address: String, value: Block) {

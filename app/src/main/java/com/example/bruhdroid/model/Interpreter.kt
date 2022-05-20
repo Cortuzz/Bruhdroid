@@ -14,7 +14,7 @@ class Interpreter(_blocks: List<Block>? = null) :
     var output = ""
     var input = ""
     var waitingForInput = false
-    var memory = Memory(null)
+    var memory = Memory(null, "GLOBAL SCOPE")
     var currentLine = -1
     var debug = false
     var ioLines = 0
@@ -31,6 +31,24 @@ class Interpreter(_blocks: List<Block>? = null) :
         clear()
         blocks = _blocks.toMutableList()
     }
+
+    fun getMemoryData(mem: Memory = memory): String {
+        val data = parseStack(mem.stack).ifEmpty {"EMPTY"}
+
+        if (mem.prevMemory == null) {
+            return "${mem.scope}: $data"
+        }
+        return "${mem.scope}: $data\n${getMemoryData(mem.prevMemory)}"
+    }
+
+    private fun parseStack(stack: MutableMap<String, Valuable>): String {
+        var data = ""
+        for (pair in stack) {
+            data += "\n${pair.key} = ${getVisibleValue(pair.value)}: ${pair.value.type}"
+        }
+        return data
+    }
+
 
     private fun pragmaClear() {
         pragma = mutableMapOf(
@@ -59,7 +77,7 @@ class Interpreter(_blocks: List<Block>? = null) :
         appliedConditions.clear()
         cycleLines.clear()
         blocks?.clear()
-        memory = Memory(null)
+        memory = Memory(null, "GLOBAL SCOPE")
         currentLine = -1
         ioLines = 0
         pragmaClear()
@@ -193,7 +211,7 @@ class Interpreter(_blocks: List<Block>? = null) :
         return parsed
     }
 
-    fun parseInput() {
+    private fun parseInput() {
         val block = blocks!![currentLine]
         val rawList = input.split(",")
         val rawCommands = block.expression.split(",")
@@ -281,7 +299,7 @@ class Interpreter(_blocks: List<Block>? = null) :
             Instruction.IF -> {
                 val statement = checkStatement(block.expression)
                 appliedConditions.add(statement)
-                memory = Memory(memory)
+                memory = Memory(memory, "IF SCOPE")
                 return !statement
             }
             Instruction.ELIF -> {
@@ -291,7 +309,7 @@ class Interpreter(_blocks: List<Block>? = null) :
                 val statement = checkStatement(block.expression)
                 appliedConditions[appliedConditions.lastIndex] = statement
                 memory = memory.prevMemory!!
-                memory = Memory(memory)
+                memory = Memory(memory, "ELIF SCOPE")
                 return !statement
             }
             Instruction.ELSE -> {
@@ -299,11 +317,11 @@ class Interpreter(_blocks: List<Block>? = null) :
                     return true
                 }
                 memory = memory.prevMemory!!
-                memory = Memory(memory)
+                memory = Memory(memory, "ELSE SCOPE")
                 return false
             }
             Instruction.WHILE -> {
-                memory = Memory(memory)
+                memory = Memory(memory, "WHILE SCOPE")
                 if (checkStatement(block.expression)) {
                     cycleLines.add(currentLine)
                 } else {
