@@ -49,7 +49,6 @@ class Interpreter(_blocks: List<Block>? = null) :
         return data
     }
 
-
     private fun pragmaClear() {
         pragma = mutableMapOf(
         "INIT_MESSAGE" to "true",
@@ -188,7 +187,7 @@ class Interpreter(_blocks: List<Block>? = null) :
         return when (valuable.type) {
             Type.STRING -> "\"$rawValue\""
             Type.BOOL -> rawValue.uppercase()
-            Type.UNDEFINED -> "Ты еблан?"
+            Type.UNDEFINED -> "NULL"
             Type.LIST -> {
                 val str = mutableListOf<String>()
                 valuable.array.forEach { el -> str.add(getVisibleValue(el)) }
@@ -382,8 +381,15 @@ class Interpreter(_blocks: List<Block>? = null) :
 
     private fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Block) {
         valueBlock as Valuable
-        valueBlock.type = type
 
+        if (type == Type.LIST) {
+            val block = valueBlock.clone()
+            block.type = type
+            memory.push(name, block)
+            return
+        }
+
+        valueBlock.type = type
         memory.push(name, valueBlock)
     }
 
@@ -433,6 +439,8 @@ class Interpreter(_blocks: List<Block>? = null) :
 
         return if (data == "rand()") {
             Valuable(Math.random(), Type.FLOAT)
+        } else if (data in listOf("true", "false")) {
+            Valuable(data, Type.BOOL)
         } else if (data.last() == '"' && data.first() == '"') {
             // Maybe substring is better solution
             Valuable(data.replace("\"", ""), Type.STRING)
@@ -452,7 +460,7 @@ class Interpreter(_blocks: List<Block>? = null) :
         parseMap[raw] = data
 
         val stack = mutableListOf<Block>()
-        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()",
+        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()",
             "abs", "exp", "sorted", "ceil", "floor")
 
         for (value in data) {
@@ -484,8 +492,14 @@ class Interpreter(_blocks: List<Block>? = null) :
                                 "∓" -> -operand2
                                 ".toInt()" -> Valuable(operand2.convertToInt(operand2), Type.INT)
                                 ".toFloat()" -> Valuable(operand2.convertToFloat(operand2), Type.FLOAT)
-                                ".toString()" -> Valuable(operand2.value, Type.STRING)
+                                ".toString()" -> Valuable(operand2.convertToString(operand2), Type.STRING)
                                 ".toBool()" -> Valuable(operand2.convertToBool(operand2), Type.BOOL)
+                                ".toList()" -> {
+                                    val array = operand2.convertToArray(operand2).toMutableList()
+                                    val listVal = Valuable(array.size, Type.LIST)
+                                    listVal.array = array
+                                    listVal
+                                }
                                 ".sort()" -> operand2.sort()
                                 "abs" -> operand2.absolute()
                                 "exp" -> operand2.exponent()
@@ -515,6 +529,8 @@ class Interpreter(_blocks: List<Block>? = null) :
                                 "*=" -> tryFindInMemory(memory, operand1) * operand2
                                 "+=" -> tryFindInMemory(memory, operand1) + operand2
                                 "-=" -> tryFindInMemory(memory, operand1) - operand2
+                                "%=" -> tryFindInMemory(memory, operand1) % operand2
+                                "//=" -> tryFindInMemory(memory, operand1).intDiv(operand2)
                                 else -> {throwOperationError("Expected correct expression but bad operation was found")
                                     throw Exception()
                                 }

@@ -188,6 +188,29 @@ class Valuable(varValue: Any, var type: Type) :
         }
     }
 
+    fun convertToString(valuable: Valuable): String {
+        return when (valuable.type) {
+            Type.LIST -> {
+                valuable.array.toString()
+            }
+            Type.UNDEFINED -> {throw TypeError("Expected not-null type but ${valuable.type} was found")}
+            else -> {valuable.value}
+        }
+    }
+
+    fun convertToArray(valuable: Valuable): List<Valuable> {
+        if (valuable.type != Type.STRING) {
+            throw TypeError("Expected type STRING but ${valuable.type} was found")
+        }
+
+        val arr = valuable.value.toList()
+        val valArr = mutableListOf<Valuable>()
+        for (value in arr) {
+            valArr.add(Valuable(value, Type.STRING))
+        }
+        return valArr
+    }
+
     fun convertToInt(valuable: Valuable): Int {
         return when (valuable.type) {
             Type.BOOL -> {

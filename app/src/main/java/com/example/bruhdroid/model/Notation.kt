@@ -54,6 +54,7 @@ class Notation {
             ".toFloat()" to Operator.CONVERT,
             ".toString()" to Operator.CONVERT,
             ".toBool()" to Operator.CONVERT,
+            ".toList()" to Operator.CONVERT,
             "abs" to Operator.MATH,
             "exp" to Operator.MATH,
             "floor" to Operator.MATH,
@@ -63,7 +64,7 @@ class Notation {
 
         fun convertToRpn(infixNotation: List<String>): List<String> {
             val unary = listOf("+", "-", "*")
-            val convertedUnary = listOf("±", "∓", "#", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()")
+            val convertedUnary = listOf("±", "∓", "#", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()")
             var mayUnary = true
             var arrayInit = false
             val postfixNotation = mutableListOf<String>()
@@ -146,7 +147,7 @@ class Notation {
         fun tokenizeString(str: String): List<String> {
             val name = "([\\d]+\\.?[\\d]+|\\w[\\w\\d_]*|\".*\")"
             val reserved = "(rand\\(\\)|abs|exp|floor|ceil|sorted)"
-            val convert = "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\)|\\.sort\\(\\))"
+            val convert = "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\)|\\.sort\\(\\)|\\.toList\\(\\))"
             val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|//|\\*|%|/|==|=|!=|>=|<=|<|>|)"
             val bracket = "(\\(|\\)|\\[|\\])"
             val exp = Regex("($convert|$reserved|$bracket|$name|$operator)")
