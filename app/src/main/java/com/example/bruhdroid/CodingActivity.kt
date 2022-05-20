@@ -5,10 +5,13 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ClipData
 import android.content.DialogInterface
+import android.graphics.Paint
 import android.os.Bundle
+import android.text.Layout
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
+import android.view.Gravity
 import android.view.View
 import android.view.View.DragShadowBuilder
 import android.widget.*
@@ -19,14 +22,17 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bruhdroid.databinding.*
-import com.example.bruhdroid.model.*
+import com.example.bruhdroid.model.Category
+import com.example.bruhdroid.model.CategoryAdapter
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.blocks.*
+import com.example.bruhdroid.model.src.blocks.Block
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.w3c.dom.Text
 import java.util.*
 
 
@@ -880,7 +886,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, layoutId: Int, instruction: Instruction, connect: Boolean = false) {
         val view = layoutInflater.inflate(layoutId, null)
@@ -980,11 +985,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         viewToBlock[view] = Block(instruction)
     }
 
-    private fun buildAlertDialog(label: String, message: String): AlertDialog.Builder {
+    private fun buildAlertDialog(label: String, message: String?): AlertDialog.Builder {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
+        if (message != null) {
+            builder.setMessage(message)
+        }
         builder.setTitle(label)
-        builder.setMessage(message)
-
         return builder
     }
 
@@ -996,26 +1002,33 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun showCustomDialog() {
-        val dialog = Dialog(this)
-        dialog.setCancelable(true)
-        dialog.setContentView(R.layout.input_dialog)
+        val builder = buildAlertDialog("Enter value", null)
 
-        val inputVal: EditText = dialog.findViewById(R.id.input)
-        val submitButton: Button = dialog.findViewById(R.id.button)
+        val input = EditText(this)
+        //input.textAlignment =
+        //builder.setView(input)
 
-        submitButton.setOnClickListener {
-            interpreter.input = inputVal.text.toString()
-            interpreter.waitingForInput = false
-            dialog.dismiss()
-            if (!debugMode) {
-                controller.resumeFull()
-            } else {
-                GlobalScope.launch {
-                    controller.resumeProgram()
-                }
-            }
-        }
-        dialog.show()
+        //builder.show()
+//        val dialog = Dialog(this)
+//        dialog.setCancelable(true)
+//        dialog.setContentView(R.layout.input_dialog)
+//
+//        val inputVal: EditText = dialog.findViewById(R.id.input)
+//        val submitButton: Button = dialog.findViewById(R.id.button)
+//
+//        submitButton.setOnClickListener {
+//            interpreter.input = inputVal.text.toString()
+//            interpreter.waitingForInput = false
+//            dialog.dismiss()
+//            if (!debugMode) {
+//                controller.resumeFull()
+//            } else {
+//                GlobalScope.launch {
+//                    controller.resumeProgram()
+//                }
+//            }
+//        }
+//        dialog.show()
     }
 
     private fun showSaveDialog() {
