@@ -8,6 +8,7 @@ import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
+import com.example.bruhdroid.model.src.UnhandledError
 import com.example.bruhdroid.model.src.blocks.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
@@ -83,7 +84,7 @@ class Controller: Observable() {
         }
     }
 
-    private var lexerErrors = ""
+    private var internalErrors = ""
     private var runtimeErrors = ""
     private lateinit var interpreter: Interpreter
     private var notifying = false
@@ -113,8 +114,8 @@ class Controller: Observable() {
             GlobalScope.launch {
                 resumeProgram()
             }
-        } catch (e: LexerError) {
-            lexerErrors = e.message.toString().dropLast(2)
+        } catch (e: UnhandledError) {
+            internalErrors = e.message.toString()
             setChanged()
             notifyObservers()
         } catch (e: RuntimeError) {
@@ -130,6 +131,9 @@ class Controller: Observable() {
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
             notifying = true
+        } catch (e: UnhandledError) {
+            internalErrors = e.message.toString()
+            notifying = true
         }
         if (notifying) {
             setChanged()
@@ -142,6 +146,8 @@ class Controller: Observable() {
             interpreter.run()
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
+        } catch (e: UnhandledError) {
+            internalErrors = e.message.toString()
         }
         setChanged()
         notifyObservers()
@@ -156,9 +162,9 @@ class Controller: Observable() {
         AppCompatDelegate.setDefaultNightMode(mode)
     }
 
-    fun popLexerErrors(): String {
-        val err = lexerErrors
-        lexerErrors = ""
+    fun popInternalErrors(): String {
+        val err = internalErrors
+        internalErrors = ""
         return err
     }
 

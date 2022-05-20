@@ -19,10 +19,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.bruhdroid.databinding.ActivityCodingBinding
-import com.example.bruhdroid.databinding.BottomsheetBinBinding
-import com.example.bruhdroid.databinding.BottomsheetConsoleBinding
-import com.example.bruhdroid.databinding.BottomsheetFragmentBinding
+import com.example.bruhdroid.databinding.*
 import com.example.bruhdroid.model.*
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.blocks.*
@@ -55,12 +52,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
     private lateinit var bindingSheetConsole: BottomsheetConsoleBinding
+    private lateinit var bindingSheetMemory: BottomsheetMemoryBinding
     private lateinit var categoryRecycler: RecyclerView
     private lateinit var categoryAdapter: CategoryAdapter
 
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
+    private lateinit var bottomSheetMemory: BottomSheetDialog
 
     private val interpreter = Interpreter()
     private val controller = Controller()
@@ -77,6 +76,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         bindingSheetConsole = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_console, null, false)
         bottomSheetConsole = BottomSheetDialog(this@CodingActivity)
         bottomSheetConsole.setContentView(bindingSheetConsole.root)
+
+        bindingSheetMemory = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_memory, null, false)
+        bottomSheetMemory = BottomSheetDialog(this@CodingActivity)
+        bottomSheetMemory.setContentView(bindingSheetMemory.root)
 
         bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
         bottomSheetBin = BottomSheetDialog(this@CodingActivity)
@@ -100,6 +103,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
+        }
+        binding.memoryButton.setOnClickListener {
+            bottomSheetMemory.show()
         }
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
@@ -1019,9 +1025,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         dialog.show()
     }
 
+    private fun showMemoryInfo(info: String) {
+        bindingSheetMemory.memory.text = info
+
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     override fun update(p0: Observable?, p1: Any?) {
-        val lexerErrors = controller.popLexerErrors()
+        val internalErrors = controller.popInternalErrors()
         val runtimeErrors = controller.popRuntimeErrors()
         val output = interpreter.output
 
@@ -1029,8 +1040,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             runOnUiThread {showErrorDialog("RUNTIME ERROR", runtimeErrors)}
             return
         }
-        if (lexerErrors.isNotEmpty()) {
-            runOnUiThread {showErrorDialog("LEXER ERROR", lexerErrors)}
+        if (internalErrors.isNotEmpty()) {
+            runOnUiThread {showErrorDialog("INTERNAL ERROR", internalErrors)}
             return
         }
 
@@ -1040,7 +1051,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
         if (output.isNotEmpty()) {
             runOnUiThread {
-                bottomSheetConsole.show()
                 bindingSheetConsole.console.text = output
             }
         }
@@ -1056,6 +1066,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if ((debugType == Debug.NEXT ||
                         debugType == Debug.BREAKPOINT && breakpoint == true)) {
                 val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
+                showMemoryInfo(interpreter.getMemoryData())
 
                 runOnUiThread {
                     button?.setBackgroundResource(when (debugType) {
