@@ -3,16 +3,15 @@ package com.example.bruhdroid
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.ClipData
 import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
+import android.view.View.DragShadowBuilder
 import android.widget.*
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -95,10 +94,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         interpreter.addObserver(this)
 
         binding.mainPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event,-20)
+            generateDropAreaForScroll(v, event,30)
         }
         binding.buttonsPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event,20)
+            generateDropAreaForScroll(v, event,-30)
         }
 
         binding.menuButton.setOnClickListener {
@@ -398,7 +397,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             DragEvent.ACTION_DRAG_LOCATION -> {
-                binding.mainCode.scrollBy(0,speed)
+                println("FUCK")
+                binding.mainCode.panBy(0.0F,speed.toFloat(),false)
                 v.invalidate()
                 true
             }
@@ -822,7 +822,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         view.setOnLongClickListener {
             currentDrag = it
             makeBlocksInvisible(it)
-            it.startDragAndDrop(null, View.DragShadowBuilder(it), it, 0)
+            val dummyData = ClipData.newPlainText("dummyData", null)
+            val shadowBuilder = DragShadowBuilder(it)
+            it.startDragAndDrop(dummyData, shadowBuilder, it, 0)
             true
         }
     }
@@ -847,6 +849,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
         val elseView = layoutInflater.inflate(blockId, null)
+        generateBreakpoint(elseView)
         val index = codingViewList.indexOf(endBlock)
         codingViewList[index] = elseView
         try {codingViewList.add(index + 1, endBlock)}

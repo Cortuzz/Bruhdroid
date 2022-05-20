@@ -43,6 +43,10 @@ class TemplatesActivity : AppCompatActivity() {
             val button = buttonBinding.button
 
             button.text = file.nameWithoutExtension
+            buttonBinding.deleteButton.setOnClickListener{
+                file.delete()
+                binding.savedPrograms.removeView(buttonBinding.root)
+            }
             button.height = 50 * dp.toInt()
             button.width = 300 * dp.toInt()
 
