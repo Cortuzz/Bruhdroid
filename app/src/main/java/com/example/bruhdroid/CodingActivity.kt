@@ -56,14 +56,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
     private lateinit var bindingSheetConsole: BottomsheetConsoleBinding
-    private lateinit var bindingSheetMemory: BottomsheetMemoryBinding
     private lateinit var categoryRecycler: RecyclerView
     private lateinit var categoryAdapter: CategoryAdapter
 
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
-    private lateinit var bottomSheetMemory: BottomSheetDialog
     private var dp by Delegates.notNull<Float>()
 
     private var layoutMap = mapOf<Instruction, ViewBlock>()
@@ -99,10 +97,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         bottomSheetConsole = BottomSheetDialog(this@CodingActivity)
         bottomSheetConsole.setContentView(bindingSheetConsole.root)
 
-        bindingSheetMemory = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_memory, null, false)
-        bottomSheetMemory = BottomSheetDialog(this@CodingActivity)
-        bottomSheetMemory.setContentView(bindingSheetMemory.root)
-
         bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
         bottomSheetBin = BottomSheetDialog(this@CodingActivity)
         bottomSheetBin.setContentView(bindingSheetBin.root)
@@ -112,7 +106,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         if (blocks is Array<*>) {
             parseBlocks(blocks)
         }
-
 
         controller.addObserver(this)
         interpreter.addObserver(this)
@@ -124,6 +117,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             generateDropAreaForScroll(v, event,-30)
         }
 
+        binding.changeThemeButton.setOnClickListener {
+            Controller().changeTheme(resources.configuration.uiMode)
+        }
         binding.menuButton.setOnClickListener {
             bottomSheetMenu.show()
         }
