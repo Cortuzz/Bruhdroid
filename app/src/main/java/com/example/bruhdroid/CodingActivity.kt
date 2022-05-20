@@ -566,7 +566,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
                 view.bringToFront()
                 codingViewList.add(view)
-                generateDragArea(view)
+
+                if (viewToBlock[view]!!.instruction !in connectingInstructions) {
+                    generateDragArea(view)
+                }
             }
             buildConstraints(bindingSheetBin.deletedList, binViewList)
             buildConstraints(binding.container, codingViewList)
