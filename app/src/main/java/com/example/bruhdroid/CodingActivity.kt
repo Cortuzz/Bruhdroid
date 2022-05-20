@@ -66,8 +66,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private var layoutMap = mapOf<Instruction, ViewBlock>()
     private val interpreter = Interpreter()
     private val controller = Controller()
-    private val startConnectingInstructions = listOf(Instruction.WHILE, Instruction.IF, Instruction.FUNC)
-    private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.FUNC_END)
+    private val startConnectingInstructions = listOf(Instruction.WHILE, Instruction.IF,
+        Instruction.FUNC, Instruction.FOR)
+    private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE,
+        Instruction.FUNC_END, Instruction.END_FOR)
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -86,7 +88,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
             Instruction.FUNC to ViewBlock("Method", R.drawable.ic_block_func),
             Instruction.RETURN to ViewBlock("Return", R.drawable.ic_block_return),
-            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_call)
+            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_call),
+            Instruction.FOR to ViewBlock("For", R.drawable.ic_block_for)
         )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
@@ -233,7 +236,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             when (instr) {
                 in listOf(Instruction.INIT,Instruction.SET) -> firstCategory.add(view)
                 in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT) -> secondCategory.add(view)
-                in listOf(Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE) -> thirdCategory.add(view)
+                in listOf(Instruction.FOR, Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE) -> thirdCategory.add(view)
                 in listOf(Instruction.IF) -> fourthCategory.add(view)
                 in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)-> fifthCategory.add(view)
                 else -> {}
@@ -310,7 +313,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
             Instruction.ELIF to R.layout.block_elif,
-            Instruction.FUNC_END to R.layout.block_func_end)
+            Instruction.FUNC_END to R.layout.block_func_end,
+            Instruction.END_FOR to R.layout.block_end_for)
 
         GlobalScope.launch {
             for (block in blocks) {
@@ -647,8 +651,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             clearConstraints(set, view)
         }
 
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE, Instruction.ELIF, Instruction.FUNC_END)
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE, Instruction.ELIF, Instruction.FUNC)
+        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE,
+            Instruction.ELIF, Instruction.FUNC_END, Instruction.END_FOR)
+        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE,
+            Instruction.ELIF, Instruction.FUNC, Instruction.FOR)
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -662,7 +668,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             if (viewToBlock[view]!!.instruction in endInstructions) {
-                Log.d("hh", viewToBlock[view]!!.instruction.toString() + " " + i.toString())
                 val nest = nestViews.removeLast()
                 val nestId = nest.id
                 val connector = connectorsMap[view]!!
@@ -890,6 +895,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 Instruction.WHILE -> {
                     endBlock = layoutInflater.inflate(R.layout.empty_block, null)
                     endInstruction = Instruction.END_WHILE
+                }
+                Instruction.FOR -> {
+                    endBlock = layoutInflater.inflate(R.layout.block_end_for, null)
+                    endInstruction = Instruction.END_FOR
                 }
                 Instruction.FUNC -> {
                     endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
