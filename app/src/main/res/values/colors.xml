@@ -14,6 +14,9 @@
     <color name="primary_background">#F4E8D8</color>
     <color name="secondary_background">#FFFFFF</color>
     <color name="activity_background">#FFFFFF</color>
+    <color name="main_activity_1">#F4E8D8</color>
+    <color name="main_activity_2">#FFFFFF</color>
+
     <color name="primary">#FF5F54</color>
     <color name="secondary">#212330</color>
     <color name="error_color">#9A1140</color>

@@ -6,15 +6,14 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.LexerError
 import com.example.bruhdroid.model.src.RuntimeError
 import com.example.bruhdroid.model.src.UnhandledError
-import com.example.bruhdroid.model.src.blocks.*
+import com.example.bruhdroid.model.src.blocks.Block
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import java.util.*
@@ -93,6 +92,7 @@ class Controller: Observable() {
     private lateinit var interpreter: Interpreter
     private var notifying = false
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun runProgram(ip: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>, debug: Boolean = false) {
         interpreter = ip
 

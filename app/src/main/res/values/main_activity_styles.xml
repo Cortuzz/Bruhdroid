@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="logo_1">
-        <item name="android:textColor">@color/primary</item>
+        <item name="android:textColor">@color/accent_button</item>
         <item name="android:textSize">40sp</item>
     </style>
 
@@ -18,7 +18,7 @@
     </style>
 
     <style name="custom_button">
-        <item name="android:textColor">@color/secondary</item>
+        <item name="android:textColor">#212330</item>
         <item name="android:layout_width">300dp</item>
         <item name="android:layout_height">50dp</item>
         <item name="android:background">@drawable/btn_rounded_corner</item>
