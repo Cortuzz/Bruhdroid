@@ -31,6 +31,16 @@ class Valuable(varValue: Any, var type: Type) :
         return this
     }
 
+    fun getLength(): Valuable {
+        return if (type !in listOf(Type.LIST, Type.STRING)) {
+            throw TypeError("len() be applied to type $type")
+        } else if (type == Type.LIST) {
+            Valuable(array.size, Type.INT)
+        } else {
+            Valuable(value.length, Type.INT)
+        }
+    }
+
     operator fun unaryMinus(): Valuable {
         if (type == Type.INT) {
             return Valuable(-value.toInt(), type)

@@ -55,6 +55,7 @@ class Notation {
             ".toString()" to Operator.CONVERT,
             ".toBool()" to Operator.CONVERT,
             ".toList()" to Operator.CONVERT,
+            "len" to Operator.MATH,
             "abs" to Operator.MATH,
             "exp" to Operator.MATH,
             "floor" to Operator.MATH,
@@ -156,7 +157,7 @@ class Notation {
 
         fun tokenizeString(str: String): List<String> {
             val name = "([\\d]+\\.?[\\d]+|\\w[\\w\\d_]*|\".*\")"
-            val reserved = "(rand\\(\\)|abs|exp|floor|ceil|sorted)"
+            val reserved = "(rand\\(\\)|abs|exp|floor|ceil|sorted|len)"
             val convert =
                 "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\)|\\.sort\\(\\)|\\.toList\\(\\))"
             val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|//|\\*|%|/|==|=|!=|>=|<=|<|>|)"
