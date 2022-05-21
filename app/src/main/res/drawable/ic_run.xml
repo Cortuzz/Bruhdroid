@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="26dp"
+    android:viewportWidth="30"
+    android:viewportHeight="26">
+  <path
+      android:pathData="M9,4.934C9,4.122 9.916,3.649 10.578,4.118L19.848,10.684C20.411,11.083 20.411,11.917 19.848,12.316L10.578,18.882C9.916,19.351 9,18.878 9,18.066V4.934Z"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="@color/accent_button"
+      android:fillType="evenOdd"
+      android:strokeColor="@color/accent_button"
+      android:strokeLineCap="round"/>
+</vector>

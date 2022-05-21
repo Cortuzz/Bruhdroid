@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AlertDialogCustom.Light.V28" parent="AlertDialogCustom.Light">
+        <item name="android:dialogCornerRadius">15sp</item>
+
+    </style>
+
+    <style name="Theme.Bruhdroid" parent="Theme.Bruhdroid.Light"/>
+    <style name="Block" parent="Block.Light"/>
+    <style name="Expression" parent="Expression.Light"/>
+    <style name="AlertDialogCustom" parent="AlertDialogCustom.Light.V28"/>
+</resources>

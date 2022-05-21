@@ -1,3 +1,53 @@
 <resources>
+    <string name="logo_of_app_1">Lang</string>
+    <string name="logo_of_app_2">App</string>
+    <string name="descriptions">Modern and safe programming language</string>
+    <string name="start_button">Let\'s code</string>
+    <string name="load_button">Load templates</string>
+    <string name="exit_button">Exit =(</string>
+
+    <string name="save_dialog_title">Program name:</string>
+
+    <string name="templates">Templates</string>
+    <string name="saved_programs">Saved programs</string>
+    <string name="bubble_sort_button">Bubble sort</string>
+    <string name="infinity_loop_button">Infinity counter</string>
+    <string name="ahegao_button">Ahegao</string>
+
     <string name="app_name">Bruhdroid</string>
+    <string name="logo">Logo</string>
+    <string name="suppress_data_warning">Suppress</string>
+
+    <string name="start_code">Run</string>
+    <string name="debug">Debug</string>
+    <string name="choose_block">Blocks</string>
+    <string name="block">Add block</string>
+    <string name="varName">Enter Name</string>
+    <string name="val">val</string>
+    <string name="expression">expression</string>
+    <string name="console">Console</string>
+
+    <string name="init">Init</string>
+    <string name="set">Set</string>
+    <string name="output">Print</string>
+    <string name="input">Input</string>
+    <string name="while_cycle">While</string>
+    <string name="if_block">If</string>
+    <string name="pragma">Pragma</string>
+    <string name="elif_button">Elif</string>
+    <string name="else_button">Else</string>
+    <string name="dialog">Enter value</string>
+    <string name="dialog_button">Submit</string>
+
+    <string name="resume">Resume</string>
+    <string name="pause">Pause</string>
+    <string name="next">Next</string>
+    <string name="stop">Break</string>
+    <string name="save_program">Save code</string>
+    <string name="delete">Delete</string>
+    <string name="add_block">add_block</string>
+    <string name="change_theme">Change theme</string>
+    <string name="factorial">Factorial</string>
+    <string name="fibonacci">Fibonacci</string>
+    <string name="breakpoint">Breakpoint</string>
 </resources>
