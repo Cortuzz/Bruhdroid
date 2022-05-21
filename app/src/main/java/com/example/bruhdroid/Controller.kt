@@ -19,17 +19,24 @@ import java.io.File
 import java.util.*
 
 
-class Controller: Observable() {
+class Controller : Observable() {
     companion object {
         var suppressingWarns = false
 
-        fun saveProgram(name: String, dir: File, blockMap: MutableMap<View, Block>, viewBlocks: List<View>): Boolean {
+        fun saveProgram(
+            name: String,
+            dir: File,
+            blockMap: MutableMap<View, Block>,
+            viewBlocks: List<View>
+        ): Boolean {
             return try {
                 val file = File(dir, "$name.lapp")
                 file.setWritable(true)
                 file.writeText(parseBlocks(blockMap, viewBlocks).toString())
                 true
-            } catch (e: Exception) {false}
+            } catch (e: Exception) {
+                false
+            }
         }
 
         fun loadProgram(file: File): Array<Block> {
@@ -75,7 +82,10 @@ class Controller: Observable() {
             return blocks.toTypedArray()
         }
 
-        private fun parseBlocks(blockMap: MutableMap<View, Block>, viewBlocks: List<View>): JSONArray {
+        private fun parseBlocks(
+            blockMap: MutableMap<View, Block>,
+            viewBlocks: List<View>
+        ): JSONArray {
             val jsonArray = JSONArray()
             for (i in viewBlocks) {
                 val jsonObject = JSONObject()
@@ -95,7 +105,12 @@ class Controller: Observable() {
     private var notifying = false
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun runProgram(ip: Interpreter, blockMap: MutableMap<View,Block>, viewBlocks: List<View>, debug: Boolean = false) {
+    fun runProgram(
+        ip: Interpreter,
+        blockMap: MutableMap<View, Block>,
+        viewBlocks: List<View>,
+        debug: Boolean = false
+    ) {
         interpreter = ip
 
         val blocks: MutableList<Block> = mutableListOf()

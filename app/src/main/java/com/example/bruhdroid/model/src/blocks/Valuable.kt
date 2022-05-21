@@ -8,7 +8,7 @@ import kotlin.math.floor
 import kotlin.math.exp
 
 class Valuable(varValue: Any, var type: Type) :
-    Block(Instruction.VAL,"") {
+    Block(Instruction.VAL, "") {
     var value: String = varValue.toString()
     var array: MutableList<Valuable> = mutableListOf()
 
@@ -123,8 +123,11 @@ class Valuable(varValue: Any, var type: Type) :
     }
 
     operator fun compareTo(operand: Valuable): Int {
-        val dif = try{value.toFloat() - operand.value.toFloat()}
-        catch (e: Exception) {throw TypeError("Expected INT or FLOAT but found $type and ${operand.type}")}
+        val dif = try {
+            value.toFloat() - operand.value.toFloat()
+        } catch (e: Exception) {
+            throw TypeError("Expected INT or FLOAT but found $type and ${operand.type}")
+        }
         return if (dif < 0) {
             -1
         } else if (dif > 0) {
@@ -193,8 +196,12 @@ class Valuable(varValue: Any, var type: Type) :
             Type.LIST -> {
                 valuable.array.toString()
             }
-            Type.UNDEFINED -> {throw TypeError("Expected not-null type but ${valuable.type} was found")}
-            else -> {valuable.value}
+            Type.UNDEFINED -> {
+                throw TypeError("Expected not-null type but ${valuable.type} was found")
+            }
+            else -> {
+                valuable.value
+            }
         }
     }
 

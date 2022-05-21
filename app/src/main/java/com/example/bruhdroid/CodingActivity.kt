@@ -65,10 +65,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private var layoutMap = mapOf<Instruction, ViewBlock>()
     private val interpreter = Interpreter()
     private val controller = Controller()
-    private val startConnectingInstructions = listOf(Instruction.WHILE, Instruction.IF,
-        Instruction.FUNC, Instruction.FOR)
-    private val connectingInstructions = listOf(Instruction.END, Instruction.END_WHILE,
-        Instruction.FUNC_END, Instruction.END_FOR)
+    private val startConnectingInstructions = listOf(
+        Instruction.WHILE, Instruction.IF,
+        Instruction.FUNC, Instruction.FOR
+    )
+    private val connectingInstructions = listOf(
+        Instruction.END, Instruction.END_WHILE,
+        Instruction.FUNC_END, Instruction.END_FOR
+    )
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -77,11 +81,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         dp = this.resources.displayMetrics.density
         layoutMap = mapOf(
             Instruction.PRAGMA to ViewBlock("Pragma", R.drawable.ic_block_pragma),
-            Instruction.PRINT to  ViewBlock("Print", R.drawable.ic_block_print),
-            Instruction.INPUT to  ViewBlock("Input", R.drawable.ic_block_input),
-            Instruction.INIT to  ViewBlock("Init", R.drawable.ic_block_init),
-            Instruction.WHILE to  ViewBlock("While", R.drawable.ic_block_while),
-            Instruction.IF to  ViewBlock("If", R.drawable.ic_block_if),
+            Instruction.PRINT to ViewBlock("Print", R.drawable.ic_block_print),
+            Instruction.INPUT to ViewBlock("Input", R.drawable.ic_block_input),
+            Instruction.INIT to ViewBlock("Init", R.drawable.ic_block_init),
+            Instruction.WHILE to ViewBlock("While", R.drawable.ic_block_while),
+            Instruction.IF to ViewBlock("If", R.drawable.ic_block_if),
             Instruction.SET to ViewBlock("Set", R.drawable.ic_block_set),
             Instruction.BREAK to ViewBlock("Break", R.drawable.ic_block_break, false),
             Instruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
@@ -94,11 +98,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         setBindingSheetBlocks()
 
-        bindingSheetConsole = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_console, null, false)
+        bindingSheetConsole =
+            DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_console, null, false)
         bottomSheetConsole = BottomSheetDialog(this@CodingActivity)
         bottomSheetConsole.setContentView(bindingSheetConsole.root)
 
-        bindingSheetBin = DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
+        bindingSheetBin =
+            DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_bin, null, false)
         bottomSheetBin = BottomSheetDialog(this@CodingActivity)
         bottomSheetBin.setContentView(bindingSheetBin.root)
 
@@ -112,10 +118,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         interpreter.addObserver(this)
 
         binding.mainPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event,30)
+            generateDropAreaForScroll(v, event, 30)
         }
         binding.buttonsPanel.setOnDragListener { v, event ->
-            generateDropAreaForScroll(v, event,-30)
+            generateDropAreaForScroll(v, event, -30)
         }
 
         binding.changeThemeButton.setOnClickListener {
@@ -192,10 +198,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @SuppressLint("InflateParams")
     private fun makeBlockView(viewBlock: ViewBlock): View {
-            val block = when(viewBlock.hasText) {
-                true -> layoutInflater.inflate(R.layout.block, null)
-                false -> layoutInflater.inflate(R.layout.block_non_text, null)
-            }
+        val block = when (viewBlock.hasText) {
+            true -> layoutInflater.inflate(R.layout.block, null)
+            false -> layoutInflater.inflate(R.layout.block_non_text, null)
+        }
 
         block.findViewById<TextView>(R.id.textView).text = viewBlock.label
         block.background = ContextCompat.getDrawable(this, viewBlock.drawable)
@@ -229,15 +235,30 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             val view = makeBlockView(layoutMap[instr]!!)
 
             view.setOnClickListener {
-                buildBlock(prevBlock, makeBlockView(layoutMap[instr]!!), instr,
-                    instr in startConnectingInstructions)
+                buildBlock(
+                    prevBlock, makeBlockView(layoutMap[instr]!!), instr,
+                    instr in startConnectingInstructions
+                )
             }
             when (instr) {
-                in listOf(Instruction.INIT,Instruction.SET) -> firstCategory.add(view)
-                in listOf(Instruction.PRAGMA,Instruction.INPUT,Instruction.PRINT) -> secondCategory.add(view)
-                in listOf(Instruction.FOR, Instruction.WHILE,Instruction.BREAK,Instruction.CONTINUE) -> thirdCategory.add(view)
+                in listOf(Instruction.INIT, Instruction.SET) -> firstCategory.add(view)
+                in listOf(
+                    Instruction.PRAGMA,
+                    Instruction.INPUT,
+                    Instruction.PRINT
+                ) -> secondCategory.add(view)
+                in listOf(
+                    Instruction.FOR,
+                    Instruction.WHILE,
+                    Instruction.BREAK,
+                    Instruction.CONTINUE
+                ) -> thirdCategory.add(view)
                 in listOf(Instruction.IF) -> fourthCategory.add(view)
-                in listOf(Instruction.FUNC,Instruction.RETURN,Instruction.FUNC_CALL)-> fifthCategory.add(view)
+                in listOf(
+                    Instruction.FUNC,
+                    Instruction.RETURN,
+                    Instruction.FUNC_CALL
+                ) -> fifthCategory.add(view)
                 else -> {}
             }
         }
@@ -261,8 +282,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     override fun onCategoryClick(position: Int) {
         bindingSheetMenu.blocks.removeAllViews()
-        val blockMenuParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-            (110 * dp).toInt())
+        val blockMenuParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            (110 * dp).toInt()
+        )
 
         for (view in categoryBlocks[position]) {
             bindingSheetMenu.blocks.addView(view, blockMenuParams)
@@ -307,20 +330,24 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
-        val map2=mapOf(
+        val map2 = mapOf(
             Instruction.END_WHILE to R.layout.empty_block,
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
             Instruction.ELIF to R.layout.block_elif,
             Instruction.FUNC_END to R.layout.block_func_end,
-            Instruction.END_FOR to R.layout.block_end_for)
+            Instruction.END_FOR to R.layout.block_end_for
+        )
 
         GlobalScope.launch {
             for (block in blocks) {
                 block as Block
                 val instr = block.instruction
-                val view = if(instr in layoutMap) { makeBlockView(layoutMap[instr]!!) }
-                else { layoutInflater.inflate(map2[instr]!!, null) }
+                val view = if (instr in layoutMap) {
+                    makeBlockView(layoutMap[instr]!!)
+                } else {
+                    layoutInflater.inflate(map2[instr]!!, null)
+                }
 
                 view.id = View.generateViewId()
                 generateBreakpoint(view)
@@ -342,7 +369,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 if (viewToBlock[view]!!.instruction !in connectingInstructions) {
                     generateDragArea(view)
                     runOnUiThread {
-                        binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
+                        binding.container.addView(
+                            view,
+                            ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
+                        )
                     }
                 } else {
                     runOnUiThread {
@@ -384,7 +414,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         super.onBackPressed()
     }
 
-    private fun generateDropAreaForScroll(v: View, event: DragEvent,speed: Int): Boolean {
+    private fun generateDropAreaForScroll(v: View, event: DragEvent, speed: Int): Boolean {
         return when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 v.invalidate()
@@ -392,7 +422,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             DragEvent.ACTION_DRAG_LOCATION -> {
-                binding.mainCode.panBy(0.0F,speed.toFloat(),false)
+                binding.mainCode.panBy(0.0F, speed.toFloat(), false)
                 v.invalidate()
                 true
             }
@@ -533,7 +563,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 tempView.bringToFront()
                 codingViewList.add(tempView)
                 if (viewToBlock[tempView]!!.instruction !in connectingInstructions &&
-                    viewToBlock[tempView]!!.instruction !in listOf(Instruction.ELSE, Instruction.ELIF)) {
+                    viewToBlock[tempView]!!.instruction !in listOf(
+                        Instruction.ELSE,
+                        Instruction.ELIF
+                    )
+                ) {
                     generateDragArea(tempView)
                 }
             }
@@ -571,7 +605,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
 
                 val instr = viewToBlock[currentDrag]!!.instruction
-                if (instr in  startConnectingInstructions) {
+                if (instr in startConnectingInstructions) {
                     reBuildBlocks(newIndex, currentDrag, true)
                 } else {
                     reBuildBlocks(newIndex, currentDrag)
@@ -605,7 +639,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if (indexFrom == 0 || indexTo == 0) {
                 when {
                     indexFrom == 0 -> {
-                        val connector  = connectorsMap[codingViewList[0]]
+                        val connector = connectorsMap[codingViewList[0]]
                         connectorsMap[tempViews[0]] = connector as View
                     }
                     indexTo == 0 -> {
@@ -650,10 +684,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             clearConstraints(set, view)
         }
 
-        val endInstructions = listOf(Instruction.END, Instruction.END_WHILE, Instruction.ELSE,
-            Instruction.ELIF, Instruction.FUNC_END, Instruction.END_FOR)
-        val startInstructions = listOf(Instruction.IF, Instruction.WHILE, Instruction.ELSE,
-            Instruction.ELIF, Instruction.FUNC, Instruction.FOR)
+        val endInstructions = listOf(
+            Instruction.END, Instruction.END_WHILE, Instruction.ELSE,
+            Instruction.ELIF, Instruction.FUNC_END, Instruction.END_FOR
+        )
+        val startInstructions = listOf(
+            Instruction.IF, Instruction.WHILE, Instruction.ELSE,
+            Instruction.ELIF, Instruction.FUNC, Instruction.FOR
+        )
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -680,14 +718,38 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 80)
             } else if (connectorsMap[view] != null) {
                 prevView.bringToFront()
-                set.connect(connectorsMap[view]!!.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
-                set.connect(connectorsMap[view]!!.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-                set.connect(connectorsMap[view]!!.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
+                set.connect(
+                    connectorsMap[view]!!.id,
+                    ConstraintSet.TOP,
+                    prevView.id,
+                    ConstraintSet.BOTTOM,
+                    -15
+                )
+                set.connect(
+                    connectorsMap[view]!!.id,
+                    ConstraintSet.BOTTOM,
+                    view.id,
+                    ConstraintSet.TOP,
+                    0
+                )
+                set.connect(
+                    connectorsMap[view]!!.id,
+                    ConstraintSet.LEFT,
+                    view.id,
+                    ConstraintSet.LEFT,
+                    80
+                )
             }
 
             if (nestViews.isNotEmpty()) {
-                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height -15}
-                set.connect(view.id, ConstraintSet.LEFT, nestViews.last().id, ConstraintSet.LEFT, 80)
+                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height - 15 }
+                set.connect(
+                    view.id,
+                    ConstraintSet.LEFT,
+                    nestViews.last().id,
+                    ConstraintSet.LEFT,
+                    80
+                )
             }
             set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
         }
@@ -704,7 +766,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     val connector = when {
                         codingViewList.indexOf(drag) == 0 -> connectorsMap[codingViewList[1]]
                         index == 0 -> connectorsMap[drag]
-                        else -> {throw Exception()}
+                        else -> {
+                            throw Exception()
+                        }
                     }
                     connectorsMap[codingViewList[0]] = connector as View
                 }
@@ -834,9 +898,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun generateBreakpoint(view: View) {
         val button = view.findViewById<ImageButton>(R.id.breakpoint)
         button?.setOnClickListener {
-           val block = viewToBlock[view] ?: return@setOnClickListener
-           block.breakpoint = !block.breakpoint
-           drawBreakpoint(button, block)
+            val block = viewToBlock[view] ?: return@setOnClickListener
+            block.breakpoint = !block.breakpoint
+            drawBreakpoint(button, block)
         }
     }
 
@@ -847,8 +911,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         generateBreakpoint(elseView)
         val index = codingViewList.indexOf(endBlock)
         codingViewList[index] = elseView
-        try {codingViewList.add(index + 1, endBlock)}
-        catch (e: Exception) {codingViewList.add(endBlock)}
+        try {
+            codingViewList.add(index + 1, endBlock)
+        } catch (e: Exception) {
+            codingViewList.add(endBlock)
+        }
 
         viewToBlock[elseView] = Block(instr, "")
         elseView.id = View.generateViewId()
@@ -858,9 +925,15 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         elseConnector.id = View.generateViewId()
         binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
         if (full) {
-            binding.container.addView(elseView, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
+            binding.container.addView(
+                elseView,
+                ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
+            )
         } else {
-            binding.container.addView(elseView, ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt()))
+            binding.container.addView(
+                elseView,
+                ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt())
+            )
         }
 
         elseView.setOnDragListener { v, event ->
@@ -876,7 +949,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     @SuppressLint("InflateParams")
-    private fun buildBlock(prevView: View?, view: View, instruction: Instruction, connect: Boolean = false) {
+    private fun buildBlock(
+        prevView: View?,
+        view: View,
+        instruction: Instruction,
+        connect: Boolean = false
+    ) {
         var endBlock: View? = null
         var nestedConnector: View? = null
         val connector = layoutInflater.inflate(R.layout.block_connector, null)
@@ -939,9 +1017,15 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
-            binding.container.addView(view, ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt()))
+            binding.container.addView(
+                view,
+                ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt())
+            )
         } else {
-            binding.container.addView(view, ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt()))
+            binding.container.addView(
+                view,
+                ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
+            )
         }
 
         if (nestedConnector != null) {
@@ -1042,7 +1126,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         alertDialog.show()
 
         submitButton.setOnClickListener {
-            if (Controller.saveProgram(inputVal.text.toString(), this.filesDir, viewToBlock, codingViewList)) {
+            if (Controller.saveProgram(
+                    inputVal.text.toString(),
+                    this.filesDir,
+                    viewToBlock,
+                    codingViewList
+                )
+            ) {
                 Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
@@ -1066,16 +1156,16 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         val output = interpreter.output
 
         if (runtimeErrors.isNotEmpty()) {
-            runOnUiThread {showErrorDialog("RUNTIME ERROR", runtimeErrors)}
+            runOnUiThread { showErrorDialog("RUNTIME ERROR", runtimeErrors) }
             return
         }
         if (internalErrors.isNotEmpty()) {
-            runOnUiThread {showErrorDialog("INTERNAL ERROR", internalErrors)}
+            runOnUiThread { showErrorDialog("INTERNAL ERROR", internalErrors) }
             return
         }
 
         if (interpreter.waitingForInput) {
-            runOnUiThread {showCustomDialog()}
+            runOnUiThread { showCustomDialog() }
             return
         }
         if (output.isNotEmpty()) {
@@ -1093,15 +1183,18 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             val breakpoint = block?.breakpoint
 
             if ((debugType == Debug.NEXT ||
-                        debugType == Debug.BREAKPOINT && breakpoint == true)) {
+                        debugType == Debug.BREAKPOINT && breakpoint == true)
+            ) {
                 val button = getDebuggerView()?.findViewById<ImageButton>(R.id.breakpoint)
 
                 runOnUiThread {
                     showMemoryInfo(interpreter.getMemoryData())
-                    button?.setBackgroundResource(when (debugType) {
-                        Debug.NEXT -> android.R.drawable.presence_away
-                        Debug.BREAKPOINT -> android.R.drawable.presence_busy
-                    })
+                    button?.setBackgroundResource(
+                        when (debugType) {
+                            Debug.NEXT -> android.R.drawable.presence_away
+                            Debug.BREAKPOINT -> android.R.drawable.presence_busy
+                        }
+                    )
                 }
                 return
             }

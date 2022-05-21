@@ -45,12 +45,13 @@ class TemplatesActivity : AppCompatActivity() {
                 continue
             }
 
-            val buttonBinding: ButtonBinding = DataBindingUtil.inflate(layoutInflater, R.layout.button, null, false)
+            val buttonBinding: ButtonBinding =
+                DataBindingUtil.inflate(layoutInflater, R.layout.button, null, false)
             val dp: Float = this.resources.displayMetrics.density
-            var button = buttonBinding.text
+            val button = buttonBinding.text
 
             button.text = file.nameWithoutExtension
-            buttonBinding.deleteButton.setOnClickListener{
+            buttonBinding.deleteButton.setOnClickListener {
                 file.delete()
                 binding.savedPrograms.removeView(buttonBinding.root)
             }
