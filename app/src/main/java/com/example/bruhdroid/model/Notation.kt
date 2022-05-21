@@ -64,7 +64,17 @@ class Notation {
 
         fun convertToRpn(infixNotation: List<String>): List<String> {
             val unary = listOf("+", "-", "*")
-            val convertedUnary = listOf("±", "∓", "#", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()")
+            val convertedUnary = listOf(
+                "±",
+                "∓",
+                "#",
+                ".toInt()",
+                ".toFloat()",
+                ".toBool()",
+                ".toString()",
+                ".sort()",
+                ".toList()"
+            )
             var mayUnary = true
             var arrayInit = false
             val postfixNotation = mutableListOf<String>()

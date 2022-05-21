@@ -15,11 +15,11 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     var debug = false
 
 
-    private var pragma : MutableMap<String, String> = mutableMapOf(
+    private var pragma: MutableMap<String, String> = mutableMapOf(
         "INIT_MESSAGE" to "true",
         "IO_MESSAGE" to "true",
         "IO_LINES" to "10"
-        )
+    )
 
     private var parseMap: MutableMap<String, List<String>> = mutableMapOf()
     private var ioLines = 0
@@ -38,7 +38,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     fun getMemoryData(mem: Memory = memory): String {
-        val data = parseStack(mem.stack).ifEmpty {"EMPTY"}
+        val data = parseStack(mem.stack).ifEmpty { "EMPTY" }
 
         if (mem.prevMemory == null) {
             return "${mem.scope}: $data"
@@ -56,9 +56,9 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
     private fun pragmaClear() {
         pragma = mutableMapOf(
-        "INIT_MESSAGE" to "true",
-        "IO_MESSAGE" to "true",
-        "IO_LINES" to "10"
+            "INIT_MESSAGE" to "true",
+            "IO_MESSAGE" to "true",
+            "IO_LINES" to "10"
         )
     }
 
@@ -66,10 +66,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         output = if (pragma["INIT_MESSAGE"] == "true") {
             ioLines = 5
             "⢸⣿⡟⠛⢿⣷⠀⢸⣿⡟⠛⢿⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡇⠀⢸⣿⡇⠀\n" +
-            "⢸⣿⣧⣤⣾⠿⠀⢸⣿⣇⣀⣸⡿⠃⢸⣿⡇⠀⢸⣿⡇⢸⣿⣇⣀⣸⣿⡇⠀\n" +
-            "⢸⣿⡏⠉⢹⣿⡆⢸⣿⡟⠛⢻⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡏⠉⢹⣿⡇⠀\n" +
-            "⢸⣿⣧⣤⣼⡿⠃⢸⣿⡇⠀⢸⣿⡇⠸⣿⣧⣤⣼⡿⠁⢸⣿⡇⠀⢸⣿⡇⠀\n" +
-            "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀ \n"
+                    "⢸⣿⣧⣤⣾⠿⠀⢸⣿⣇⣀⣸⡿⠃⢸⣿⡇⠀⢸⣿⡇⢸⣿⣇⣀⣸⣿⡇⠀\n" +
+                    "⢸⣿⡏⠉⢹⣿⡆⢸⣿⡟⠛⢻⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡏⠉⢹⣿⡇⠀\n" +
+                    "⢸⣿⣧⣤⣼⡿⠃⢸⣿⡇⠀⢸⣿⡇⠸⣿⣧⣤⣼⡿⠁⢸⣿⡇⠀⢸⣿⡇⠀\n" +
+                    "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀ \n"
         } else {
             ""
         }
@@ -265,8 +265,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     private fun parseFunc(expression: String): Map<String, List<String>> {
-        val split = expression.replace(")", "").replace(" ","").
-        split("(").toMutableList()
+        val split = expression.replace(")", "").replace(" ", "").split("(").toMutableList()
 
         val name = listOf(split.removeFirst())
         val args = split.joinToString().split(",")
@@ -479,16 +478,19 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 memory = memory.prevMemory!!
             }
             Instruction.BREAK -> {
-                try{skipCycle()}
-                catch (e: Exception) {
-                    throwOutOfCycleError("It is not possible to use BREAK outside the context of a loop")}
+                try {
+                    skipCycle()
+                } catch (e: Exception) {
+                    throwOutOfCycleError("It is not possible to use BREAK outside the context of a loop")
+                }
             }
             Instruction.CONTINUE -> {
                 try {
                     currentLine = cycleLines.removeLast() - 1
                     memory = memory.prevMemory!!
                 } catch (e: Exception) {
-                    throwOutOfCycleError("It is not possible to use CONTINUE block outside the context of a loop")}
+                    throwOutOfCycleError("It is not possible to use CONTINUE block outside the context of a loop")
+                }
             }
             else -> parseRawBlock(block.expression)
         }
@@ -591,12 +593,14 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        val data = parseMap[raw]?: Notation.convertToRpn(Notation.tokenizeString(raw))
+        val data = parseMap[raw] ?: Notation.convertToRpn(Notation.tokenizeString(raw))
         parseMap[raw] = data
 
         val stack = mutableListOf<Block>()
-        val unary = listOf("±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()",
-            "abs", "exp", "sorted", "ceil", "floor")
+        val unary = listOf(
+            "±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()",
+            "abs", "exp", "sorted", "ceil", "floor"
+        )
 
         for (value in data) {
             if (value.isEmpty()) {
@@ -607,9 +611,11 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 stack.add(parsedValue)
             } else {
                 try {
-                    var operand2 = try{stack.removeLast()}
-                    catch (e: Exception)
-                    {throwOperationError("Expected correct expression but bad operation was found")}
+                    var operand2 = try {
+                        stack.removeLast()
+                    } catch (e: Exception) {
+                        throwOperationError("Expected correct expression but bad operation was found")
+                    }
 
                     if (operand2 is Variable) {
                         try {
@@ -626,8 +632,14 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                                 "±" -> +operand2
                                 "∓" -> -operand2
                                 ".toInt()" -> Valuable(operand2.convertToInt(operand2), Type.INT)
-                                ".toFloat()" -> Valuable(operand2.convertToFloat(operand2), Type.FLOAT)
-                                ".toString()" -> Valuable(operand2.convertToString(operand2), Type.STRING)
+                                ".toFloat()" -> Valuable(
+                                    operand2.convertToFloat(operand2),
+                                    Type.FLOAT
+                                )
+                                ".toString()" -> Valuable(
+                                    operand2.convertToString(operand2),
+                                    Type.STRING
+                                )
                                 ".toBool()" -> Valuable(operand2.convertToBool(operand2), Type.BOOL)
                                 ".toList()" -> {
                                     val array = operand2.convertToArray(operand2).toMutableList()
@@ -641,16 +653,19 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                                 "sorted" -> operand2.sorted()
                                 "floor" -> operand2.floor()
                                 "ceil" -> operand2.ceil()
-                                else -> {throwOperationError("Expected correct expression but bad operation was found")
+                                else -> {
+                                    throwOperationError("Expected correct expression but bad operation was found")
                                     throw Exception()
                                 }
                             }
                         )
                         continue
                     }
-                    var operand1 = try{stack.removeLast()}
-                    catch (e: Exception)
-                    {throwOperationError("Expected correct expression but bad operation was found")}
+                    var operand1 = try {
+                        stack.removeLast()
+                    } catch (e: Exception) {
+                        throwOperationError("Expected correct expression but bad operation was found")
+                    }
 
                     if (value in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=")) {
                         if (operand1 is Valuable) {
@@ -666,7 +681,8 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                                 "-=" -> tryFindInMemory(memory, operand1) - operand2
                                 "%=" -> tryFindInMemory(memory, operand1) % operand2
                                 "//=" -> tryFindInMemory(memory, operand1).intDiv(operand2)
-                                else -> {throwOperationError("Expected correct expression but bad operation was found")
+                                else -> {
+                                    throwOperationError("Expected correct expression but bad operation was found")
                                     throw Exception()
                                 }
                             }
@@ -708,8 +724,9 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
                     val result: Valuable? = when (value) {
                         "?" -> {
-                            try {operand1.array[operand2.value.toInt()]}
-                            catch (e: IndexOutOfBoundsException) {
+                            try {
+                                operand1.array[operand2.value.toInt()]
+                            } catch (e: IndexOutOfBoundsException) {
                                 throw IndexOutOfRangeError("${e.message}")
                             }
                         }
