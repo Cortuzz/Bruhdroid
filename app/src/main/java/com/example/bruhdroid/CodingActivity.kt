@@ -819,22 +819,24 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 currentView.visibility = View.INVISIBLE
                 val block = viewToBlock[currentView]
 
-                when (block!!.instruction) {
-                    Instruction.IF -> ifList.add(currentView)
-                    in listOf(Instruction.ELSE, Instruction.ELIF) -> {
-                        val checkIf = ifList.removeLast()
-                        if (checkIf == v) {
-                            connector = connectorsMap[currentView]
+                if (ifList.isNotEmpty()) {
+                    when (block!!.instruction) {
+                        Instruction.IF -> ifList.add(currentView)
+                        in listOf(Instruction.ELSE, Instruction.ELIF) -> {
+                            val checkIf = ifList.removeLast()
+                            if (checkIf == v) {
+                                connector = connectorsMap[currentView]
+                            }
                         }
+                        else -> {}
                     }
-                    else -> {}
                 }
 
                 if (connectorsMap[currentView] != null) {
                     connectorsMap[currentView]!!.visibility = View.INVISIBLE
                 }
 
-                if (block.instruction in connectingInstructions) {
+                if (block!!.instruction in connectingInstructions) {
                     count--
                 } else if (block.instruction in startConnectingInstructions) {
                     count++

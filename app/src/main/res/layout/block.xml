@@ -33,6 +33,7 @@
         android:hint="@string/expression"
         android:inputType="textPersonName"
         android:textColorHint="@color/default_button"
+        android:textColor="@color/default_button"
         android:theme="@style/Expression"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,6 +50,7 @@
         android:background="@android:drawable/presence_invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/breakpoint" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
