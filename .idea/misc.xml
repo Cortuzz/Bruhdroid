@@ -43,9 +43,12 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_bin.xml" value="0.177" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_if.xml" value="0.209" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_init.xml" value="0.193" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_pragma.xml" value="0.1725" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_print.xml" value="0.2225" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_set.xml" value="0.211" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_block_while.xml" value="0.1555" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_console.xml" value="0.1725" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_debug.xml" value="0.1725" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_init_block.xml" value="0.2285" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_input_block.xml" value="0.177" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2165" />
@@ -59,6 +62,10 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_print_block.xml" value="0.2285" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_run.xml" value="0.2445" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_save.xml" value="0.2445" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_stop.xml" value="0.1725" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_theme.xml" value="0.1725" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/ic_trash.xml" value="0.22" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/rounded_console.xml" value="0.1805" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/rounded_dialog.xml" value="0.224" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/rounded_expression.xml" value="0.213" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/drawable/run_button.xml" value="0.2435" />
@@ -68,13 +75,14 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_blocks.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_coding.xml" value="0.264" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_main.xml" value="0.176" />
-        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_templates.xml" value="0.12986111111111112" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/activity_templates.xml" value="0.16" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block.xml" value="0.264" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_break.xml" value="0.264" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_connector.xml" value="0.536" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_continue.xml" value="0.22265625" />
-        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_elif.xml" value="0.15512820512820513" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_elif.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_else.xml" value="0.4" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_end_for.xml" value="0.13418803418803418" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_func_end.xml" value="0.17264957264957265" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_if.xml" value="0.536" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/block_init.xml" value="0.2" />
@@ -89,7 +97,7 @@
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottomsheet_fragment.xml" value="0.2" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/bottomsheet_memory.xml" value="0.2236328125" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/buttomsheet_fragment.xml" value="0.16" />
-        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/button.xml" value="0.2236328125" />
+        <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/button.xml" value="0.4" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/category_item.xml" value="0.15902777777777777" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/condition_block_end.xml" value="0.536" />
         <entry key="..\:/androidProjects/Bruhdroid/app/src/main/res/layout/console.xml" value="0.15833333333333333" />
