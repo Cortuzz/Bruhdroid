@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:theme="@style/Block"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="200dp"
-    android:layout_height="80dp"
-    android:background="@drawable/btn_rounded_corner"
-    >
+    android:layout_height="60dp"
+    android:background="@drawable/ic_block_if"
+    android:theme="@style/Block">
 
     <Button
         android:id="@+id/addElifButton"
-        android:layout_width="75dp"
-        android:layout_height="47dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_expression"
         android:text="@string/elif_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/addElseButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35" />
 
     <TextView
         android:id="@+id/textView"
@@ -26,23 +27,35 @@
         android:textAlignment="center"
         android:textColor="#546E7A"
         android:textSize="34sp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.457" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
         android:id="@+id/addElseButton"
-        android:layout_width="75dp"
-        android:layout_height="47dp"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+
         android:layout_marginEnd="16dp"
+        android:background="@drawable/rounded_expression"
         android:text="@string/else_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/addElifButton"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.515" />
+        app:layout_constraintVertical_bias="0.35" />
+
+    <ImageButton
+        android:id="@+id/breakpoint"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="10dp"
+        android:background="@android:drawable/presence_invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/breakpoint" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

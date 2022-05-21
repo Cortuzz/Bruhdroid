@@ -34,7 +34,7 @@
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/guideline4"
-            app:layout_constraintVertical_bias="0.767" />
+            app:layout_constraintVertical_bias="0.559" />
 
         <TextView
             android:id="@+id/header_title_2"
@@ -62,21 +62,34 @@
 
         <Button
             android:id="@+id/startButton"
-            style="@style/button"
-            android:layout_marginBottom="12dp"
+            style="@style/custom_button"
+            android:layout_marginBottom="8dp"
             android:text="@string/start_button"
+            app:layout_constraintBottom_toTopOf="@+id/loadButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/description"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/loadButton"
+            style="@style/custom_button"
+            android:layout_marginBottom="8dp"
+            android:text="@string/load_button"
             app:layout_constraintBottom_toTopOf="@+id/exitButton"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/startButton"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/exitButton"
-            style="@style/button"
-            android:layout_marginBottom="36dp"
+            style="@style/custom_button"
+            android:layout_marginBottom="16dp"
             android:text="@string/exit_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/loadButton"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -85,7 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_end="329dp" />
+            app:layout_constraintGuide_percent="0.6" />
 
         <ImageButton
             android:id="@+id/changeThemeButton"

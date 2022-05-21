@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="21dp"
+    android:height="21dp"
+    android:viewportWidth="21"
+    android:viewportHeight="21">
+  <path
+      android:pathData="M6.563,4.594H14.438C14.96,4.594 15.46,4.801 15.83,5.17C16.199,5.54 16.406,6.04 16.406,6.563V14.438C16.406,14.96 16.199,15.46 15.83,15.83C15.46,16.199 14.96,16.406 14.438,16.406H6.563C6.04,16.406 5.54,16.199 5.17,15.83C4.801,15.46 4.594,14.96 4.594,14.438V6.563C4.594,6.04 4.801,5.54 5.17,5.17C5.54,4.801 6.04,4.594 6.563,4.594V4.594Z"
+      android:fillColor="@color/accent_button"/>
+</vector>
