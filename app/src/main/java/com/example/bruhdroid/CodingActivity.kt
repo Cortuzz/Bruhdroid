@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
 import android.view.View
@@ -876,7 +875,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InflateParams")
     private fun buildBlock(prevView: View?, view: View, instruction: Instruction, connect: Boolean = false) {
         var endBlock: View? = null

@@ -9,13 +9,15 @@
 
     <Button
         android:id="@+id/addElifButton"
-        android:layout_width="75dp"
-        android:layout_height="47dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_expression"
         android:text="@string/elif_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/addElseButton"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35" />
 
     <TextView
         android:id="@+id/textView"
@@ -34,13 +36,16 @@
 
     <Button
         android:id="@+id/addElseButton"
-        android:layout_width="75dp"
-        android:layout_height="47dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/rounded_expression"
         android:text="@string/else_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35" />
 
     <ImageButton
         android:id="@+id/breakpoint"
@@ -50,6 +55,7 @@
         android:background="@android:drawable/presence_invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/breakpoint" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

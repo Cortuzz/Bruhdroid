@@ -10,7 +10,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Else"
+        android:text="@string/else_button"
         android:layout_marginStart="10dp"
         android:textAlignment="center"
         android:textColor="@color/default_button"
@@ -41,6 +41,7 @@
         android:background="@android:drawable/presence_invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/breakpoint" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

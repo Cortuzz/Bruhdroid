@@ -49,4 +49,5 @@
     <string name="change_theme">Change theme</string>
     <string name="factorial">Factorial</string>
     <string name="fibonacci">Fibonacci</string>
+    <string name="breakpoint">Breakpoint</string>
 </resources>
