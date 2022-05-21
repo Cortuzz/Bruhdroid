@@ -570,7 +570,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     private fun getValue(data: String): Block? {
-        if (data in listOf("abs", "exp", "sorted", "ceil", "floor")) {
+        if (data in listOf("abs", "exp", "sorted", "ceil", "floor", "len")) {
             return null
         }
 
@@ -599,7 +599,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         val stack = mutableListOf<Block>()
         val unary = listOf(
             "±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()",
-            "abs", "exp", "sorted", "ceil", "floor"
+            "abs", "exp", "sorted", "ceil", "floor", "len"
         )
 
         for (value in data) {
@@ -653,6 +653,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                                 "sorted" -> operand2.sorted()
                                 "floor" -> operand2.floor()
                                 "ceil" -> operand2.ceil()
+                                "len" -> operand2.getLength()
                                 else -> {
                                     throwOperationError("Expected correct expression but bad operation was found")
                                     throw Exception()
