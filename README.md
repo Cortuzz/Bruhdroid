@@ -1,4 +1,4 @@
-# Bruhdroid 
+# Bruhdroid - May 2022
 This project is a block programming language for android devices
 <br>
 Bruhdroid - приложение для Android, позволяющее писать код с помощью блоков <br>
