@@ -172,7 +172,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             updateDebugger()
 
             GlobalScope.launch {
-                controller.resumeProgram()
+                controller.resumeOneIteration()
             }
         }
 
@@ -181,7 +181,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             updateDebugger()
 
             GlobalScope.launch {
-                controller.resumeProgram()
+                controller.resumeOneIteration()
             }
         }
 
@@ -225,11 +225,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         categoryRecycler(categoryList)
 
-        val firstCategory = LinkedList<View>()
-        val secondCategory = LinkedList<View>()
-        val thirdCategory = LinkedList<View>()
-        val fourthCategory = LinkedList<View>()
-        val fifthCategory = LinkedList<View>()
+        val firstBlockCategory = LinkedList<View>()
+        val secondBlockCategory = LinkedList<View>()
+        val thirdBlockCategory = LinkedList<View>()
+        val fourthBlockCategory = LinkedList<View>()
+        val fifthBlockCategory = LinkedList<View>()
 
         for (instr in layoutMap.keys) {
             val view = makeBlockView(layoutMap[instr]!!)
@@ -241,33 +241,33 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 )
             }
             when (instr) {
-                in listOf(Instruction.INIT, Instruction.SET) -> firstCategory.add(view)
+                in listOf(Instruction.INIT, Instruction.SET) -> firstBlockCategory.add(view)
                 in listOf(
                     Instruction.PRAGMA,
                     Instruction.INPUT,
                     Instruction.PRINT
-                ) -> secondCategory.add(view)
+                ) -> secondBlockCategory.add(view)
                 in listOf(
                     Instruction.FOR,
                     Instruction.WHILE,
                     Instruction.BREAK,
                     Instruction.CONTINUE
-                ) -> thirdCategory.add(view)
-                in listOf(Instruction.IF) -> fourthCategory.add(view)
+                ) -> thirdBlockCategory.add(view)
+                in listOf(Instruction.IF) -> fourthBlockCategory.add(view)
                 in listOf(
                     Instruction.FUNC,
                     Instruction.RETURN,
                     Instruction.FUNC_CALL
-                ) -> fifthCategory.add(view)
+                ) -> fifthBlockCategory.add(view)
                 else -> {}
             }
         }
 
-        categoryBlocks.add(firstCategory)
-        categoryBlocks.add(secondCategory)
-        categoryBlocks.add(thirdCategory)
-        categoryBlocks.add(fourthCategory)
-        categoryBlocks.add(fifthCategory)
+        categoryBlocks.add(firstBlockCategory)
+        categoryBlocks.add(secondBlockCategory)
+        categoryBlocks.add(thirdBlockCategory)
+        categoryBlocks.add(fourthBlockCategory)
+        categoryBlocks.add(fifthBlockCategory)
 
         onCategoryClick(0)
     }
@@ -330,7 +330,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
-        val map2 = mapOf(
+        val subsequentInstructionsViews = mapOf(
             Instruction.END_WHILE to R.layout.empty_block,
             Instruction.END to R.layout.condition_block_end,
             Instruction.ELSE to R.layout.block_else,
@@ -346,7 +346,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 val view = if (instr in layoutMap) {
                     makeBlockView(layoutMap[instr]!!)
                 } else {
-                    layoutInflater.inflate(map2[instr]!!, null)
+                    layoutInflater.inflate(subsequentInstructionsViews[instr]!!, null)
                 }
 
                 view.id = View.generateViewId()
@@ -1104,10 +1104,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             interpreter.waitingForInput = false
             alertDialog.dismiss()
             if (!debugMode) {
-                controller.resumeFull()
+                controller.resumeAllIterations()
             } else {
                 GlobalScope.launch {
-                    controller.resumeProgram()
+                    controller.resumeOneIteration()
                 }
             }
         }
@@ -1203,7 +1203,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             GlobalScope.launch {
                 runOnUiThread {
-                    controller.resumeProgram()
+                    controller.resumeOneIteration()
                 }
             }
         }

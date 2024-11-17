@@ -569,7 +569,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return tryFindInMemory(memory.prevMemory, block)
     }
 
-    private fun getValue(data: String): Block? {
+    private fun evaluateExpressionToBlock(data: String): Block? {
         if (data in listOf("abs", "exp", "sorted", "ceil", "floor", "len")) {
             return null
         }
@@ -606,7 +606,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
             if (value.isEmpty()) {
                 continue
             }
-            val parsedValue = getValue(value)
+            val parsedValue = evaluateExpressionToBlock(value)
             if (parsedValue != null) {
                 stack.add(parsedValue)
             } else {

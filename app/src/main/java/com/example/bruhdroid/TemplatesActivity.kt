@@ -36,10 +36,10 @@ class TemplatesActivity : AppCompatActivity() {
             openCodingActivity(TemplateStorage.getBlocks(Template.AHEGAO))
         }
 
-        loadPrograms()
+        loadSavedProgramsFromStorage()
     }
 
-    private fun loadPrograms() {
+    private fun loadSavedProgramsFromStorage() {
         for (file in this.filesDir.listFiles()) {
             if (!file.name.contains("\\.lapp$".toRegex())) {
                 continue
