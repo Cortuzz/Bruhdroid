@@ -1,4 +1,4 @@
-package com.example.bruhdroid.model
+package com.example.bruhdroid.model.memory
 
 import com.example.bruhdroid.model.src.StackCorruptionError
 import com.example.bruhdroid.model.src.Type
@@ -7,7 +7,7 @@ import com.example.bruhdroid.model.src.blocks.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
 
 class Memory(val prevMemory: Memory?, val scope: String) {
-    val stack: MutableMap<String, Valuable> = mutableMapOf()
+    private val stack: MutableMap<String, Valuable> = mutableMapOf()
 
     fun push(address: String, value: Block) {
         value as Valuable
@@ -17,6 +17,10 @@ class Memory(val prevMemory: Memory?, val scope: String) {
             }
         }
         stack[address] = value
+    }
+
+    fun getAllVariables(): Map<String, Valuable> {
+        return stack.toMap()
     }
 
     private fun initArray(value: Valuable, count: Int) {

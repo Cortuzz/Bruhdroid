@@ -1,5 +1,7 @@
 package com.example.bruhdroid.model
 
+import com.example.bruhdroid.model.memory.Memory
+import com.example.bruhdroid.model.memory.MemoryPresentor
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
@@ -14,6 +16,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
     private var blocks = _blocks?.toMutableList()
     private var memory = Memory(null, "GLOBAL SCOPE")
+    private val memoryPresentor = MemoryPresentor()
     private var input = ""
     private var currentLine = -1
     private var debug = false
@@ -57,21 +60,8 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
        waitingForInput = false
     }
 
-    fun getMemoryData(mem: Memory = memory): String {
-        val data = parseStack(mem.stack).ifEmpty { "EMPTY" }
-
-        if (mem.prevMemory == null) {
-            return "${mem.scope}: $data"
-        }
-        return "${mem.scope}: $data\n\n${getMemoryData(mem.prevMemory)}"
-    }
-
-    private fun parseStack(stack: MutableMap<String, Valuable>): String {
-        var data = ""
-        for (pair in stack) {
-            data += "\n${pair.key} = ${getVisibleValue(pair.value)}: ${pair.value.type}"
-        }
-        return data
+    fun getMemoryData(): String {
+        return memoryPresentor.getMemoryData(memory)
     }
 
     private fun pragmaClear() {
@@ -217,22 +207,6 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         }
     }
 
-    private fun getVisibleValue(valuable: Valuable): String {
-        val rawValue = valuable.value
-
-        return when (valuable.type) {
-            Type.STRING -> "\"$rawValue\""
-            Type.BOOL -> rawValue.uppercase()
-            Type.UNDEFINED -> "NULL"
-            Type.LIST -> {
-                val str = mutableListOf<String>()
-                valuable.array.forEach { el -> str.add(getVisibleValue(el)) }
-                str.toString()
-            }
-            else -> rawValue
-        }
-    }
-
     private fun split(str: String): List<String> {
         var isString = false
         val parsed = mutableListOf<String>()
@@ -346,7 +320,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 }
 
                 for (raw in rawList) {
-                    output += "${getVisibleValue(parseRawBlock(raw))} "
+                    output += "${memoryPresentor.getVisibleValue(parseRawBlock(raw))} "
                 }
                 ++ioLines
                 output += "\n"

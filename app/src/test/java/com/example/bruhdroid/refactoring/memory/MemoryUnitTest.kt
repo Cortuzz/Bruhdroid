@@ -1,10 +1,7 @@
 package com.example.bruhdroid.refactoring.memory;
 
-import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.Memory
-import com.example.bruhdroid.model.src.Instruction
+import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.Valuable
 import io.mockk.every
 import io.mockk.mockk
