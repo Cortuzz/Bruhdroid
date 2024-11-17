@@ -6,14 +6,17 @@ import java.lang.IndexOutOfBoundsException
 import java.util.*
 
 class Interpreter(_blocks: List<Block>? = null) : Observable() {
-    var blocks = _blocks?.toMutableList()
-    var output = ""
-    var input = ""
-    var waitingForInput = false
-    var memory = Memory(null, "GLOBAL SCOPE")
-    var currentLine = -1
-    var debug = false
 
+    var output = ""
+        private set
+    var waitingForInput = false
+        private set
+
+    private var blocks = _blocks?.toMutableList()
+    private var memory = Memory(null, "GLOBAL SCOPE")
+    private var input = ""
+    private var currentLine = -1
+    private var debug = false
 
     private var pragma: MutableMap<String, String> = mutableMapOf(
         "INIT_MESSAGE" to "true",
@@ -35,6 +38,23 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     fun initBlocks(_blocks: List<Block>) {
         clear()
         blocks = _blocks.toMutableList()
+    }
+
+    fun getBlockAtCurrentLine(): Block? {
+        return blocks?.get(getCurrentLine())
+    }
+
+    fun getBlocksSize(): Int? {
+        return blocks?.size
+    }
+
+    fun getCurrentLine(): Int {
+        return currentLine + 1
+    }
+
+    fun handleUserInput(inp: String) {
+       input = inp
+       waitingForInput = false
     }
 
     fun getMemoryData(mem: Memory = memory): String {
@@ -95,7 +115,9 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         pragmaUpdate()
     }
 
-    fun runOnce(): Boolean {
+    fun runOnce(debugMode: Boolean): Boolean {
+        debug = debugMode
+
         if (input.isNotEmpty()) {
             parseInput()
         }
@@ -124,7 +146,9 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return true
     }
 
-    fun run() {
+    fun run(debugMode: Boolean) {
+        debug = debugMode
+
         if (input.isNotEmpty()) {
             parseInput()
         }

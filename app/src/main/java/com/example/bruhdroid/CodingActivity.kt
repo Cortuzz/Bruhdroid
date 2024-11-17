@@ -172,7 +172,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             updateDebugger()
 
             GlobalScope.launch {
-                controller.resumeOneIteration()
+                controller.resumeOneIteration(debugMode)
             }
         }
 
@@ -181,7 +181,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             updateDebugger()
 
             GlobalScope.launch {
-                controller.resumeOneIteration()
+                controller.resumeOneIteration(debugMode)
             }
         }
 
@@ -321,7 +321,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         return try {
-            getKey(viewToBlock, interpreter.blocks?.get(interpreter.currentLine + 1))
+            getKey(viewToBlock, interpreter.getBlockAtCurrentLine())
         } catch (e: Exception) {
             null
         }
@@ -1100,14 +1100,13 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         alertDialog.show()
 
         submitButton.setOnClickListener {
-            interpreter.input = inputVal.text.toString()
-            interpreter.waitingForInput = false
+            interpreter.handleUserInput(inputVal.text.toString())
             alertDialog.dismiss()
             if (!debugMode) {
-                controller.resumeAllIterations()
+                controller.resumeAllIterations(false)
             } else {
                 GlobalScope.launch {
-                    controller.resumeOneIteration()
+                    controller.resumeOneIteration(true)
                 }
             }
         }
@@ -1180,8 +1179,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             return
         }
 
-        if (interpreter.currentLine + 1 != interpreter.blocks?.size) {
-            val block = interpreter.blocks?.get(interpreter.currentLine + 1)
+        if (interpreter.getCurrentLine() != interpreter.getBlocksSize()) {
+            val block = interpreter.getBlockAtCurrentLine()
             val breakpoint = block?.breakpoint
 
             if ((debugType == Debug.NEXT ||
@@ -1203,7 +1202,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             GlobalScope.launch {
                 runOnUiThread {
-                    controller.resumeOneIteration()
+                    controller.resumeOneIteration(debugMode)
                 }
             }
         }

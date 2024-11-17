@@ -122,18 +122,17 @@ class Controller : Observable() {
 
         try {
             interpreter.initBlocks(blocks)
-            interpreter.debug = debug
 
             if (!debug) {
                 GlobalScope.launch {
                     coroutineScope {
-                        resumeAllIterations()
+                        resumeAllIterations(false)
                     }
                 }
                 return
             }
             GlobalScope.launch {
-                resumeOneIteration()
+                resumeOneIteration(true)
             }
         } catch (e: UnhandledError) {
             internalErrors = e.message.toString()
@@ -146,9 +145,9 @@ class Controller : Observable() {
         }
     }
 
-    fun resumeOneIteration() {
+    fun resumeOneIteration(debug: Boolean) {
         try {
-            notifying = interpreter.runOnce()
+            notifying = interpreter.runOnce(debug)
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
             notifying = true
@@ -162,9 +161,9 @@ class Controller : Observable() {
         }
     }
 
-    fun resumeAllIterations() {
+    fun resumeAllIterations(debug: Boolean) {
         try {
-            interpreter.run()
+            interpreter.run(debug)
         } catch (e: RuntimeError) {
             runtimeErrors = e.message.toString()
         } catch (e: UnhandledError) {
