@@ -595,7 +595,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        val data = parseMap[raw] ?: Notation.convertToRpn(Notation.tokenizeString(raw))
+        val data = parseMap[raw] ?: Notation.convertInfixToPostfixNotation(Notation.tokenizeString(raw))
         parseMap[raw] = data
 
         val stack = mutableListOf<Block>()

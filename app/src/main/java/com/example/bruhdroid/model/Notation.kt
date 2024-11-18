@@ -8,7 +8,7 @@ class Notation {
     companion object {
         private val operatorBuilders = OperatorBuilderFactory().getOperatorBuilders()
 
-        fun convertToRpn(infixNotation: List<String>): List<String> {
+        fun convertInfixToPostfixNotation(infixNotation: List<String>): List<String> {
             var parseDto = OperatorParseDto(
                 postfixNotation = mutableListOf(),
                 operationStack = mutableListOf(),

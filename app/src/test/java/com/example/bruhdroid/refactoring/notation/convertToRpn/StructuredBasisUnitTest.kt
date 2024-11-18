@@ -2,7 +2,6 @@ package com.example.bruhdroid.refactoring.notation.convertToRpn
 
 import com.example.bruhdroid.model.Notation
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Test
 
 // Тесты, предназначенные для базисного тестирования
@@ -15,7 +14,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -30,7 +29,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -45,7 +44,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -60,7 +59,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -75,7 +74,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -85,7 +84,7 @@ class StructuredBasisUnitTest {
             ")",
         )
 
-        Notation.convertToRpn(input)
+        Notation.convertInfixToPostfixNotation(input)
     }
 
 
@@ -96,7 +95,7 @@ class StructuredBasisUnitTest {
             "]",
         )
 
-        Notation.convertToRpn(input)
+        Notation.convertInfixToPostfixNotation(input)
     }
 
     @Test
@@ -111,7 +110,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -127,7 +126,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -143,7 +142,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -158,7 +157,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -173,7 +172,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -188,7 +187,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -204,7 +203,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 }

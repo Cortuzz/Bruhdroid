@@ -18,7 +18,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -34,7 +34,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -49,7 +49,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -65,7 +65,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -81,7 +81,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -96,7 +96,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -113,7 +113,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 
@@ -128,7 +128,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertToRpn(input)
+            Notation.convertInfixToPostfixNotation(input)
         )
     }
 }
