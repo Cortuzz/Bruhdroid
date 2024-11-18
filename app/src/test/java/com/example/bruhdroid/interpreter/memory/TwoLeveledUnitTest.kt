@@ -18,8 +18,6 @@ class TwoLeveledUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
-
-        Assert.assertEquals("1", memory["a"]?.value)
+        Assert.assertEquals("1", interpreter.memory.get("a")?.value)
     }
 }

@@ -18,9 +18,9 @@ class ConditionUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("2", memory["a"]?.value)
+        Assert.assertEquals("2", memory.get("a")?.value)
     }
 
     @Test
@@ -33,9 +33,9 @@ class ConditionUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("3", memory["a"]?.value)
+        Assert.assertEquals("3", memory.get("a")?.value)
     }
 
     @Test
@@ -53,9 +53,9 @@ class ConditionUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d, e, f))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("2", memory["a"]?.value)
+        Assert.assertEquals("2", memory.get("a")?.value)
     }
 
     @Test
@@ -73,9 +73,9 @@ class ConditionUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d, e, f))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("1", memory["a"]?.value)
+        Assert.assertEquals("1", memory.get("a")?.value)
     }
 
     @Test
@@ -94,9 +94,9 @@ class ConditionUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d, e, f, g))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("2", memory["a"]?.value)
+        Assert.assertEquals("2", memory.get("a")?.value)
     }
 
     @Test
@@ -115,9 +115,9 @@ class ConditionUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d, e, f, g))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("3", memory["a"]?.value)
+        Assert.assertEquals("3", memory.get("a")?.value)
     }
 
     @Test
@@ -145,7 +145,7 @@ class ConditionUnitTest {
         for (block in blocks) {
             val interpreter = Interpreter(block.key)
             interpreter.run()
-            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+            Assert.assertEquals(block.value, interpreter.memory.get("a")?.value)
         }
     }
 
@@ -187,7 +187,7 @@ class ConditionUnitTest {
         for (block in blocks) {
             val interpreter = Interpreter(block.key)
             interpreter.run()
-            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+            Assert.assertEquals(block.value, interpreter.memory.get("a")?.value)
         }
     }
 
@@ -251,7 +251,7 @@ class ConditionUnitTest {
         for (block in blocks) {
             val interpreter = Interpreter(block.key)
             interpreter.run()
-            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+            Assert.assertEquals(block.value, interpreter.memory.get("a")?.value)
         }
     }
 }

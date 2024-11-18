@@ -17,16 +17,15 @@ class LogicUnitTest {
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
-        Assert.assertEquals(3, memory.size)
+        val memory = interpreter.memory
 
-        Assert.assertEquals(Type.BOOL, memory["a"]?.type)
-        Assert.assertEquals(Type.BOOL, memory["b"]?.type)
-        Assert.assertEquals(Type.BOOL, memory["c"]?.type)
+        Assert.assertEquals(Type.BOOL, memory.get("a")?.type)
+        Assert.assertEquals(Type.BOOL, memory.get("b")?.type)
+        Assert.assertEquals(Type.BOOL, memory.get("c")?.type)
 
-        Assert.assertEquals("true", memory["a"]?.value)
-        Assert.assertEquals("false", memory["b"]?.value)
-        Assert.assertEquals("false", memory["c"]?.value)
+        Assert.assertEquals("true", memory.get("a")?.value)
+        Assert.assertEquals("false", memory.get("b")?.value)
+        Assert.assertEquals("false", memory.get("c")?.value)
     }
 
     @Test
@@ -37,14 +36,13 @@ class LogicUnitTest {
         val interpreter = Interpreter(listOf(a, b))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
-        Assert.assertEquals(2, memory.size)
+        val memory = interpreter.memory
 
-        Assert.assertEquals(Type.BOOL, memory["a"]?.type)
-        Assert.assertEquals(Type.BOOL, memory["b"]?.type)
+        Assert.assertEquals(Type.BOOL, memory.get("a")?.type)
+        Assert.assertEquals(Type.BOOL, memory.get("b")?.type)
 
-        Assert.assertEquals("true", memory["a"]?.value)
-        Assert.assertEquals("false", memory["b"]?.value)
+        Assert.assertEquals("true", memory.get("a")?.value)
+        Assert.assertEquals("false", memory.get("b")?.value)
     }
 
     @Test

@@ -17,11 +17,10 @@ class InitializationUnitTest {
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
 
-        Assert.assertEquals(2, interpreter.memory.stack.size)
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("3", memory["a"]?.value)
-        Assert.assertEquals("2", memory["b"]?.value)
+        Assert.assertEquals("3", memory.get("a")?.value)
+        Assert.assertEquals("2", memory.get("b")?.value)
     }
 
     @Test
@@ -31,18 +30,17 @@ class InitializationUnitTest {
         val interpreter = Interpreter(listOf(a))
         interpreter.run()
 
-        Assert.assertEquals(4, interpreter.memory.stack.size)
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("1", memory["a"]?.value)
-        Assert.assertEquals("2.45", memory["b"]?.value)
-        Assert.assertEquals("45", memory["c"]?.value)
-        Assert.assertEquals("3,2", memory["d"]?.value)
+        Assert.assertEquals("1", memory.get("a")?.value)
+        Assert.assertEquals("2.45", memory.get("b")?.value)
+        Assert.assertEquals("45", memory.get("c")?.value)
+        Assert.assertEquals("3,2", memory.get("d")?.value)
 
-        Assert.assertEquals(Type.INT, memory["a"]?.type)
-        Assert.assertEquals(Type.FLOAT, memory["b"]?.type)
-        Assert.assertEquals(Type.STRING, memory["c"]?.type)
-        Assert.assertEquals(Type.STRING, memory["d"]?.type)
+        Assert.assertEquals(Type.INT, memory.get("a")?.type)
+        Assert.assertEquals(Type.FLOAT, memory.get("b")?.type)
+        Assert.assertEquals(Type.STRING, memory.get("c")?.type)
+        Assert.assertEquals(Type.STRING, memory.get("d")?.type)
     }
 
     @Test
@@ -54,11 +52,10 @@ class InitializationUnitTest {
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
-        Assert.assertEquals(2, memory.size)
+        val memory = interpreter.memory
 
-        Assert.assertEquals("75", memory["a"]?.value)
-        Assert.assertEquals("423", memory["b"]?.value)
+        Assert.assertEquals("75", memory.get("a")?.value)
+        Assert.assertEquals("423", memory.get("b")?.value)
     }
 
     @Test
@@ -69,10 +66,9 @@ class InitializationUnitTest {
         val interpreter = Interpreter(listOf(a, b))
         interpreter.run()
 
-        Assert.assertEquals(1, interpreter.memory.stack.size)
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("14", memory["a"]?.value)
+        Assert.assertEquals("14", memory.get("a")?.value)
     }
 
     @Test
@@ -84,10 +80,10 @@ class InitializationUnitTest {
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("-5", memory["a"]?.value)
-        Assert.assertEquals("5", memory["b"]?.value)
-        Assert.assertEquals("-25", memory["c"]?.value)
+        Assert.assertEquals("-5", memory.get("a")?.value)
+        Assert.assertEquals("5", memory.get("b")?.value)
+        Assert.assertEquals("-25", memory.get("c")?.value)
     }
 }

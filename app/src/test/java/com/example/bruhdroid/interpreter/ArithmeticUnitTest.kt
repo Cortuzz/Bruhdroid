@@ -16,13 +16,12 @@ class ArithmeticUnitTest {
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
+        
+        val memory = interpreter.memory
 
-        Assert.assertEquals(3, interpreter.memory.stack.size)
-        val memory = interpreter.memory.stack
-
-        Assert.assertEquals("10", memory["a"]?.value)
-        Assert.assertEquals("7", memory["b"]?.value)
-        Assert.assertEquals("-36", memory["c"]?.value)
+        Assert.assertEquals("10", memory.get("a")?.value)
+        Assert.assertEquals("7", memory.get("b")?.value)
+        Assert.assertEquals("-36", memory.get("c")?.value)
     }
 
     @Test
@@ -33,13 +32,12 @@ class ArithmeticUnitTest {
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
+        
+        val memory = interpreter.memory
 
-        Assert.assertEquals(3, interpreter.memory.stack.size)
-        val memory = interpreter.memory.stack
-
-        Assert.assertEquals("24", memory["a"]?.value)
-        Assert.assertEquals("4", memory["b"]?.value)
-        Assert.assertEquals("46", memory["c"]?.value)
+        Assert.assertEquals("24", memory.get("a")?.value)
+        Assert.assertEquals("4", memory.get("b")?.value)
+        Assert.assertEquals("46", memory.get("c")?.value)
     }
 
     @Test
@@ -51,12 +49,11 @@ class ArithmeticUnitTest {
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
-        Assert.assertEquals(3, memory.size)
+        val memory = interpreter.memory
 
-        Assert.assertEquals("5", memory["a"]?.value)
-        Assert.assertEquals("72", memory["b"]?.value)
-        Assert.assertEquals("-13", memory["c"]?.value)
+        Assert.assertEquals("5", memory.get("a")?.value)
+        Assert.assertEquals("72", memory.get("b")?.value)
+        Assert.assertEquals("-13", memory.get("c")?.value)
     }
 
     @Test
@@ -69,16 +66,15 @@ class ArithmeticUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
-        Assert.assertEquals(4, memory.size)
+        val memory = interpreter.memory
 
-        Assert.assertEquals("-5", memory["a"]?.value)
-        Assert.assertEquals("3", memory["b"]?.value)
+        Assert.assertEquals("-5", memory.get("a")?.value)
+        Assert.assertEquals("3", memory.get("b")?.value)
 
-        Assert.assertEquals("true", memory["c"]?.value)
-        Assert.assertEquals(Type.BOOL, memory["c"]?.type)
+        Assert.assertEquals("true", memory.get("c")?.value)
+        Assert.assertEquals(Type.BOOL, memory.get("c")?.type)
 
-        Assert.assertEquals("false", memory["d"]?.value)
-        Assert.assertEquals(Type.BOOL, memory["d"]?.type)
+        Assert.assertEquals("false", memory.get("d")?.value)
+        Assert.assertEquals(Type.BOOL, memory.get("d")?.type)
     }
 }

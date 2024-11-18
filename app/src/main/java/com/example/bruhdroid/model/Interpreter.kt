@@ -13,9 +13,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         private set
     var waitingForInput = false
         private set
+    var memory = Memory(null, "GLOBAL SCOPE")
+        private set
 
     private var blocks = _blocks?.toMutableList()
-    private var memory = Memory(null, "GLOBAL SCOPE")
     private val memoryPresentor = MemoryPresentor()
     private var input = ""
     private var currentLine = -1
@@ -134,6 +135,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         }
 
         return true
+    }
+
+    fun run() {
+        run(false)
     }
 
     fun run(debugMode: Boolean) {
@@ -577,7 +582,6 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         } else if (data in listOf("true", "false")) {
             Valuable(data, Type.BOOL)
         } else if (data.last() == '"' && data.first() == '"') {
-            // Maybe substring is better solution
             Valuable(data.replace("\"", ""), Type.STRING)
         } else if (data.contains("^[A-Za-z]+\$".toRegex())) {
             Variable(data)

@@ -21,10 +21,10 @@ class CyclesUnitTest {
         val interpreter = Interpreter(listOf(a, counter, b, c, incCounter, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("128", memory["a"]?.value)
-        Assert.assertEquals("7", memory["count"]?.value)
+        Assert.assertEquals("128", memory.get("a")?.value)
+        Assert.assertEquals("7", memory.get("count")?.value)
     }
 
     @Test
@@ -46,10 +46,10 @@ class CyclesUnitTest {
         val interpreter = Interpreter(listOf(a, counter, b, c, d, e, e1, f, incCounter, g))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("6912", memory["a"]?.value)
-        Assert.assertEquals("11", memory["count"]?.value)
+        Assert.assertEquals("6912", memory.get("a")?.value)
+        Assert.assertEquals("11", memory.get("count")?.value)
     }
 
     @Test
@@ -63,8 +63,8 @@ class CyclesUnitTest {
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("1", memory["a"]?.value)
+        Assert.assertEquals("1", memory.get("a")?.value)
     }
 }
