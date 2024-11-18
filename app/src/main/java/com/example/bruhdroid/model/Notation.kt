@@ -3,20 +3,20 @@ package com.example.bruhdroid.model
 
 class Notation {
     companion object {
-        private enum class Operator(val operator: Char, val priority: Int) {
-            CONVERT('r', 10),
-            UNARY_MINUS('∓', 9), UNARY_PLUS('±', 9),
-            DEFINE_BY_INDEX('?', 8),
-            MULTIPLY('*', 7), DIVIDE('/', 7),
-            SUBTRACT('-', 6), ADD('+', 6),
-            EQUALS('=', 5), NOT_EQUALS('≠', 5),
-            LESS('<', 5), GREATER('>', 5),
-            LESS_OR_EQUALS('≤', 5), GREATER_OR_EQUALS('≥', 5),
-            NOT('!', 4), AND('&', 3), OR('|', 2),
-            MATH('m', 10),
-            OPEN_BRACKET('(', 0), CLOSE_BRACKET(')', 0),
-            OPEN_INDEX('[', 0), CLOSE_INDEX(']', 0),
-            INIT_ARRAY('#', -1), DEFINE('≈', -2)
+        private enum class Operator(val operator: String, val priority: Int) {
+            CONVERT("r", 10),
+            UNARY_MINUS("∓", 9), UNARY_PLUS("±", 9),
+            DEFINE_BY_INDEX("?", 8),
+            MULTIPLY("*", 7), DIVIDE("/", 7),
+            SUBTRACT("-", 6), ADD("+", 6),
+            EQUALS("=", 5), NOT_EQUALS("≠", 5),
+            LESS("<", 5), GREATER(">", 5),
+            LESS_OR_EQUALS("≤", 5), GREATER_OR_EQUALS("≥", 5),
+            NOT("!", 4), AND("&", 3), OR("|", 2),
+            MATH("m", 10),
+            OPEN_BRACKET("(", 0), CLOSE_BRACKET(")", 0),
+            OPEN_INDEX("[", 0), CLOSE_INDEX("]", 0),
+            INIT_ARRAY("#", -1), DEFINE("≈", -2)
         }
 
         private val operators = mapOf(
@@ -113,7 +113,7 @@ class Notation {
                                 s = opStack.removeLast()
                             }
                             if (!arrayInit) {
-                                postfixNotation.add("?")
+                                postfixNotation.add(Operator.DEFINE_BY_INDEX.operator)
                             }
                             arrayInit = false
                             mayUnary = false
@@ -121,10 +121,10 @@ class Notation {
                         else -> {
                             if (mayUnary && infixNotation[count] in unary) {
                                 when (infixNotation[count]) {
-                                    "-" -> opStack.add("∓")
-                                    "+" -> opStack.add("±")
+                                    "-" -> opStack.add(Operator.UNARY_MINUS.operator)
+                                    "+" -> opStack.add(Operator.UNARY_PLUS.operator)
                                     "*" -> {
-                                        opStack.add("#")
+                                        opStack.add(Operator.INIT_ARRAY.operator)
                                         arrayInit = true
                                     }
                                 }
