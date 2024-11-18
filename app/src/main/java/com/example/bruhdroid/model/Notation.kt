@@ -1,8 +1,7 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.operator.Operator
-import com.example.bruhdroid.model.operator.OperatorBuilder
-import com.example.bruhdroid.model.operator.OperatorBuilderFactory
+import com.example.bruhdroid.model.operator.builder.OperatorBuilderFactory
+import com.example.bruhdroid.model.operator.OperatorParseDto
 
 
 class Notation {
@@ -10,96 +9,29 @@ class Notation {
         private val operatorBuilders = OperatorBuilderFactory().getOperatorBuilders()
 
         fun convertToRpn(infixNotation: List<String>): List<String> {
-            var mayUnary = true
-            var arrayInit = false
-            val postfixNotation = mutableListOf<String>()
-            val opStack = mutableListOf<Operator>()
+            var parseDto = OperatorParseDto(
+                postfixNotation = mutableListOf(),
+                operationStack = mutableListOf(),
+                mayUnary = true,
+                arrayInitialization = false
+            )
 
-            for (count in infixNotation.indices) {
-                var isOperator = false
-                if (infixNotation[count] == "") {
+            for (inputOperator in infixNotation) {
+                if (inputOperator == "")
                     continue
-                }
-                val inputOperator = infixNotation[count]
-                for (operatorBuilder in operatorBuilders) {
-                    if (isOperator)
-                        break
-                    if (!operatorBuilder.match(inputOperator, mayUnary))
-                        continue
-                    isOperator = true
 
-                    val operator = operatorBuilder.buildOperator(inputOperator, mayUnary)
-                    when (operator.inputOperator) {
-                        "(" -> {
-                            opStack.add(operator)
-                            mayUnary = true
-                        }
-                        "[" -> {
-                            opStack.add(operator)
-                            mayUnary = true
-                        }
-                        ")" -> {
-                            var s = opStack.removeLast()
-                            while (s.operator != "(") {
-                                postfixNotation.add(s.inputOperator)
-                                s = opStack.removeLast()
-                            }
-                            mayUnary = false
-                        }
-                        "]" -> {
-                            var s = opStack.removeLast()
-                            while (s.operator != "[") {
-                                postfixNotation.add(s.inputOperator)
-                                s = opStack.removeLast()
-                            }
-                            if (!arrayInit) {
-                                postfixNotation.add("?")
-                            }
-                            arrayInit = false
-                            mayUnary = false
-                        }
-                        else -> {
-                            if (mayUnary && !operator.unary || !mayUnary && operator.unary) {
-                                isOperator = false
-                                continue
-                            }
-
-                            if (mayUnary && operator.unary) {
-                                if (operator.inputOperator == "*")
-                                    arrayInit = true
-
-                                opStack.add(operator)
-                                mayUnary = false
-                                break
-                            }
-
-                            while (opStack.size > 0 && opStack.last().unary)
-                                postfixNotation.add(opStack.removeLast().operator)
-
-                            if (opStack.size > 0 && operator.priority <= opStack.last().priority)
-                                postfixNotation.add(opStack.removeLast().inputOperator)
-
-                            opStack.add(operator)
-                            mayUnary = true
-                        }
-                    }
-                }
-
-                if (!isOperator) {
-                    postfixNotation.add(inputOperator)
-                    mayUnary = false
-                }
+                parseDto = parseOperator(inputOperator, parseDto)
             }
 
-            for (i in opStack.reversed()) {
+            for (i in parseDto.operationStack.reversed()) {
                 if (i.unary) {
-                    postfixNotation.add(i.operator)
+                    parseDto.postfixNotation.add(i.operator)
                     continue
                 }
-                postfixNotation.add(i.inputOperator)
+                parseDto.postfixNotation.add(i.inputOperator)
             }
 
-            return postfixNotation
+            return parseDto.postfixNotation
         }
 
         fun tokenizeString(str: String): List<String> {
@@ -112,6 +44,22 @@ class Notation {
             val exp = Regex("($convert|$reserved|$bracket|$name|$operator)")
 
             return (exp.findAll(str).toList().map { it.destructured.toList()[0] })
+        }
+
+        private fun parseOperator(inputOperator: String, dto: OperatorParseDto): OperatorParseDto {
+            val parseDto = dto.prototype()
+
+            for (operatorBuilder in operatorBuilders) {
+                if (operatorBuilder.tryBuild(inputOperator, parseDto.mayUnary) == null)
+                    continue
+
+                return operatorBuilder.parse(parseDto)
+            }
+
+            parseDto.postfixNotation.add(inputOperator)
+            parseDto.mayUnary = false
+
+            return parseDto
         }
     }
 }

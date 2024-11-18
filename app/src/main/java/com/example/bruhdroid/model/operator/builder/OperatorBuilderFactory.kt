@@ -1,4 +1,9 @@
-package com.example.bruhdroid.model.operator
+package com.example.bruhdroid.model.operator.builder
+
+import com.example.bruhdroid.model.operator.builder.CloseAggregateOperatorBuilder
+import com.example.bruhdroid.model.operator.builder.CloseIndexOperatorBuilder
+import com.example.bruhdroid.model.operator.builder.OpenAggregateOperatorBuilder
+import com.example.bruhdroid.model.operator.builder.OperatorBuilder
 
 class OperatorBuilderFactory {
     fun getOperatorBuilders(): List<OperatorBuilder> {
@@ -28,10 +33,10 @@ class OperatorBuilderFactory {
             OperatorBuilder("&", 3, listOf("&&")),
             OperatorBuilder("|", 2, listOf("||")),
             OperatorBuilder("m", 10, listOf("len", "abs", "exp", "floor", "ceil", "sorted")),
-            OperatorBuilder("(", 0, listOf("("), unaryChange = false),
-            OperatorBuilder(")", 0, listOf(")"), unaryChange = true),
-            OperatorBuilder("[", 0, listOf("["), unaryChange = false),
-            OperatorBuilder("]", 0, listOf("]"), unaryChange = true),
+            OpenAggregateOperatorBuilder("(", 0, listOf("(")),
+            CloseAggregateOperatorBuilder(")", 0, listOf(")"), "("),
+            OpenAggregateOperatorBuilder("[", 0, listOf("[")),
+            CloseIndexOperatorBuilder("]", 0, listOf("]"), "["),
             OperatorBuilder("#", -1, listOf("*"), unary = true),
             OperatorBuilder("≈", -2, listOf("=", "+=", "-=", "*=", "/=", "//=", "%="))
         )

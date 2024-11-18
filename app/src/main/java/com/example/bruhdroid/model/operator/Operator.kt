@@ -5,4 +5,5 @@ class Operator (
     val priority: Int,
     val inputOperator: String,
     val unary: Boolean = false,
-) { }
+) {
+}
