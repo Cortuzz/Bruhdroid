@@ -4,7 +4,7 @@ import com.example.bruhdroid.model.operation.operand.OperandBuilder
 import com.example.bruhdroid.model.operation.operator.builder.*
 import com.example.bruhdroid.model.src.IndexOutOfRangeError
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 
 class OperationBuilderFactory {
     fun getOperatorBuilders(): List<IOperationBuilder> {

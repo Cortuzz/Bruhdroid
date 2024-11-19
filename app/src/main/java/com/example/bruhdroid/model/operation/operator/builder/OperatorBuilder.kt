@@ -3,7 +3,7 @@ package com.example.bruhdroid.model.operation.operator.builder
 import com.example.bruhdroid.model.operation.IOperationBuilder
 import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.operation.OperationParseDto
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 
 open class OperatorBuilder(
     protected val operator: String,

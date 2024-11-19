@@ -3,9 +3,8 @@ package com.example.bruhdroid.model.operation.operand
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.operation.Operation
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.IDataPresenter
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
 
 class Operand(value: String): Operation(value) {

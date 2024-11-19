@@ -8,7 +8,7 @@ import com.example.bruhdroid.model.operation.operator.AssignOperator
 import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
-import java.lang.IndexOutOfBoundsException
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import java.util.*
 
 class Interpreter(_blocks: List<Block>? = null) : Observable() {

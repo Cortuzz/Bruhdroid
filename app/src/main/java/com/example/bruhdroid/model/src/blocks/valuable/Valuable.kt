@@ -1,14 +1,15 @@
-package com.example.bruhdroid.model.src.blocks
+package com.example.bruhdroid.model.src.blocks.valuable
 
-import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.src.blocks.IDataPresenter
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.exp
 
-class Valuable(varValue: Any, var type: Type) :
+open class Valuable(varValue: Any, var type: Type) :
     Block(Instruction.VAL, ""), IDataPresenter {
     var value: String = varValue.toString()
     var array: MutableList<Valuable> = mutableListOf()

@@ -1,7 +1,7 @@
 package com.example.bruhdroid.model.memory
 
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 
 class MemoryPresentor {
     fun getVisibleValue(valuable: Valuable): String {

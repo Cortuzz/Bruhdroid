@@ -1,10 +1,8 @@
 package com.example.bruhdroid.model.operation.operator.builder
 
-import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.operation.operator.Operator
-import com.example.bruhdroid.model.operation.OperationParseDto
 import com.example.bruhdroid.model.operation.operator.AssignOperator
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
 
 open class AssignmentOperatorBuilder(

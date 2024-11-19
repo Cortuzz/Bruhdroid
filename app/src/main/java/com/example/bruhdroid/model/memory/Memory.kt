@@ -3,7 +3,7 @@ package com.example.bruhdroid.model.memory
 import com.example.bruhdroid.model.src.StackCorruptionError
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.blocks.Block
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
 
 class Memory(val prevMemory: Memory?, val scope: String) {

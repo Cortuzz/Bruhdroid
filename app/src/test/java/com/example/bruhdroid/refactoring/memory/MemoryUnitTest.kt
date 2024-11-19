@@ -2,7 +2,7 @@ package com.example.bruhdroid.refactoring.memory;
 
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
