@@ -1,6 +1,6 @@
-package com.example.bruhdroid.model.operator.builder
+package com.example.bruhdroid.model.operation.operator.builder
 
-import com.example.bruhdroid.model.operator.OperatorParseDto
+import com.example.bruhdroid.model.operation.OperationParseDto
 
 class CloseIndexOperatorBuilder(
     operator: String,
@@ -11,7 +11,7 @@ class CloseIndexOperatorBuilder(
     operator,
     priority,
     inputOperator, pairAggregateOperator) {
-    override fun parse(dto: OperatorParseDto): OperatorParseDto {
+    override fun parse(dto: OperationParseDto): OperationParseDto {
         val newDto = super.parse(dto).prototype()
 
         if (!newDto.arrayInitialization) {

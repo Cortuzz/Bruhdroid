@@ -1,15 +1,16 @@
 package com.example.bruhdroid.model
 
-import com.example.bruhdroid.model.operator.builder.OperatorBuilderFactory
-import com.example.bruhdroid.model.operator.OperatorParseDto
+import com.example.bruhdroid.model.operation.OperationBuilderFactory
+import com.example.bruhdroid.model.operation.OperationParseDto
 
 
 class Notation {
     companion object {
-        private val operatorBuilders = OperatorBuilderFactory().getOperatorBuilders()
+        private val operatorBuilders = OperationBuilderFactory().getOperatorBuilders()
 
         fun convertInfixToPostfixNotation(infixNotation: List<String>): List<String> {
-            var parseDto = OperatorParseDto(
+            var parseDto = OperationParseDto(
+                inputData = "",
                 postfixNotation = mutableListOf(),
                 operationStack = mutableListOf(),
                 mayUnary = true,
@@ -17,10 +18,11 @@ class Notation {
             )
 
             for (inputOperator in infixNotation) {
+                parseDto.inputData = inputOperator
                 if (inputOperator == "")
                     continue
 
-                parseDto = parseOperator(inputOperator, parseDto)
+                parseDto = parseOperator(parseDto)
             }
 
             for (i in parseDto.operationStack.reversed()) {
@@ -46,18 +48,15 @@ class Notation {
             return (exp.findAll(str).toList().map { it.destructured.toList()[0] })
         }
 
-        private fun parseOperator(inputOperator: String, dto: OperatorParseDto): OperatorParseDto {
+        private fun parseOperator(dto: OperationParseDto): OperationParseDto {
             val parseDto = dto.prototype()
 
             for (operatorBuilder in operatorBuilders) {
-                if (operatorBuilder.tryBuild(inputOperator, parseDto.mayUnary) == null)
+                if (operatorBuilder.tryBuild(dto.inputData, parseDto.mayUnary) == null)
                     continue
 
                 return operatorBuilder.parse(parseDto)
             }
-
-            parseDto.postfixNotation.add(inputOperator)
-            parseDto.mayUnary = false
 
             return parseDto
         }

@@ -1,6 +1,6 @@
-package com.example.bruhdroid.model.operator.builder
+package com.example.bruhdroid.model.operation.operator.builder
 
-import com.example.bruhdroid.model.operator.OperatorParseDto
+import com.example.bruhdroid.model.operation.OperationParseDto
 
 open class CloseAggregateOperatorBuilder(
     operator: String,
@@ -8,7 +8,7 @@ open class CloseAggregateOperatorBuilder(
     inputOperator: List<String>,
     private val pairAggregateOperator: String
 ): AggregateOperatorBuilder(operator, priority, inputOperator, false) {
-    override fun parse(dto: OperatorParseDto): OperatorParseDto {
+    override fun parse(dto: OperationParseDto): OperationParseDto {
         val newDto = dto.prototype()
         newDto.mayUnary = unaryChange
 

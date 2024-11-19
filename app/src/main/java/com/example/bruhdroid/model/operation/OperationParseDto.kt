@@ -1,13 +1,17 @@
-package com.example.bruhdroid.model.operator
+package com.example.bruhdroid.model.operation
 
-class OperatorParseDto(
+import com.example.bruhdroid.model.operation.operator.Operator
+
+class OperationParseDto(
+    var inputData: String,
     var postfixNotation: MutableList<String>,
     var operationStack: MutableList<Operator>,
     var mayUnary: Boolean,
     var arrayInitialization: Boolean
 ) {
-    fun prototype(): OperatorParseDto {
-        return OperatorParseDto(
+    fun prototype(): OperationParseDto {
+        return OperationParseDto(
+            inputData,
             postfixNotation.toMutableList(),
             operationStack.toMutableList(),
             mayUnary,
