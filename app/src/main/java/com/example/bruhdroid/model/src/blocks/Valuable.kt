@@ -1,5 +1,6 @@
 package com.example.bruhdroid.model.src.blocks
 
+import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.src.Instruction
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
@@ -8,7 +9,7 @@ import kotlin.math.floor
 import kotlin.math.exp
 
 class Valuable(varValue: Any, var type: Type) :
-    Block(Instruction.VAL, "") {
+    Block(Instruction.VAL, ""), IDataPresenter {
     var value: String = varValue.toString()
     var array: MutableList<Valuable> = mutableListOf()
 
@@ -16,6 +17,14 @@ class Valuable(varValue: Any, var type: Type) :
         val valuable = Valuable(value, type)
         valuable.array = array
         return valuable
+    }
+
+    override fun getData(): Valuable {
+        return this
+    }
+
+    override fun tryGetData(): Valuable {
+        return getData()
     }
 
     operator fun unaryPlus(): Valuable {

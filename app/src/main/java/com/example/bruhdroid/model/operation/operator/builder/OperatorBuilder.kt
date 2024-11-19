@@ -8,15 +8,18 @@ import com.example.bruhdroid.model.src.blocks.Valuable
 open class OperatorBuilder(
     protected val operator: String,
     protected val priority: Int,
-    protected val inputOperatorMatches: List<String>,
+    protected val inputOperator: String = operator,
     protected val action: (operand1: Valuable, operand2: Valuable?) -> Valuable?,
     protected val unary: Boolean = false,
     val unaryChange: Boolean = true,
 ): IOperationBuilder {
+    fun getStringOperator(): String {
+        return operator
+    }
 
     override fun parse(dto: OperationParseDto): OperationParseDto {
         val newDto = dto.prototype()
-        val operatorObj = build(inputOperatorMatches[0], newDto.mayUnary)
+        val operatorObj = build(inputOperator, newDto.mayUnary)
 
         if (newDto.mayUnary && unary) {
             if (operator == "#")
@@ -28,10 +31,10 @@ open class OperatorBuilder(
         }
 
         while (newDto.operationStack.size > 0 && newDto.operationStack.last().unary)
-            newDto.postfixNotation.add(newDto.operationStack.removeLast().operator)
+            newDto.operations.add(newDto.operationStack.removeLast())
 
         if (newDto.operationStack.size > 0 && priority <= newDto.operationStack.last().priority)
-            newDto.postfixNotation.add(newDto.operationStack.removeLast().inputOperator)
+            newDto.operations.add(newDto.operationStack.removeLast())
 
         newDto.operationStack.add(operatorObj)
         newDto.mayUnary = unaryChange
@@ -42,7 +45,7 @@ open class OperatorBuilder(
         if (unary && !mayUnary || !unary && mayUnary)
             return false
 
-        return inputOperatorMatches.contains(inputOperator)
+        return this.inputOperator == inputOperator
     }
 
     override fun build(inputOperator: String, mayUnary: Boolean): Operator {

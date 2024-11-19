@@ -1,5 +1,7 @@
 package com.example.bruhdroid.model.operation
 
+import com.example.bruhdroid.model.operation.operator.Operator
+
 interface IOperationBuilder {
     fun parse(dto: OperationParseDto): OperationParseDto
 

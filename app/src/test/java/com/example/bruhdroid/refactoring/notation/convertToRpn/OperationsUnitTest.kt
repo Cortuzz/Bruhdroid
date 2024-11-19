@@ -18,7 +18,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -34,7 +34,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -49,7 +49,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -65,7 +65,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -81,7 +81,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -96,7 +96,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -113,7 +113,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -128,7 +128,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input)
+            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 }

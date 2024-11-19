@@ -3,10 +3,15 @@ package com.example.bruhdroid.model.operation.operator.builder
 open class AggregateOperatorBuilder(
     operator: String,
     priority: Int,
-    inputOperator: List<String>,
     unaryChange: Boolean,
-): OperatorBuilder(operator, priority, inputOperator, { _, _ -> null }, false, unaryChange) {
+): OperatorBuilder(
+    operator,
+    priority,
+    action =  { _, _ -> null },
+    unary = false,
+    unaryChange =  unaryChange
+) {
     override fun match(inputOperator: String, mayUnary: Boolean): Boolean {
-        return inputOperatorMatches.contains(inputOperator)
+        return this.inputOperator == inputOperator
     }
 }

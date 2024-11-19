@@ -5,83 +5,148 @@ import com.example.bruhdroid.model.operation.operator.builder.CloseAggregateOper
 import com.example.bruhdroid.model.operation.operator.builder.CloseIndexOperatorBuilder
 import com.example.bruhdroid.model.operation.operator.builder.OpenAggregateOperatorBuilder
 import com.example.bruhdroid.model.operation.operator.builder.OperatorBuilder
+import com.example.bruhdroid.model.src.Type
+import com.example.bruhdroid.model.src.blocks.Valuable
 
 class OperationBuilderFactory {
     fun getOperatorBuilders(): List<IOperationBuilder> {
+        val indexCheckOperatorBuilder = getIndexCheckOperator()
+
         return listOf(
-            OperatorBuilder("r", 10, listOf(
-                ".toInt()",
-                ".toString()",
-                ".toFloat()",
-                ".toList()",
-                ".toBool()",
-                ), unary = true,
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder(".toInt()", 10, unary = true,
+                action = { operand1, _ ->  Valuable(operand1.convertToInt(operand1), Type.INT) },
             ),
-            OperatorBuilder("∓", 9, listOf("-"),
+            OperatorBuilder(".toString()", 10, unary = true,
+                action = { operand1, _ -> Valuable(operand1.convertToString(operand1), Type.STRING) },
+            ),
+            OperatorBuilder(".toFloat()", 10, unary = true,
+                action = { operand1, _ -> Valuable(operand1.convertToFloat(operand1), Type.FLOAT) },
+            ),
+            OperatorBuilder(".toList()", 10, unary = true,
+                action = { operand1, _ ->
+                    val array = operand1.convertToArray(operand1).toMutableList()
+                    val listVal = Valuable(array.size, Type.LIST)
+                    listVal.array = array
+                    listVal
+                 },
+            ),
+            OperatorBuilder(".toBool()", 10, unary = true,
+                action = { operand1, _ -> Valuable(operand1.convertToBool(operand1), Type.BOOL) },
+            ),
+            OperatorBuilder(".sort()", 10, unary = true,
+                action = { operand1, _ -> operand1.sort() },
+            ),
+
+            OperatorBuilder("∓", 9, "-",
                 action = { operand1, _ -> -operand1 },
                 unary = true, unaryChange = false
             ),
-            OperatorBuilder("±", 9, listOf("+"),
+            OperatorBuilder("±", 9, "+",
                 action = { operand1, _ -> +operand1 },
                 unary = true, unaryChange = false
             ),
-            OperatorBuilder("?", 8, listOf("?"),
-                action = { operand1, _ -> TODO() }
+            indexCheckOperatorBuilder,
+            OperatorBuilder("*", 7,
+                action = { operand1, operand2 -> operand1 * operand2!! }
             ),
-            OperatorBuilder("*", 7, listOf("*"),
-                action = { operand1, _ -> -operand1 }
-            ),
-            OperatorBuilder("/", 7, listOf("/", "//", "%"),
-                action = { operand1, operand2 -> operand1 / operand2!! } // TODO
-            ),
-            OperatorBuilder("-", 6, listOf("-"),
-                action = { operand1, operand2 -> operand1 - operand2!! }
-            ),
-            OperatorBuilder("+", 6, listOf("+"),
+            OperatorBuilder("/", 7,
                 action = { operand1, operand2 -> operand1 / operand2!! }
             ),
-            OperatorBuilder("=", 5, listOf("=="),
+            OperatorBuilder("//", 7,
+                action = { operand1, operand2 -> operand1.intDiv(operand2!!) }
+            ),
+            OperatorBuilder("%", 7,
+                action = { operand1, operand2 -> operand1 % operand2!! }
+            ),
+            OperatorBuilder("-", 6,
+                action = { operand1, operand2 -> operand1 - operand2!! }
+            ),
+            OperatorBuilder("+", 6,
+                action = { operand1, operand2 -> operand1 + operand2!! }
+            ),
+            OperatorBuilder("==", 5,
+                action = { operand1, operand2 -> Valuable(operand1 == operand2, Type.BOOL) }
+            ),
+            OperatorBuilder("!=", 5,
+                action = { operand1, operand2 -> Valuable(operand1 != operand2, Type.BOOL) }
+            ),
+            OperatorBuilder("<", 5,
+                action = { operand1, operand2 -> Valuable(operand1 < operand2!!, Type.BOOL) }
+            ),
+            OperatorBuilder(">", 5,
+                action = { operand1, operand2 -> Valuable(operand1 > operand2!!, Type.BOOL) }
+            ),
+            OperatorBuilder("<=", 5,
+                action = { operand1, operand2 -> Valuable(operand1 <= operand2!!, Type.BOOL) }
+            ),
+            OperatorBuilder(">=", 5,
+                action = { operand1, operand2 -> Valuable(operand1 >= operand2!!, Type.BOOL) }
+            ),
+            OperatorBuilder("!", 4,
                 action = { operand1, operand2 -> TODO() }
             ),
-            OperatorBuilder("≠", 5, listOf("!="),
+            OperatorBuilder("&&", 3,
+                action = { operand1, operand2 -> operand1.and(operand2!!) }
+            ),
+            OperatorBuilder("||", 2,
+                action = { operand1, operand2 -> operand1.or(operand2!!) }
+            ),
+
+            OperatorBuilder("len", 10, unary = true,
+                action = { operand1, _ -> operand1.getLength() },
+            ),
+            OperatorBuilder("abs", 10, unary = true,
+                action = { operand1, _ -> operand1.absolute() },
+            ),
+            OperatorBuilder("exp", 10, unary = true,
+                action = { operand1, _ -> operand1.exponent() },
+            ),
+            OperatorBuilder("floor", 10, unary = true,
+                action = { operand1, _ -> operand1.floor() },
+            ),
+            OperatorBuilder("ceil", 10, unary = true,
+                action = { operand1, _ -> operand1.ceil() },
+            ),
+            OperatorBuilder("sorted", 10, unary = true,
+                action = { operand1, _ -> operand1.sorted() },
+            ),
+            OpenAggregateOperatorBuilder("(", 0),
+            CloseAggregateOperatorBuilder(")", 0, "("),
+            OpenAggregateOperatorBuilder("[", 0),
+            CloseIndexOperatorBuilder("]", 0, "[",
+                indexCheckOperatorBuilder
+            ),
+            OperatorBuilder("#", -1, "*", unary = true,
                 action = { operand1, operand2 -> TODO() }
             ),
-            OperatorBuilder("<", 5, listOf("<"),
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder("=", -2,
+                action = { _, operand2 -> operand2!!.getData() },
             ),
-            OperatorBuilder(">", 5, listOf(">"),
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder("+=", -2,
+                action = { operand1, operand2 -> operand1.getData() + operand2!! },
             ),
-            OperatorBuilder("≤", 5, listOf("<="),
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder("-=", -2,
+                action = { operand1, operand2 -> operand1.getData() - operand2!! },
             ),
-            OperatorBuilder("≥", 5, listOf(">="),
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder("*=", -2,
+                action = { operand1, operand2 -> operand1.getData() * operand2!! },
             ),
-            OperatorBuilder("!", 4, listOf("!"),
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder("/=", -2,
+                action = { operand1, operand2 -> operand1.getData() / operand2!! },
             ),
-            OperatorBuilder("&", 3, listOf("&&"),
-                action = { operand1, operand2 -> TODO() }
+            OperatorBuilder("//=", -2,
+                action = { operand1, operand2 -> operand1.getData().intDiv(operand2!!) },
             ),
-            OperatorBuilder("|", 2, listOf("||"),
-                action = { operand1, operand2 -> TODO() }
-            ),
-            OperatorBuilder("m", 10, listOf("len", "abs", "exp", "floor", "ceil", "sorted"),
-                action = { operand1, _ -> TODO() },
-            ),
-            OpenAggregateOperatorBuilder("(", 0, listOf("(")),
-            CloseAggregateOperatorBuilder(")", 0, listOf(")"), "("),
-            OpenAggregateOperatorBuilder("[", 0, listOf("[")),
-            CloseIndexOperatorBuilder("]", 0, listOf("]"), "["),
-            OperatorBuilder("#", -1, listOf("*"), unary = true,
-                action = { operand1, operand2 -> TODO() }
-            ),
-            OperatorBuilder("≈", -2, listOf("=", "+=", "-=", "*=", "/=", "//=", "%="),
-                action = { operand1, _ -> TODO() },
+            OperatorBuilder("%=", -2,
+                action = { operand1, operand2 -> operand1.getData() % operand2!! },
             ),
             OperandBuilder()
+        )
+    }
+
+    private fun getIndexCheckOperator(): OperatorBuilder {
+        return OperatorBuilder("?", 8,
+            action = { operand1, _ -> TODO() }
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.example.bruhdroid.model
 
+import com.example.bruhdroid.model.operation.Operation
 import com.example.bruhdroid.model.operation.OperationBuilderFactory
 import com.example.bruhdroid.model.operation.OperationParseDto
 
@@ -8,10 +9,10 @@ class Notation {
     companion object {
         private val operatorBuilders = OperationBuilderFactory().getOperatorBuilders()
 
-        fun convertInfixToPostfixNotation(infixNotation: List<String>): List<String> {
+        fun convertInfixToPostfixNotation(infixNotation: List<String>): List<Operation> {
             var parseDto = OperationParseDto(
                 inputData = "",
-                postfixNotation = mutableListOf(),
+                operations = mutableListOf(),
                 operationStack = mutableListOf(),
                 mayUnary = true,
                 arrayInitialization = false
@@ -27,13 +28,14 @@ class Notation {
 
             for (i in parseDto.operationStack.reversed()) {
                 if (i.unary) {
-                    parseDto.postfixNotation.add(i.operator)
+                    parseDto.operations.add(i)
                     continue
                 }
-                parseDto.postfixNotation.add(i.inputOperator)
+
+                parseDto.operations.add(i)
             }
 
-            return parseDto.postfixNotation
+            return parseDto.operations
         }
 
         fun tokenizeString(str: String): List<String> {

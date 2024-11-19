@@ -1,7 +1,10 @@
 package com.example.bruhdroid.model
 
+import android.annotation.SuppressLint
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.memory.MemoryPresentor
+import com.example.bruhdroid.model.operation.Operation
+import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
 import java.lang.IndexOutOfBoundsException
@@ -28,7 +31,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         "IO_LINES" to "10"
     )
 
-    private var parseMap: MutableMap<String, List<String>> = mutableMapOf()
+    private var parseMap: MutableMap<String, List<Operation>> = mutableMapOf()
     private var ioLines = 0
     private var appliedConditions: MutableList<Boolean> = mutableListOf()
     private var cycleLines: MutableList<Int> = mutableListOf()
@@ -73,6 +76,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         )
     }
 
+    @SuppressLint("SuspiciousIndentation")
     private fun pragmaUpdate() {
         output = if (pragma["INIT_MESSAGE"] == "true") {
             ioLines = 5
@@ -555,220 +559,110 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return tryPushToAnyMemory(memory.prevMemory, name, type, valueBlock)
     }
 
-    private fun tryFindInMemory(memory: Memory, block: Block): Valuable {
-        block as Variable
-        val address = block.name
-        val value = memory.get(address)
-
-        if (value != null) {
-            return value
-        }
-
-        if (memory.prevMemory == null) {
-            memory.throwStackError(address)
-            throw Exception()
-        }
-
-        return tryFindInMemory(memory.prevMemory, block)
-    }
-
-    private fun evaluateExpressionToBlock(data: String): Block? {
-        if (data in listOf("abs", "exp", "sorted", "ceil", "floor", "len")) {
-            return null
-        }
-
-        return if (data == "rand()") {
-            Valuable(Math.random(), Type.FLOAT)
-        } else if (data in listOf("true", "false")) {
-            Valuable(data, Type.BOOL)
-        } else if (data.last() == '"' && data.first() == '"') {
-            Valuable(data.replace("\"", ""), Type.STRING)
-        } else if (data.contains("^[A-Za-z]+\$".toRegex())) {
-            Variable(data)
-        } else {
-            when {
-                data.contains("[\\d]+\\.[\\d]+".toRegex()) -> Valuable(data, Type.FLOAT)
-                data.contains("[\\d]+".toRegex()) -> Valuable(data, Type.INT)
-                else -> null
-            }
-        }
-    }
-
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
         val data = parseMap[raw] ?: Notation.convertInfixToPostfixNotation(Notation.tokenizeString(raw))
         parseMap[raw] = data
 
-        val stack = mutableListOf<Block>()
+        val stack = mutableListOf<IDataPresenter>()
         val unary = listOf(
-            "±", "∓", ".toInt()", ".toFloat()", ".toBool()", ".toString()", ".sort()", ".toList()",
             "abs", "exp", "sorted", "ceil", "floor", "len"
         )
 
-        for (value in data) {
-            if (value.isEmpty()) {
-                continue
-            }
-            val parsedValue = evaluateExpressionToBlock(value)
+        for (operation in data) {
+            val parsedValue = operation.evaluateExpressionToBlock(memory)
+            val rawOperation = operation.operation
             if (parsedValue != null) {
                 stack.add(parsedValue)
-            } else {
-                try {
-                    var operand2 = try {
-                        stack.removeLast()
-                    } catch (e: Exception) {
-                        throwOperationError("Expected correct expression but bad operation was found")
-                    }
+                continue
+            }
+            operation as Operator
 
-                    if (operand2 is Variable) {
-                        try {
-                            operand2 = tryFindInMemory(memory, operand2)
-                        } catch (e: StackCorruptionError) {
-                            throw RuntimeError("${e.message}")
-                        }
-                    }
-                    operand2 as Valuable
+            try {
+                if (stack.isEmpty())
+                    throwOperationError("Expected correct expression but bad operation was found")
 
-                    if (value in unary) {
-                        stack.add(
-                            when (value) {
-                                "±" -> +operand2
-                                "∓" -> -operand2
-                                ".toInt()" -> Valuable(operand2.convertToInt(operand2), Type.INT)
-                                ".toFloat()" -> Valuable(
-                                    operand2.convertToFloat(operand2),
-                                    Type.FLOAT
-                                )
-                                ".toString()" -> Valuable(
-                                    operand2.convertToString(operand2),
-                                    Type.STRING
-                                )
-                                ".toBool()" -> Valuable(operand2.convertToBool(operand2), Type.BOOL)
-                                ".toList()" -> {
-                                    val array = operand2.convertToArray(operand2).toMutableList()
-                                    val listVal = Valuable(array.size, Type.LIST)
-                                    listVal.array = array
-                                    listVal
-                                }
-                                ".sort()" -> operand2.sort()
-                                "abs" -> operand2.absolute()
-                                "exp" -> operand2.exponent()
-                                "sorted" -> operand2.sorted()
-                                "floor" -> operand2.floor()
-                                "ceil" -> operand2.ceil()
-                                "len" -> operand2.getLength()
-                                else -> {
-                                    throwOperationError("Expected correct expression but bad operation was found")
-                                    throw Exception()
-                                }
-                            }
-                        )
-                        continue
-                    }
-                    var operand1 = try {
-                        stack.removeLast()
-                    } catch (e: Exception) {
-                        throwOperationError("Expected correct expression but bad operation was found")
-                    }
+                val operand2 = stack.removeLast().getData() // Если =, то не нужно получать данные
 
-                    if (value in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=")) {
-                        if (operand1 is Valuable) {
-                            operand1.value = operand2.value
-                            operand1.type = operand2.type
-                            operand1.array = operand2.array
-                        } else if (operand1 is Variable) {
-                            val operand = when (value) {
-                                "=" -> operand2
-                                "/=" -> tryFindInMemory(memory, operand1) / operand2
-                                "*=" -> tryFindInMemory(memory, operand1) * operand2
-                                "+=" -> tryFindInMemory(memory, operand1) + operand2
-                                "-=" -> tryFindInMemory(memory, operand1) - operand2
-                                "%=" -> tryFindInMemory(memory, operand1) % operand2
-                                "//=" -> tryFindInMemory(memory, operand1).intDiv(operand2)
-                                else -> {
-                                    throwOperationError("Expected correct expression but bad operation was found")
-                                    throw Exception()
-                                }
-                            }
-
-                            if (initialize) {
-                                pushToLocalMemory(operand1.name, operand2.type, operand.clone())
-                            } else {
-                                tryPushToAnyMemory(
-                                    memory,
-                                    operand1.name,
-                                    operand2.type,
-                                    operand.clone()
-                                )
-                            }
-                        }
-
-                        return operand2
-                    }
-
-                    if (value == "#") {
-                        operand1 as Variable
-                        if (initialize) {
-                            pushToLocalMemory(operand1.name, Type.LIST, operand2)
-                        } else {
-                            tryPushToAnyMemory(memory, operand1.name, Type.LIST, operand2)
-                        }
-
-                        return operand2
-                    }
-
-                    if (operand1 is Variable) {
-                        try {
-                            operand1 = tryFindInMemory(memory, operand1)
-                        } catch (e: StackCorruptionError) {
-                            throw RuntimeError("${e.message}")
-                        }
-                    }
-                    operand1 as Valuable
-
-                    val result: Valuable? = when (value) {
-                        "?" -> {
-                            try {
-                                operand1.array[operand2.value.toInt()]
-                            } catch (e: IndexOutOfBoundsException) {
-                                throw IndexOutOfRangeError("${e.message}")
-                            }
-                        }
-                        "+" -> operand1 + operand2
-                        "-" -> operand1 - operand2
-                        "*" -> operand1 * operand2
-                        "/" -> operand1 / operand2
-                        "//" -> operand1.intDiv(operand2)
-                        "%" -> operand1 % operand2
-
-                        "&&" -> operand1.and(operand2)
-                        "||" -> operand1.or(operand2)
-
-                        "==" -> Valuable(operand1 == operand2, Type.BOOL)
-                        "!=" -> Valuable(operand1 != operand2, Type.BOOL)
-                        "<" -> Valuable(operand1 < operand2, Type.BOOL)
-                        ">" -> Valuable(operand1 > operand2, Type.BOOL)
-                        "<=" -> Valuable(operand1 < operand2 || operand1 == operand2, Type.BOOL)
-                        ">=" -> Valuable(operand1 > operand2 || operand1 == operand2, Type.BOOL)
-                        "=" -> {
-                            if (initialize) {
-                                pushToLocalMemory(operand1.value, operand2.type, operand2.clone())
-                            } else {
-                                tryPushToAnyMemory(
-                                    memory,
-                                    operand1.value,
-                                    operand2.type,
-                                    operand2.clone()
-                                )
-                            }
-                            operand2
-                        }
-                        else -> null
-                    }
-
-                    stack.add(result!!)
-                } catch (e: Exception) {
-                    throw RuntimeError("${e.message}\nAt expression: $raw")
+                if (operation.unary) {
+                    operation.act(operand2, null)
+                    continue
                 }
+
+                if (stack.isEmpty())
+                    throwOperationError("Expected correct expression but bad operation was found")
+
+                var operand1 = stack.removeLast()
+
+                if (rawOperation in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=") && operand1 is Variable) {
+                    val operand =
+                        if (rawOperation == "=")
+                            operand2
+                        else
+                            operation.act(operand1.getData(), operand2)
+
+                    if (initialize) {
+                        pushToLocalMemory(operand1.name, operand2.type, operand!!.clone())
+                    } else {
+                        tryPushToAnyMemory(
+                            memory,
+                            operand1.name,
+                            operand2.type,
+                            operand!!.clone()
+                        )
+                    }
+
+                    return operand2
+                }
+
+                if (rawOperation == "#") {
+                    operand1 as Variable
+                    if (initialize) {
+                        pushToLocalMemory(operand1.name, Type.LIST, operand2)
+                    } else {
+                        tryPushToAnyMemory(memory, operand1.name, Type.LIST, operand2)
+                    }
+
+                    return operand2
+                }
+
+                if (operand1 is Variable) {
+                    try {
+                        operand1 = operand1.getData()
+                    } catch (e: StackCorruptionError) {
+                        throw RuntimeError("${e.message}")
+                    }
+                }
+                operand1 as Valuable
+
+                val result: Valuable? = when (rawOperation) {
+                    "?" -> {
+                        try {
+                            operand1.array[operand2.value.toInt()]
+                        } catch (e: IndexOutOfBoundsException) {
+                            throw IndexOutOfRangeError("${e.message}")
+                        }
+                    }
+                    in listOf("+", "-", "*", "/", "//", "%", "&&", "||", "==", "!=", "<", ">", "<=", ">=") ->
+                        operation.act(operand1, operand2)
+                    "=" -> {
+                        if (initialize) {
+                            pushToLocalMemory(operand1.value, operand2.type, operand2.clone())
+                        } else {
+                            tryPushToAnyMemory(
+                                memory,
+                                operand1.value,
+                                operand2.type,
+                                operand2.clone()
+                            )
+                        }
+                        operand2
+                    }
+                    else -> null
+                }
+
+                stack.add(result!!)
+            } catch (e: Exception) {
+                throw RuntimeError("${e.message}\nAt expression: $raw")
             }
         }
 
@@ -781,7 +675,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         val last = stack.removeLast()
         if (last is Variable) {
             try {
-                return tryFindInMemory(memory, last)
+                return last.getData()
             } catch (e: StackCorruptionError) {
                 throw RuntimeError("${e.message}\nAt expression: $raw")
             }

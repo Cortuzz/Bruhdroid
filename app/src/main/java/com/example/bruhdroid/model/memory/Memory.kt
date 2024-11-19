@@ -9,6 +9,25 @@ import com.example.bruhdroid.model.src.blocks.Variable
 class Memory(val prevMemory: Memory?, val scope: String) {
     private val stack: MutableMap<String, Valuable> = mutableMapOf()
 
+    fun tryFindInMemory(name: String): Valuable {
+        return tryFindInMemory(name, this)
+    }
+
+    private fun tryFindInMemory(name: String, memory: Memory): Valuable {
+        val value = memory.get(name)
+
+        if (value != null) {
+            return value
+        }
+
+        if (memory.prevMemory == null) {
+            memory.throwStackError(name)
+            throw Exception()
+        }
+
+        return tryFindInMemory(name, memory.prevMemory)
+    }
+
     fun push(address: String, value: Block) {
         value as Valuable
         if (value.type == Type.LIST) {
@@ -34,7 +53,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
     }
 
     fun throwStackError(address: String) {
-        val corruptedVar = Variable(address)
+        val corruptedVar = Variable(address, this)
         throw StackCorruptionError(
             "Expected reserved memory for Variable ${address}@" +
                     "${corruptedVar.hashCode()} at address 0x" +
