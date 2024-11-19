@@ -1,10 +1,8 @@
 package com.example.bruhdroid.model.operation
 
 import com.example.bruhdroid.model.operation.operand.OperandBuilder
-import com.example.bruhdroid.model.operation.operator.builder.CloseAggregateOperatorBuilder
-import com.example.bruhdroid.model.operation.operator.builder.CloseIndexOperatorBuilder
-import com.example.bruhdroid.model.operation.operator.builder.OpenAggregateOperatorBuilder
-import com.example.bruhdroid.model.operation.operator.builder.OperatorBuilder
+import com.example.bruhdroid.model.operation.operator.builder.*
+import com.example.bruhdroid.model.src.IndexOutOfRangeError
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.blocks.Valuable
 
@@ -116,29 +114,29 @@ class OperationBuilderFactory {
             CloseIndexOperatorBuilder("]", 0, "[",
                 indexCheckOperatorBuilder
             ),
-            OperatorBuilder("#", -1, "*", unary = true,
-                action = { operand1, operand2 -> TODO() }
+            AssignmentOperatorBuilder("#", -1, "*", unary = true,
+                assignment = { _, operand2 -> operand2 }
             ),
-            OperatorBuilder("=", -2,
-                action = { _, operand2 -> operand2!!.getData() },
+            AssignmentOperatorBuilder("=", -2,
+                assignment = { _, operand2 -> operand2 },
             ),
-            OperatorBuilder("+=", -2,
-                action = { operand1, operand2 -> operand1.getData() + operand2!! },
+            AssignmentOperatorBuilder("+=", -2,
+                assignment = { operand1, operand2 -> operand1.getData() + operand2 },
             ),
-            OperatorBuilder("-=", -2,
-                action = { operand1, operand2 -> operand1.getData() - operand2!! },
+            AssignmentOperatorBuilder("-=", -2,
+                assignment = { operand1, operand2 -> operand1.getData() - operand2 },
             ),
-            OperatorBuilder("*=", -2,
-                action = { operand1, operand2 -> operand1.getData() * operand2!! },
+            AssignmentOperatorBuilder("*=", -2,
+                assignment = { operand1, operand2 -> operand1.getData() * operand2 },
             ),
-            OperatorBuilder("/=", -2,
-                action = { operand1, operand2 -> operand1.getData() / operand2!! },
+            AssignmentOperatorBuilder("/=", -2,
+                assignment = { operand1, operand2 -> operand1.getData() / operand2 },
             ),
-            OperatorBuilder("//=", -2,
-                action = { operand1, operand2 -> operand1.getData().intDiv(operand2!!) },
+            AssignmentOperatorBuilder("//=", -2,
+                assignment = { operand1, operand2 -> operand1.getData().intDiv(operand2) },
             ),
-            OperatorBuilder("%=", -2,
-                action = { operand1, operand2 -> operand1.getData() % operand2!! },
+            AssignmentOperatorBuilder("%=", -2,
+                assignment = { operand1, operand2 -> operand1.getData() % operand2 },
             ),
             OperandBuilder()
         )
@@ -146,7 +144,13 @@ class OperationBuilderFactory {
 
     private fun getIndexCheckOperator(): OperatorBuilder {
         return OperatorBuilder("?", 8,
-            action = { operand1, _ -> TODO() }
+            action = { operand1, operand2 ->
+                try {
+                    operand1.array[operand2!!.value.toInt()]
+                } catch (e: IndexOutOfBoundsException) {
+                    throw IndexOutOfRangeError("${e.message}")
+                }
+            }
         )
     }
 }

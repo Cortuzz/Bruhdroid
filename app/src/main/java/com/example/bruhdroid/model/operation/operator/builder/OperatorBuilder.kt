@@ -52,7 +52,7 @@ open class OperatorBuilder(
         if (!match(inputOperator, mayUnary))
             throw Exception("Unable to create operator. Operator does not match signature.")
 
-        return Operator(operator, priority, inputOperator, unary, action)
+        return Operator(operator, priority, unary, action)
     }
 
     override fun tryBuild(inputOperator: String, mayUnary: Boolean): Operator? {

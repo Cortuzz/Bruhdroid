@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.memory.MemoryPresentor
 import com.example.bruhdroid.model.operation.Operation
+import com.example.bruhdroid.model.operation.operator.AssignOperator
 import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
@@ -402,7 +403,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 currentLine = funcVarsLines.removeLast()
 
                 removeFunctionMemory()
-                pushToLocalMemory(varName, value.type, value)
+                memory.pushToLocalMemory(varName, value.type, value)
             }
             Instruction.INPUT -> {
                 waitingForInput = true
@@ -523,54 +524,14 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return false
     }
 
-    private fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Block) {
-        valueBlock as Valuable
-
-        if (type == Type.LIST) {
-            val block = valueBlock.clone()
-            block.type = type
-            memory.push(name, block)
-            return
-        }
-
-        valueBlock.type = type
-        memory.push(name, valueBlock)
-    }
-
-    private fun tryPushToAnyMemory(
-        memory: Memory,
-        name: String,
-        type: Type,
-        valueBlock: Block
-    ): Boolean {
-        valueBlock as Valuable
-        valueBlock.type = type
-
-        if (memory.get(name) != null) {
-            memory.push(name, valueBlock)
-            return true
-        }
-
-        if (memory.prevMemory == null) {
-            memory.throwStackError(name)
-            return false
-        }
-
-        return tryPushToAnyMemory(memory.prevMemory, name, type, valueBlock)
-    }
-
     private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
         val data = parseMap[raw] ?: Notation.convertInfixToPostfixNotation(Notation.tokenizeString(raw))
         parseMap[raw] = data
 
         val stack = mutableListOf<IDataPresenter>()
-        val unary = listOf(
-            "abs", "exp", "sorted", "ceil", "floor", "len"
-        )
 
         for (operation in data) {
             val parsedValue = operation.evaluateExpressionToBlock(memory)
-            val rawOperation = operation.operation
             if (parsedValue != null) {
                 stack.add(parsedValue)
                 continue
@@ -581,10 +542,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 if (stack.isEmpty())
                     throwOperationError("Expected correct expression but bad operation was found")
 
-                val operand2 = stack.removeLast().getData() // Если =, то не нужно получать данные
+                val operand2 = stack.removeLast().getData()
 
                 if (operation.unary) {
-                    operation.act(operand2, null)
+                    stack.add(operation.act(operand2, null)!!)
                     continue
                 }
 
@@ -593,94 +554,27 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
                 var operand1 = stack.removeLast()
 
-                if (rawOperation in listOf("=", "/=", "+=", "-=", "*=", "%=", "//=") && operand1 is Variable) {
-                    val operand =
-                        if (rawOperation == "=")
-                            operand2
-                        else
-                            operation.act(operand1.getData(), operand2)
-
-                    if (initialize) {
-                        pushToLocalMemory(operand1.name, operand2.type, operand!!.clone())
-                    } else {
-                        tryPushToAnyMemory(
-                            memory,
-                            operand1.name,
-                            operand2.type,
-                            operand!!.clone()
-                        )
-                    }
-
+                if (operation is AssignOperator) {
+                    operation.assign(operand1 as Variable, operand2, initialize, memory)
                     return operand2
                 }
 
-                if (rawOperation == "#") {
-                    operand1 as Variable
-                    if (initialize) {
-                        pushToLocalMemory(operand1.name, Type.LIST, operand2)
-                    } else {
-                        tryPushToAnyMemory(memory, operand1.name, Type.LIST, operand2)
-                    }
+                operand1 = operand1.getData()
 
-                    return operand2
-                }
-
-                if (operand1 is Variable) {
-                    try {
-                        operand1 = operand1.getData()
-                    } catch (e: StackCorruptionError) {
-                        throw RuntimeError("${e.message}")
-                    }
-                }
-                operand1 as Valuable
-
-                val result: Valuable? = when (rawOperation) {
-                    "?" -> {
-                        try {
-                            operand1.array[operand2.value.toInt()]
-                        } catch (e: IndexOutOfBoundsException) {
-                            throw IndexOutOfRangeError("${e.message}")
-                        }
-                    }
-                    in listOf("+", "-", "*", "/", "//", "%", "&&", "||", "==", "!=", "<", ">", "<=", ">=") ->
-                        operation.act(operand1, operand2)
-                    "=" -> {
-                        if (initialize) {
-                            pushToLocalMemory(operand1.value, operand2.type, operand2.clone())
-                        } else {
-                            tryPushToAnyMemory(
-                                memory,
-                                operand1.value,
-                                operand2.type,
-                                operand2.clone()
-                            )
-                        }
-                        operand2
-                    }
-                    else -> null
-                }
-
-                stack.add(result!!)
+                stack.add(operation.act(operand1, operand2)!!)
             } catch (e: Exception) {
                 throw RuntimeError("${e.message}\nAt expression: $raw")
             }
         }
 
-        if (stack.isEmpty()) {
+        if (stack.size != 1)
             throwOperationError("Expected correct expression but bad operation was found", raw)
+
+        try {
+            return stack.removeLast().getData()
+        } catch (e: StackCorruptionError) {
+            throw RuntimeError("${e.message}\nAt expression: $raw")
         }
-        if (stack.size > 1) {
-            throwOperationError("Expected correct expression but bad operation was found", raw)
-        }
-        val last = stack.removeLast()
-        if (last is Variable) {
-            try {
-                return last.getData()
-            } catch (e: StackCorruptionError) {
-                throw RuntimeError("${e.message}\nAt expression: $raw")
-            }
-        }
-        return last as Valuable
     }
 
     private fun throwOperationError(message: String, raw: String = "") {

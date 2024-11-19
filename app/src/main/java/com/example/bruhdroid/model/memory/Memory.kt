@@ -61,4 +61,44 @@ class Memory(val prevMemory: Memory?, val scope: String) {
                     "but stack corruption has occurred"
         )
     }
+
+    fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Valuable) {
+        if (type == Type.LIST) {
+            val block = valueBlock.clone()
+            block.type = type
+            push(name, block)
+            return
+        }
+
+        valueBlock.type = type
+        push(name, valueBlock)
+    }
+
+    fun tryPushToAnyMemory(name: String, type: Type, valueBlock: Valuable): Boolean {
+        valueBlock.type = type
+
+       return tryPushToAnyMemory(this, name, type, valueBlock)
+    }
+
+    private fun tryPushToAnyMemory(
+        memory: Memory,
+        name: String,
+        type: Type,
+        valueBlock: Block
+    ): Boolean {
+        valueBlock as Valuable
+        valueBlock.type = type
+
+        if (memory.get(name) != null) {
+            memory.push(name, valueBlock)
+            return true
+        }
+
+        if (memory.prevMemory == null) {
+            memory.throwStackError(name)
+            return false
+        }
+
+        return tryPushToAnyMemory(memory.prevMemory, name, type, valueBlock)
+    }
 }
