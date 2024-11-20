@@ -1,19 +1,17 @@
-package com.example.bruhdroid.model.src.blocks.valuable
+package com.example.bruhdroid.model.src.blocks.valuable.numeric
 
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import kotlin.math.abs
 import kotlin.math.exp
 
-class IntegerValuable(
+open class NumericValuable(
     varValue: Any,
-): Valuable(varValue, Type.INT) {
-    override operator fun unaryMinus(): Valuable {
-        return Valuable(-value.toInt(), type)
-    }
-
+    type: Type
+): Valuable(varValue, type) {
     override operator fun plus(operand: Valuable): Valuable {
-        if (operand.type !in listOf(Type.INT, Type.FLOAT)) {
+        if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
@@ -24,7 +22,7 @@ class IntegerValuable(
     }
 
     override operator fun minus(operand: Valuable): Valuable {
-        if (operand.type !in listOf(Type.INT, Type.FLOAT)) {
+        if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
@@ -35,11 +33,7 @@ class IntegerValuable(
     }
 
     override operator fun times(operand: Valuable): Valuable {
-        if (operand.type == Type.STRING) {
-            return Valuable(operand.value.repeat(value.toInt()), operand.type)
-        }
-
-        if (operand.type !in listOf(Type.INT, Type.FLOAT)) {
+        if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
@@ -50,7 +44,7 @@ class IntegerValuable(
     }
 
     override operator fun div(operand: Valuable): Valuable {
-        if (operand.type !in listOf(Type.INT, Type.FLOAT)) {
+        if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
@@ -58,7 +52,7 @@ class IntegerValuable(
     }
 
     override fun intDiv(operand: Valuable): Valuable {
-        if (operand.type !in listOf(Type.INT, Type.FLOAT)) {
+        if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
@@ -66,7 +60,7 @@ class IntegerValuable(
     }
 
     override operator fun rem(operand: Valuable): Valuable {
-        if (operand.type !in listOf(Type.INT, Type.FLOAT)) {
+        if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
@@ -79,11 +73,11 @@ class IntegerValuable(
     }
 
     override fun convertToBool(valuable: Valuable): Boolean {
-        return valuable.value.toInt() != 0
+        return valuable.value.toFloat() != 0f
     }
 
     override fun convertToFloat(valuable: Valuable): Float {
-        return valuable.value.toFloat()
+        return value.toFloat()
     }
 
     override fun convertToString(valuable: Valuable): String {
@@ -91,11 +85,11 @@ class IntegerValuable(
     }
 
     override fun convertToInt(valuable: Valuable): Int {
-        return valuable.value.toInt()
+        return valuable.value.toFloat().toInt()
     }
 
     override fun absolute(): Valuable {
-        return Valuable(abs(value.toInt()), type)
+        return Valuable(abs(value.toFloat()), type)
     }
 
     override fun exponent(): Valuable {
