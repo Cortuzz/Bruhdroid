@@ -1,9 +1,8 @@
 package com.example.bruhdroid.variables.integer
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.StringValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 import org.junit.Assert
 import org.junit.Test
 
@@ -18,37 +17,37 @@ class TypesUnitTest {
 
     @Test
     fun typeIsCorrect() {
-        Assert.assertEquals(Type.INT, IntegerValuable(4).type)
+        Assert.assertEquals(ValuableType.INT, IntegerValuable(4).type)
     }
 
     @Test
     fun intPlusInt() {
-        Assert.assertEquals(Type.INT, (a + b).type)
+        Assert.assertEquals(ValuableType.INT, (a + b).type)
     }
 
     @Test
     fun intMinusInt() {
-        Assert.assertEquals(Type.INT, (a - b).type)
+        Assert.assertEquals(ValuableType.INT, (a - b).type)
     }
 
     @Test
     fun intTimesInt() {
-        Assert.assertEquals(Type.INT, (a * b).type)
+        Assert.assertEquals(ValuableType.INT, (a * b).type)
     }
 
     @Test
     fun intTimesString() {
-        Assert.assertEquals(Type.STRING, (a * str).type)
-        Assert.assertEquals(Type.STRING, (b * str).type)
+        Assert.assertEquals(ValuableType.STRING, (a * str).type)
+        Assert.assertEquals(ValuableType.STRING, (b * str).type)
     }
 
     @Test
     fun intDivisionInt() {
-        Assert.assertEquals(Type.INT, (a / b).type)
+        Assert.assertEquals(ValuableType.INT, (a / b).type)
     }
 
     @Test
     fun intReminderInt() {
-        Assert.assertEquals(Type.INT, (a % b).type)
+        Assert.assertEquals(ValuableType.INT, (a % b).type)
     }
 }

@@ -1,15 +1,18 @@
 package com.example.bruhdroid.model
 
 import android.annotation.SuppressLint
+import com.example.bruhdroid.exception.*
+import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.IDataPresenter
+import com.example.bruhdroid.model.blocks.BlockInstruction
+import com.example.bruhdroid.model.blocks.Variable
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.memory.MemoryPresentor
 import com.example.bruhdroid.model.operation.Operation
 import com.example.bruhdroid.model.operation.operator.AssignOperator
 import com.example.bruhdroid.model.operation.operator.Operator
-import com.example.bruhdroid.model.src.*
-import com.example.bruhdroid.model.src.blocks.*
-import com.example.bruhdroid.model.src.blocks.valuable.BooleanValuable
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.valuable.BooleanValuable
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 import java.util.*
 
 class Interpreter(_blocks: List<Block>? = null) : Observable() {
@@ -183,15 +186,15 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         while (currentLine < blocks!!.size - 1) {
             val block = blocks!![++currentLine]
 
-            if (block.instruction == Instruction.IF) {
+            if (block.instruction == BlockInstruction.IF) {
                 count++
             }
-            if (block.instruction == Instruction.END) {
+            if (block.instruction == BlockInstruction.END) {
                 count--
             }
 
-            if (count == 0 || (count == 1 && (block.instruction == Instruction.ELIF ||
-                        block.instruction == Instruction.ELSE))
+            if (count == 0 || (count == 1 && (block.instruction == BlockInstruction.ELIF ||
+                        block.instruction == BlockInstruction.ELSE))
             ) {
                 currentLine--
                 return
@@ -205,10 +208,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         while (currentLine < blocks!!.size - 1) {
             val block = blocks!![++currentLine]
 
-            if (block.instruction in listOf(Instruction.WHILE, Instruction.FOR)) {
+            if (block.instruction in listOf(BlockInstruction.WHILE, BlockInstruction.FOR)) {
                 count++
             }
-            if (block.instruction in listOf(Instruction.END_WHILE, Instruction.END_FOR)) {
+            if (block.instruction in listOf(BlockInstruction.END_WHILE, BlockInstruction.END_FOR)) {
                 count--
             }
 
@@ -291,10 +294,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         while (currentLine < blocks!!.size - 1) {
             val block = blocks!![++currentLine]
 
-            if (block.instruction == Instruction.FUNC) {
+            if (block.instruction == BlockInstruction.FUNC) {
                 count++
             }
-            if (block.instruction == Instruction.FUNC_END) {
+            if (block.instruction == BlockInstruction.FUNC_END) {
                 count--
             }
 
@@ -316,7 +319,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
     private fun parse(block: Block): Boolean {
         when (block.instruction) {
-            Instruction.PRAGMA -> {
+            BlockInstruction.PRAGMA -> {
                 val rawList = split(block.expression)
                 for (raw in rawList) {
                     parsePragma(raw)
@@ -324,7 +327,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 pragmaUpdate()
                 notifyIfNotDebug()
             }
-            Instruction.PRINT -> {
+            BlockInstruction.PRINT -> {
                 val rawList = split(block.expression)
                 if (pragma["IO_MESSAGE"] == "true") {
                     output += "I/O: "
@@ -345,7 +348,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 }
                 notifyIfNotDebug()
             }
-            Instruction.FUNC -> {
+            BlockInstruction.FUNC -> {
                 val name = parseFunc(block.expression)["name"]?.get(0)
                 val argNames = parseFunc(block.expression)["args"]!!
                 memory = Memory(memory, "METHOD $name SCOPE")
@@ -367,7 +370,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                     parseRawBlock("$arg = $value", true)
                 }
             }
-            Instruction.FUNC_CALL -> {
+            BlockInstruction.FUNC_CALL -> {
                 val exp = block.expression.split("=").toMutableList()
 
                 val name = exp.removeFirst().replace(" ", "")
@@ -396,8 +399,8 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                     currentLine = functionLines[funcName]!!.removeLast() - 1
                 }
             }
-            Instruction.FUNC_END -> {}
-            Instruction.RETURN -> {
+            BlockInstruction.FUNC_END -> {}
+            BlockInstruction.RETURN -> {
                 val value = parseRawBlock(block.expression)
                 val funcName = currentFunction.removeLast()
                 val varName = functionsVarsMap[funcName]!!.removeLast()
@@ -406,30 +409,30 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 removeFunctionMemory()
                 memory.pushToLocalMemory(varName, value.type, value)
             }
-            Instruction.INPUT -> {
+            BlockInstruction.INPUT -> {
                 waitingForInput = true
             }
-            Instruction.INIT -> {
+            BlockInstruction.INIT -> {
                 val rawList = split(block.expression)
 
                 for (raw in rawList) {
                     parseRawBlock(raw, true)
                 }
             }
-            Instruction.SET -> {
+            BlockInstruction.SET -> {
                 val rawList = split(block.expression)
 
                 for (raw in rawList) {
                     parseRawBlock(raw)
                 }
             }
-            Instruction.IF -> {
+            BlockInstruction.IF -> {
                 val statement = checkStatement(block.expression)
                 appliedConditions.add(statement)
                 memory = Memory(memory, "IF SCOPE")
                 return !statement
             }
-            Instruction.ELIF -> {
+            BlockInstruction.ELIF -> {
                 if (appliedConditions.last()) {
                     return true
                 }
@@ -439,7 +442,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 memory = Memory(memory, "ELIF SCOPE")
                 return !statement
             }
-            Instruction.ELSE -> {
+            BlockInstruction.ELSE -> {
                 if (appliedConditions.last()) {
                     return true
                 }
@@ -447,7 +450,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 memory = Memory(memory, "ELSE SCOPE")
                 return false
             }
-            Instruction.WHILE -> {
+            BlockInstruction.WHILE -> {
                 memory = Memory(memory, "WHILE ITERATION SCOPE")
                 if (checkStatement(block.expression)) {
                     cycleLines.add(currentLine)
@@ -455,7 +458,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                     skipCycle()
                 }
             }
-            Instruction.FOR -> {
+            BlockInstruction.FOR -> {
                 val raw = block.expression.split(",")
                 if (currentLine !in forLines) {
                     memory = Memory(memory, "FOR SCOPE")
@@ -474,26 +477,26 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                     skipCycle()
                 }
             }
-            Instruction.END -> {
+            BlockInstruction.END -> {
                 appliedConditions.removeLast()
                 memory = memory.prevMemory!!
             }
-            Instruction.END_WHILE -> {
+            BlockInstruction.END_WHILE -> {
                 currentLine = cycleLines.removeLast() - 1
                 memory = memory.prevMemory!!
             }
-            Instruction.END_FOR -> {
+            BlockInstruction.END_FOR -> {
                 currentLine = cycleLines.removeLast() - 1
                 memory = memory.prevMemory!!
             }
-            Instruction.BREAK -> {
+            BlockInstruction.BREAK -> {
                 try {
                     skipCycle()
                 } catch (e: Exception) {
                     throwOutOfCycleError("It is not possible to use BREAK outside the context of a loop")
                 }
             }
-            Instruction.CONTINUE -> {
+            BlockInstruction.CONTINUE -> {
                 try {
                     currentLine = cycleLines.removeLast() - 1
                     memory = memory.prevMemory!!

@@ -2,8 +2,8 @@ package com.example.bruhdroid.model.operation.operator.builder
 
 import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.operation.operator.AssignOperator
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.Variable
+import com.example.bruhdroid.model.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.Variable
 
 open class AssignmentOperatorBuilder(
     operator: String,

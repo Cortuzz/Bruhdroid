@@ -1,12 +1,10 @@
-package com.example.bruhdroid.model.src.blocks.valuable
+package com.example.bruhdroid.model.blocks.valuable
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.ValuableType
 
 class BooleanValuable(
     varValue: Any,
-): Valuable(varValue, Type.BOOL) {
+): Valuable(varValue, ValuableType.BOOL) {
     override fun clone(): Valuable {
         return BooleanValuable(value)
     }

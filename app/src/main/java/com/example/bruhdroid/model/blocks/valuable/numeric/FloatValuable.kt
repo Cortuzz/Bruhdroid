@@ -1,14 +1,13 @@
-package com.example.bruhdroid.model.src.blocks.valuable.numeric
+package com.example.bruhdroid.model.blocks.valuable.numeric
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 import kotlin.math.abs
-import kotlin.math.exp
 
 open class FloatValuable(
     varValue: Any,
-): NumericValuable(varValue, Type.FLOAT) {
+): NumericValuable(varValue, ValuableType.FLOAT) {
     override fun clone(): Valuable {
         return FloatValuable(value)
     }

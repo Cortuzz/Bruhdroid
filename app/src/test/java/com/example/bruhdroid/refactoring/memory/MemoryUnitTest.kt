@@ -1,9 +1,9 @@
 package com.example.bruhdroid.refactoring.memory;
 
 import com.example.bruhdroid.model.memory.Memory
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
@@ -48,7 +48,7 @@ class MemoryUnitTest {
 
         every { block.type } answers  {
             ++typeAccessCounter
-            Type.INT
+            ValuableType.INT
         }
 
         memory.push("test", block)
@@ -71,7 +71,7 @@ class MemoryUnitTest {
             "435"
         }
         every { block.type } answers  {
-            Type.INT
+            ValuableType.INT
         }
 
         memory.push("test", block)

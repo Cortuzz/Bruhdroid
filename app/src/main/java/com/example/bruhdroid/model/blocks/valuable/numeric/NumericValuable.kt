@@ -1,14 +1,13 @@
-package com.example.bruhdroid.model.src.blocks.valuable.numeric
+package com.example.bruhdroid.model.blocks.valuable.numeric
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import kotlin.math.abs
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 import kotlin.math.exp
 
 abstract class NumericValuable(
     varValue: Any,
-    type: Type
+    type: ValuableType
 ): Valuable(varValue, type) {
     override operator fun plus(operand: Valuable): Valuable {
         if (operand !is NumericValuable) {
@@ -102,7 +101,7 @@ abstract class NumericValuable(
     }
 
     protected fun checkFloating(val1: Valuable, val2: Valuable): Boolean {
-        if (val1.type == Type.FLOAT || val2.type == Type.FLOAT) {
+        if (val1.type == ValuableType.FLOAT || val2.type == ValuableType.FLOAT) {
             return true
         }
         return false

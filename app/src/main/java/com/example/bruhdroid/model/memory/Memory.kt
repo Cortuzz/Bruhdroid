@@ -1,11 +1,11 @@
 package com.example.bruhdroid.model.memory
 
-import com.example.bruhdroid.model.src.StackCorruptionError
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Block
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.Variable
-import com.example.bruhdroid.model.src.blocks.valuable.NullValuable
+import com.example.bruhdroid.exception.StackCorruptionError
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.Variable
+import com.example.bruhdroid.model.blocks.valuable.NullValuable
 
 class Memory(val prevMemory: Memory?, val scope: String) {
     private val stack: MutableMap<String, Valuable> = mutableMapOf()
@@ -31,7 +31,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
 
     fun push(address: String, value: Block) {
         value as Valuable
-        if (value.type == Type.LIST) {
+        if (value.type == ValuableType.LIST) {
             if (value.array.isEmpty()) {
                 initArray(value, value.value.toInt())
             }
@@ -63,8 +63,8 @@ class Memory(val prevMemory: Memory?, val scope: String) {
         )
     }
 
-    fun pushToLocalMemory(name: String, type: Type = Type.UNDEFINED, valueBlock: Valuable) {
-        if (type == Type.LIST) {
+    fun pushToLocalMemory(name: String, type: ValuableType = ValuableType.UNDEFINED, valueBlock: Valuable) {
+        if (type == ValuableType.LIST) {
             val block = valueBlock.clone()
             block.type = type
             push(name, block)
@@ -75,7 +75,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
         push(name, valueBlock)
     }
 
-    fun tryPushToAnyMemory(name: String, type: Type, valueBlock: Valuable): Boolean {
+    fun tryPushToAnyMemory(name: String, type: ValuableType, valueBlock: Valuable): Boolean {
         valueBlock.type = type
 
        return tryPushToAnyMemory(this, name, type, valueBlock)
@@ -84,7 +84,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
     private fun tryPushToAnyMemory(
         memory: Memory,
         name: String,
-        type: Type,
+        type: ValuableType,
         valueBlock: Block
     ): Boolean {
         valueBlock as Valuable

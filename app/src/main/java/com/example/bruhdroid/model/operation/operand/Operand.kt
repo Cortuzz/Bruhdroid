@@ -2,14 +2,13 @@ package com.example.bruhdroid.model.operation.operand
 
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.operation.Operation
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.IDataPresenter
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.Variable
-import com.example.bruhdroid.model.src.blocks.valuable.BooleanValuable
-import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.FloatValuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.IDataPresenter
+import com.example.bruhdroid.model.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.Variable
+import com.example.bruhdroid.model.blocks.valuable.BooleanValuable
+import com.example.bruhdroid.model.blocks.valuable.StringValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.FloatValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 
 class Operand(value: String): Operation(value) {
     override fun act(operand1: Valuable, operand2: Valuable?): Valuable {

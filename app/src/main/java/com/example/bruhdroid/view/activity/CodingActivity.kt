@@ -1,4 +1,4 @@
-package com.example.bruhdroid
+package com.example.bruhdroid.view.activity
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -17,13 +17,15 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bruhdroid.controller.Controller
+import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.*
-import com.example.bruhdroid.model.Category
-import com.example.bruhdroid.model.CategoryAdapter
+import com.example.bruhdroid.view.category.Category
+import com.example.bruhdroid.view.category.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.ViewBlock
-import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.blocks.BlockInstruction
+import com.example.bruhdroid.view.ViewBlock
+import com.example.bruhdroid.model.blocks.Block
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -62,16 +64,16 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bottomSheetConsole: BottomSheetDialog
     private var dp by Delegates.notNull<Float>()
 
-    private var layoutMap = mapOf<Instruction, ViewBlock>()
+    private var layoutMap = mapOf<BlockInstruction, ViewBlock>()
     private val interpreter = Interpreter()
     private val controller = Controller()
     private val startConnectingInstructions = listOf(
-        Instruction.WHILE, Instruction.IF,
-        Instruction.FUNC, Instruction.FOR
+        BlockInstruction.WHILE, BlockInstruction.IF,
+        BlockInstruction.FUNC, BlockInstruction.FOR
     )
     private val connectingInstructions = listOf(
-        Instruction.END, Instruction.END_WHILE,
-        Instruction.FUNC_END, Instruction.END_FOR
+        BlockInstruction.END, BlockInstruction.END_WHILE,
+        BlockInstruction.FUNC_END, BlockInstruction.END_FOR
     )
 
 
@@ -80,19 +82,19 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         super.onCreate(savedInstanceState)
         dp = this.resources.displayMetrics.density
         layoutMap = mapOf(
-            Instruction.PRAGMA to ViewBlock("Pragma", R.drawable.ic_block_pragma),
-            Instruction.PRINT to ViewBlock("Print", R.drawable.ic_block_print),
-            Instruction.INPUT to ViewBlock("Input", R.drawable.ic_block_input),
-            Instruction.INIT to ViewBlock("Init", R.drawable.ic_block_init),
-            Instruction.WHILE to ViewBlock("While", R.drawable.ic_block_while),
-            Instruction.IF to ViewBlock("If", R.drawable.ic_block_if),
-            Instruction.SET to ViewBlock("Set", R.drawable.ic_block_set),
-            Instruction.BREAK to ViewBlock("Break", R.drawable.ic_block_break, false),
-            Instruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
-            Instruction.FUNC to ViewBlock("Method", R.drawable.ic_block_func),
-            Instruction.RETURN to ViewBlock("Return", R.drawable.ic_block_return),
-            Instruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_call),
-            Instruction.FOR to ViewBlock("For", R.drawable.ic_block_for)
+            BlockInstruction.PRAGMA to ViewBlock("Pragma", R.drawable.ic_block_pragma),
+            BlockInstruction.PRINT to ViewBlock("Print", R.drawable.ic_block_print),
+            BlockInstruction.INPUT to ViewBlock("Input", R.drawable.ic_block_input),
+            BlockInstruction.INIT to ViewBlock("Init", R.drawable.ic_block_init),
+            BlockInstruction.WHILE to ViewBlock("While", R.drawable.ic_block_while),
+            BlockInstruction.IF to ViewBlock("If", R.drawable.ic_block_if),
+            BlockInstruction.SET to ViewBlock("Set", R.drawable.ic_block_set),
+            BlockInstruction.BREAK to ViewBlock("Break", R.drawable.ic_block_break, false),
+            BlockInstruction.CONTINUE to ViewBlock("Continue", R.drawable.ic_block_continue, false),
+            BlockInstruction.FUNC to ViewBlock("Method", R.drawable.ic_block_func),
+            BlockInstruction.RETURN to ViewBlock("Return", R.drawable.ic_block_return),
+            BlockInstruction.FUNC_CALL to ViewBlock("Call", R.drawable.ic_block_call),
+            BlockInstruction.FOR to ViewBlock("For", R.drawable.ic_block_for)
         )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
 
@@ -241,23 +243,23 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 )
             }
             when (instr) {
-                in listOf(Instruction.INIT, Instruction.SET) -> firstBlockCategory.add(view)
+                in listOf(BlockInstruction.INIT, BlockInstruction.SET) -> firstBlockCategory.add(view)
                 in listOf(
-                    Instruction.PRAGMA,
-                    Instruction.INPUT,
-                    Instruction.PRINT
+                    BlockInstruction.PRAGMA,
+                    BlockInstruction.INPUT,
+                    BlockInstruction.PRINT
                 ) -> secondBlockCategory.add(view)
                 in listOf(
-                    Instruction.FOR,
-                    Instruction.WHILE,
-                    Instruction.BREAK,
-                    Instruction.CONTINUE
+                    BlockInstruction.FOR,
+                    BlockInstruction.WHILE,
+                    BlockInstruction.BREAK,
+                    BlockInstruction.CONTINUE
                 ) -> thirdBlockCategory.add(view)
-                in listOf(Instruction.IF) -> fourthBlockCategory.add(view)
+                in listOf(BlockInstruction.IF) -> fourthBlockCategory.add(view)
                 in listOf(
-                    Instruction.FUNC,
-                    Instruction.RETURN,
-                    Instruction.FUNC_CALL
+                    BlockInstruction.FUNC,
+                    BlockInstruction.RETURN,
+                    BlockInstruction.FUNC_CALL
                 ) -> fifthBlockCategory.add(view)
                 else -> {}
             }
@@ -331,12 +333,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
         val subsequentInstructionsViews = mapOf(
-            Instruction.END_WHILE to R.layout.empty_block,
-            Instruction.END to R.layout.condition_block_end,
-            Instruction.ELSE to R.layout.block_else,
-            Instruction.ELIF to R.layout.block_elif,
-            Instruction.FUNC_END to R.layout.block_func_end,
-            Instruction.END_FOR to R.layout.block_end_for
+            BlockInstruction.END_WHILE to R.layout.empty_block,
+            BlockInstruction.END to R.layout.condition_block_end,
+            BlockInstruction.ELSE to R.layout.block_else,
+            BlockInstruction.ELIF to R.layout.block_elif,
+            BlockInstruction.FUNC_END to R.layout.block_func_end,
+            BlockInstruction.END_FOR to R.layout.block_end_for
         )
 
         GlobalScope.launch {
@@ -564,8 +566,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 codingViewList.add(tempView)
                 if (viewToBlock[tempView]!!.instruction !in connectingInstructions &&
                     viewToBlock[tempView]!!.instruction !in listOf(
-                        Instruction.ELSE,
-                        Instruction.ELIF
+                        BlockInstruction.ELSE,
+                        BlockInstruction.ELIF
                     )
                 ) {
                     generateDragArea(tempView)
@@ -685,12 +687,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
 
         val endInstructions = listOf(
-            Instruction.END, Instruction.END_WHILE, Instruction.ELSE,
-            Instruction.ELIF, Instruction.FUNC_END, Instruction.END_FOR
+            BlockInstruction.END, BlockInstruction.END_WHILE, BlockInstruction.ELSE,
+            BlockInstruction.ELIF, BlockInstruction.FUNC_END, BlockInstruction.END_FOR
         )
         val startInstructions = listOf(
-            Instruction.IF, Instruction.WHILE, Instruction.ELSE,
-            Instruction.ELIF, Instruction.FUNC, Instruction.FOR
+            BlockInstruction.IF, BlockInstruction.WHILE, BlockInstruction.ELSE,
+            BlockInstruction.ELIF, BlockInstruction.FUNC, BlockInstruction.FOR
         )
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
@@ -809,7 +811,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             var index = codingViewList.indexOf(v) + 1
             var count = 1
             val ifList = mutableListOf<View>()
-            if (viewToBlock[v]!!.instruction == Instruction.IF) {
+            if (viewToBlock[v]!!.instruction == BlockInstruction.IF) {
                 ifList.add(v)
             }
             var connector: View? = null
@@ -821,8 +823,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
                 if (ifList.isNotEmpty()) {
                     when (block!!.instruction) {
-                        Instruction.IF -> ifList.add(currentView)
-                        in listOf(Instruction.ELSE, Instruction.ELIF) -> {
+                        BlockInstruction.IF -> ifList.add(currentView)
+                        in listOf(BlockInstruction.ELSE, BlockInstruction.ELIF) -> {
                             val checkIf = ifList.removeLast()
                             if (checkIf == v) {
                                 connector = connectorsMap[currentView]
@@ -908,7 +910,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
-    private fun addStatementBlock(endBlock: View, instr: Instruction, blockId: Int, full: Boolean) {
+    private fun addStatementBlock(endBlock: View, instr: BlockInstruction, blockId: Int, full: Boolean) {
         val elseView = layoutInflater.inflate(blockId, null)
         generateBreakpoint(elseView)
         val index = codingViewList.indexOf(endBlock)
@@ -954,7 +956,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun buildBlock(
         prevView: View?,
         view: View,
-        instruction: Instruction,
+        instruction: BlockInstruction,
         connect: Boolean = false
     ) {
         var endBlock: View? = null
@@ -967,20 +969,20 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         codingViewList.add(view)
 
         if (connect) {
-            val endInstruction: Instruction
+            val endInstruction: BlockInstruction
 
             when (instruction) {
-                Instruction.WHILE -> {
+                BlockInstruction.WHILE -> {
                     endBlock = layoutInflater.inflate(R.layout.empty_block, null)
-                    endInstruction = Instruction.END_WHILE
+                    endInstruction = BlockInstruction.END_WHILE
                 }
-                Instruction.FOR -> {
+                BlockInstruction.FOR -> {
                     endBlock = layoutInflater.inflate(R.layout.block_end_for, null)
-                    endInstruction = Instruction.END_FOR
+                    endInstruction = BlockInstruction.END_FOR
                 }
-                Instruction.FUNC -> {
+                BlockInstruction.FUNC -> {
                     endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
-                    endInstruction = Instruction.FUNC_END
+                    endInstruction = BlockInstruction.FUNC_END
                 }
                 else -> {
                     endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
@@ -991,12 +993,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                         addElif.visibility = View.INVISIBLE
                         addElse.visibility = View.INVISIBLE
 
-                        addStatementBlock(endBlock, Instruction.ELSE, R.layout.block_else, false)
+                        addStatementBlock(endBlock, BlockInstruction.ELSE, R.layout.block_else, false)
                     }
                     addElif.setOnClickListener {
-                        addStatementBlock(endBlock, Instruction.ELIF, R.layout.block_elif, true)
+                        addStatementBlock(endBlock, BlockInstruction.ELIF, R.layout.block_elif, true)
                     }
-                    endInstruction = Instruction.END
+                    endInstruction = BlockInstruction.END
                 }
             }
 
@@ -1018,7 +1020,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             prevView.bringToFront()
         }
 
-        if (instruction == Instruction.BREAK || instruction == Instruction.CONTINUE) {
+        if (instruction == BlockInstruction.BREAK || instruction == BlockInstruction.CONTINUE) {
             binding.container.addView(
                 view,
                 ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt())

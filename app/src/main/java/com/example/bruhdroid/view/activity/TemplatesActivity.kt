@@ -1,16 +1,17 @@
-package com.example.bruhdroid
+package com.example.bruhdroid.view.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.example.bruhdroid.controller.Controller
+import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.databinding.ButtonBinding
-import com.example.bruhdroid.model.src.TemplateStorage
-import com.example.bruhdroid.model.src.TemplateStorage.Companion.Template
-import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.storage.TemplateStorage
+import com.example.bruhdroid.storage.TemplateStorage.Companion.Template
+import com.example.bruhdroid.model.blocks.Block
 
 
 class TemplatesActivity : AppCompatActivity() {

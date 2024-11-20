@@ -1,15 +1,14 @@
-package com.example.bruhdroid.model.src.blocks.valuable.numeric
+package com.example.bruhdroid.model.blocks.valuable.numeric
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
-import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.valuable.StringValuable
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 import kotlin.math.abs
-import kotlin.math.exp
 
 class IntegerValuable(
     varValue: Any,
-): NumericValuable(varValue, Type.INT) {
+): NumericValuable(varValue, ValuableType.INT) {
     override fun clone(): Valuable {
         return IntegerValuable(value)
     }
@@ -19,7 +18,7 @@ class IntegerValuable(
     }
 
     override operator fun times(operand: Valuable): Valuable {
-        if (operand.type == Type.STRING) {
+        if (operand.type == ValuableType.STRING) {
             return StringValuable(operand.value.repeat(value.toInt()))
         }
 

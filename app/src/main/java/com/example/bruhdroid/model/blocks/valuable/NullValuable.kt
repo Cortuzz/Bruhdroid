@@ -1,9 +1,9 @@
-package com.example.bruhdroid.model.src.blocks.valuable
+package com.example.bruhdroid.model.blocks.valuable
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.exception.TypeError
 
-class NullValuable: Valuable("", Type.UNDEFINED) {
+class NullValuable: Valuable("", ValuableType.UNDEFINED) {
     override fun clone(): Valuable {
         return NullValuable()
     }

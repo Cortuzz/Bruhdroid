@@ -1,4 +1,4 @@
-package com.example.bruhdroid
+package com.example.bruhdroid.view.activity
 
 import android.app.AlertDialog
 import android.content.DialogInterface
@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import androidx.databinding.DataBindingUtil
+import com.example.bruhdroid.controller.Controller
+import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

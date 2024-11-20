@@ -1,14 +1,15 @@
-package com.example.bruhdroid
+package com.example.bruhdroid.controller
 
 import android.content.res.Configuration
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.bruhdroid.R
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.RuntimeError
-import com.example.bruhdroid.model.src.UnhandledError
-import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.blocks.BlockInstruction
+import com.example.bruhdroid.exception.RuntimeError
+import com.example.bruhdroid.exception.UnhandledError
+import com.example.bruhdroid.model.blocks.Block
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
@@ -41,25 +42,25 @@ class Controller : Observable() {
 
         fun loadProgram(file: File): Array<Block> {
             val blocksMap = mapOf(
-                "SET" to Instruction.SET,
-                "INIT" to Instruction.INIT,
-                "PRINT" to Instruction.PRINT,
-                "PRAGMA" to Instruction.PRAGMA,
-                "INPUT" to Instruction.INPUT,
-                "IF" to Instruction.IF,
-                "ELIF" to Instruction.ELIF,
-                "ELSE" to Instruction.ELSE,
-                "WHILE" to Instruction.WHILE,
-                "END" to Instruction.END,
-                "END_WHILE" to Instruction.END_WHILE,
-                "BREAK" to Instruction.BREAK,
-                "CONTINUE" to Instruction.CONTINUE,
-                "FUNC" to Instruction.FUNC,
-                "FUNC_END" to Instruction.FUNC_END,
-                "FUNC_CALL" to Instruction.FUNC_CALL,
-                "RETURN" to Instruction.RETURN,
-                "FOR" to Instruction.FOR,
-                "END_FOR" to Instruction.END_FOR
+                "SET" to BlockInstruction.SET,
+                "INIT" to BlockInstruction.INIT,
+                "PRINT" to BlockInstruction.PRINT,
+                "PRAGMA" to BlockInstruction.PRAGMA,
+                "INPUT" to BlockInstruction.INPUT,
+                "IF" to BlockInstruction.IF,
+                "ELIF" to BlockInstruction.ELIF,
+                "ELSE" to BlockInstruction.ELSE,
+                "WHILE" to BlockInstruction.WHILE,
+                "END" to BlockInstruction.END,
+                "END_WHILE" to BlockInstruction.END_WHILE,
+                "BREAK" to BlockInstruction.BREAK,
+                "CONTINUE" to BlockInstruction.CONTINUE,
+                "FUNC" to BlockInstruction.FUNC,
+                "FUNC_END" to BlockInstruction.FUNC_END,
+                "FUNC_CALL" to BlockInstruction.FUNC_CALL,
+                "RETURN" to BlockInstruction.RETURN,
+                "FOR" to BlockInstruction.FOR,
+                "END_FOR" to BlockInstruction.END_FOR
             )
 
             val blocks = mutableListOf<Block>()

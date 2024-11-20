@@ -1,9 +1,9 @@
 package com.example.bruhdroid.model.operation.operator
 
 import com.example.bruhdroid.model.memory.Memory
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.Variable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.Variable
 
 class AssignOperator(
     operator: String,
@@ -18,7 +18,7 @@ class AssignOperator(
     ) {
         val value = assignment(operand1, operand2)
         val type = if (isArrayInitializer) {
-            Type.LIST
+            ValuableType.LIST
         } else {
             operand2.type
         }

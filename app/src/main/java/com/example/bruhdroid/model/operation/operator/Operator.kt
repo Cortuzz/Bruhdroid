@@ -2,8 +2,8 @@ package com.example.bruhdroid.model.operation.operator
 
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.operation.Operation
-import com.example.bruhdroid.model.src.blocks.IDataPresenter
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.IDataPresenter
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 
 open class Operator (
     val operator: String,

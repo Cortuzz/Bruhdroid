@@ -1,15 +1,14 @@
-package com.example.bruhdroid.model.src.blocks
+package com.example.bruhdroid.model.blocks
 
 import com.example.bruhdroid.model.memory.Memory
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.RuntimeError
-import com.example.bruhdroid.model.src.StackCorruptionError
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.exception.RuntimeError
+import com.example.bruhdroid.exception.StackCorruptionError
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 
 class Variable(
     val name: String = "",
     private val memory: Memory
-    ) : Block(Instruction.VAR, ""), IDataPresenter {
+    ) : Block(BlockInstruction.VAR, ""), IDataPresenter {
     override fun getData(): Valuable {
         try {
             return memory.tryFindInMemory(name)

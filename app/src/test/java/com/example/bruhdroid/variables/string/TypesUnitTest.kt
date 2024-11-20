@@ -1,9 +1,8 @@
 package com.example.bruhdroid.variables.string
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.StringValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 import org.junit.Assert
 import org.junit.Test
 
@@ -19,18 +18,18 @@ class TypesUnitTest {
     @Test
     fun typeIsCorrect() {
         val value = "Fsf24f124%$@#"
-        Assert.assertEquals(Type.STRING, StringValuable(value).type)
+        Assert.assertEquals(ValuableType.STRING, StringValuable(value).type)
     }
 
     @Test
     fun stringPlusString() {
-        Assert.assertEquals(Type.STRING, (a + b).type)
-        Assert.assertEquals(Type.STRING, (b + a).type)
+        Assert.assertEquals(ValuableType.STRING, (a + b).type)
+        Assert.assertEquals(ValuableType.STRING, (b + a).type)
     }
 
     @Test
     fun stringTimesInt() {
-        Assert.assertEquals(Type.STRING, (a * integer).type)
-        Assert.assertEquals(Type.STRING, (b * integer).type)
+        Assert.assertEquals(ValuableType.STRING, (a * integer).type)
+        Assert.assertEquals(ValuableType.STRING, (b * integer).type)
     }
 }

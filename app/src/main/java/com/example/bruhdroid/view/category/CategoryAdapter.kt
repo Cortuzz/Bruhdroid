@@ -1,4 +1,4 @@
-package com.example.bruhdroid.model
+package com.example.bruhdroid.view.category
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bruhdroid.R
-import com.example.bruhdroid.model.CategoryAdapter.CategoryViewHolder
+import com.example.bruhdroid.view.category.CategoryAdapter.CategoryViewHolder
 
 class CategoryAdapter(
     private var context: Context,

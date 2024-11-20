@@ -1,9 +1,7 @@
 package com.example.bruhdroid.variables.string
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.valuable.StringValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 import org.junit.Assert
 import org.junit.Test
 

@@ -1,16 +1,13 @@
-package com.example.bruhdroid.model.src.blocks.valuable
+package com.example.bruhdroid.model.blocks.valuable
 
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
-import com.example.bruhdroid.model.src.blocks.Block
-import com.example.bruhdroid.model.src.blocks.IDataPresenter
-import kotlin.math.abs
-import kotlin.math.floor
-import kotlin.math.exp
+import com.example.bruhdroid.model.blocks.BlockInstruction
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.IDataPresenter
 
-abstract class Valuable protected constructor(varValue: Any, var type: Type) :
-    Block(Instruction.VAL, ""), IDataPresenter {
+abstract class Valuable protected constructor(varValue: Any, var type: ValuableType) :
+    Block(BlockInstruction.VAL, ""), IDataPresenter {
     var value: String = varValue.toString()
     var array: MutableList<Valuable> = mutableListOf()
 

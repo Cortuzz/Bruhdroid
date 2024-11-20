@@ -1,12 +1,12 @@
-package com.example.bruhdroid.model.src.blocks.valuable
+package com.example.bruhdroid.model.blocks.valuable
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.TypeError
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 
 class ListValuable(
     varValue: Any,
-): Valuable(varValue, Type.LIST) {
+): Valuable(varValue, ValuableType.LIST) {
     override fun clone(): Valuable {
         val valuable = ListValuable(value)
         valuable.array = array

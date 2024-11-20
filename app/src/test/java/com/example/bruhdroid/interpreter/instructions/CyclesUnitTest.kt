@@ -1,22 +1,21 @@
 package com.example.bruhdroid.interpreter.instructions
 
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.blocks.BlockInstruction
+import com.example.bruhdroid.model.blocks.Block
 import org.junit.Assert
 import org.junit.Test
 
 class CyclesUnitTest {
     @Test
     fun basicWhile() {
-        val a = Block(Instruction.INIT, "a = 1")
-        val counter = Block(Instruction.INIT, "count = 0")
+        val a = Block(BlockInstruction.INIT, "a = 1")
+        val counter = Block(BlockInstruction.INIT, "count = 0")
 
-        val b = Block(Instruction.WHILE, "a < 100")
-            val c = Block(Instruction.SET, "a = a * 2")
-            val incCounter = Block(Instruction.SET, "count = count + 1")
-        val d = Block(Instruction.END_WHILE)
+        val b = Block(BlockInstruction.WHILE, "a < 100")
+            val c = Block(BlockInstruction.SET, "a = a * 2")
+            val incCounter = Block(BlockInstruction.SET, "count = count + 1")
+        val d = Block(BlockInstruction.END_WHILE)
 
         val interpreter = Interpreter(listOf(a, counter, b, c, incCounter, d))
         interpreter.run()
@@ -29,19 +28,19 @@ class CyclesUnitTest {
 
     @Test
     fun whileNestedIntoWhile() {
-        val a = Block(Instruction.INIT, "a = 1")
-        val counter = Block(Instruction.INIT, "count = 0")
+        val a = Block(BlockInstruction.INIT, "a = 1")
+        val counter = Block(BlockInstruction.INIT, "count = 0")
 
-        val b = Block(Instruction.WHILE, "a < 5000")
-            val c = Block(Instruction.SET, "a = a * 2")
+        val b = Block(BlockInstruction.WHILE, "a < 5000")
+            val c = Block(BlockInstruction.SET, "a = a * 2")
 
-            val d = Block(Instruction.WHILE, "count < 3")
-                val e = Block(Instruction.SET, "a = a * 3")
-                val e1 = Block(Instruction.SET, "count = count + 1")
-            val f = Block(Instruction.END_WHILE)
+            val d = Block(BlockInstruction.WHILE, "count < 3")
+                val e = Block(BlockInstruction.SET, "a = a * 3")
+                val e1 = Block(BlockInstruction.SET, "count = count + 1")
+            val f = Block(BlockInstruction.END_WHILE)
 
-            val incCounter = Block(Instruction.SET, "count = count + 1")
-        val g = Block(Instruction.END_WHILE)
+            val incCounter = Block(BlockInstruction.SET, "count = count + 1")
+        val g = Block(BlockInstruction.END_WHILE)
 
         val interpreter = Interpreter(listOf(a, counter, b, c, d, e, e1, f, incCounter, g))
         interpreter.run()
@@ -54,11 +53,11 @@ class CyclesUnitTest {
 
     @Test
     fun falseWhile() {
-        val a = Block(Instruction.INIT, "a = 1")
+        val a = Block(BlockInstruction.INIT, "a = 1")
 
-        val b = Block(Instruction.WHILE, "a > 100")
-            val c = Block(Instruction.SET, "a = a * 2")
-        val d = Block(Instruction.END_WHILE)
+        val b = Block(BlockInstruction.WHILE, "a > 100")
+            val c = Block(BlockInstruction.SET, "a = a * 2")
+        val d = Block(BlockInstruction.END_WHILE)
 
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()

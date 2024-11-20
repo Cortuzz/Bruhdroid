@@ -2,14 +2,12 @@ package com.example.bruhdroid.model.operation
 
 import com.example.bruhdroid.model.operation.operand.OperandBuilder
 import com.example.bruhdroid.model.operation.operator.builder.*
-import com.example.bruhdroid.model.src.IndexOutOfRangeError
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.BooleanValuable
-import com.example.bruhdroid.model.src.blocks.valuable.ListValuable
-import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.FloatValuable
-import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
+import com.example.bruhdroid.exception.IndexOutOfRangeError
+import com.example.bruhdroid.model.blocks.valuable.BooleanValuable
+import com.example.bruhdroid.model.blocks.valuable.ListValuable
+import com.example.bruhdroid.model.blocks.valuable.StringValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.FloatValuable
+import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 
 class OperationBuilderFactory {
     fun getOperatorBuilders(): List<IOperationBuilder> {

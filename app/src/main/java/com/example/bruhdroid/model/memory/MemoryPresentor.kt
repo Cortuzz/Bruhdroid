@@ -1,17 +1,17 @@
 package com.example.bruhdroid.model.memory
 
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.Valuable
 
 class MemoryPresentor {
     fun getVisibleValue(valuable: Valuable): String {
         val rawValue = valuable.value
 
         return when (valuable.type) {
-            Type.STRING -> "\"$rawValue\""
-            Type.BOOL -> rawValue.uppercase()
-            Type.UNDEFINED -> "NULL"
-            Type.LIST -> {
+            ValuableType.STRING -> "\"$rawValue\""
+            ValuableType.BOOL -> rawValue.uppercase()
+            ValuableType.UNDEFINED -> "NULL"
+            ValuableType.LIST -> {
                 val str = mutableListOf<String>()
                 valuable.array.forEach { el -> str.add(getVisibleValue(el)) }
                 str.toString()
