@@ -28,7 +28,6 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     private val memoryPresentor = MemoryPresentor()
     private var input = ""
     private var currentLine = -1
-    private var debug = false
 
     private var pragma: MutableMap<String, String> = mutableMapOf(
         "INIT_MESSAGE" to "true",
@@ -115,23 +114,32 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         pragmaUpdate()
     }
 
-    fun runOnce(debugMode: Boolean): Boolean {
-        debug = debugMode
+    fun run() {
+        tryParseInput()
 
-        if (input.isNotEmpty()) {
-            parseInput()
-        }
+        if (currentLine == -1)
+            notifyClients()
 
-        if (currentLine >= blocks!!.size - 1) {
+        while (currentLine < blocks!!.size - 1 && !waitingForInput)
+            runOnce()
+    }
+
+    fun runOnce(): Boolean {
+        tryParseInput()
+
+        if (currentLine >= blocks!!.size - 1)
             return false
-        }
 
+        runIteration()
+        return true
+    }
+
+    private fun runIteration() {
         val block = blocks!![++currentLine]
 
         try {
-            if (parse(block)) {
+            if (parse(block))
                 skipFalseBranches()
-            }
         } catch (e: RuntimeError) {
             throw RuntimeError(
                 "${e.message}\nAt line: ${currentLine + 1}, " +
@@ -141,43 +149,6 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
             throw UnhandledError(
                 "At line: ${currentLine + 1}, At instruction: ${block.instruction}\n\n${e.stackTraceToString()}"
             )
-        }
-
-        return true
-    }
-
-    fun run() {
-        run(false)
-    }
-
-    fun run(debugMode: Boolean) {
-        debug = debugMode
-
-        if (input.isNotEmpty()) {
-            parseInput()
-        }
-
-        if (currentLine == -1) {
-            notifyIfNotDebug()
-        }
-
-        while (currentLine < blocks!!.size - 1 && !waitingForInput) {
-            val block = blocks!![++currentLine]
-
-            try {
-                if (parse(block)) {
-                    skipFalseBranches()
-                }
-            } catch (e: RuntimeError) {
-                throw RuntimeError(
-                    "${e.message}\nAt line: ${currentLine + 1}, " +
-                            "At instruction: ${block.instruction}"
-                )
-            } catch (e: Exception) {
-                throw UnhandledError(
-                    "At line: ${currentLine + 1}, At instruction: ${block.instruction}\n\n${e.stackTraceToString()}"
-                )
-            }
         }
     }
 
@@ -242,7 +213,10 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return parsed
     }
 
-    private fun parseInput() {
+    private fun tryParseInput() {
+        if (input.isEmpty())
+            return
+
         val block = blocks!![currentLine]
         val rawList = input.split(",")
         val rawCommands = block.expression.split(",")
@@ -269,11 +243,9 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         pragma[split[0]] = split[1]
     }
 
-    private fun notifyIfNotDebug() {
-        if (!debug) {
-            setChanged()
-            notifyObservers()
-        }
+    private fun notifyClients() {
+        setChanged()
+        notifyObservers()
     }
 
     private fun parseFunc(expression: String): Map<String, List<String>> {
@@ -325,7 +297,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                     parsePragma(raw)
                 }
                 pragmaUpdate()
-                notifyIfNotDebug()
+                notifyClients()
             }
             BlockInstruction.PRINT -> {
                 val rawList = split(block.expression)
@@ -346,7 +318,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                         output = output.substring(ind + 1)
                     }
                 }
-                notifyIfNotDebug()
+                notifyClients()
             }
             BlockInstruction.FUNC -> {
                 val name = parseFunc(block.expression)["name"]?.get(0)

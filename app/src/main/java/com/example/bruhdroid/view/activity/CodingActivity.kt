@@ -174,7 +174,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             updateDebugger()
 
             GlobalScope.launch {
-                controller.resumeOneIteration(debugMode)
+                controller.resumeOneIteration()
             }
         }
 
@@ -183,7 +183,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             updateDebugger()
 
             GlobalScope.launch {
-                controller.resumeOneIteration(debugMode)
+                controller.resumeOneIteration()
             }
         }
 
@@ -1105,10 +1105,10 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             interpreter.handleUserInput(inputVal.text.toString())
             alertDialog.dismiss()
             if (!debugMode) {
-                controller.resumeAllIterations(false)
+                controller.resumeAllIterations()
             } else {
                 GlobalScope.launch {
-                    controller.resumeOneIteration(true)
+                    controller.resumeOneIteration()
                 }
             }
         }
@@ -1204,7 +1204,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
             GlobalScope.launch {
                 runOnUiThread {
-                    controller.resumeOneIteration(debugMode)
+                    controller.resumeOneIteration()
                 }
             }
         }
