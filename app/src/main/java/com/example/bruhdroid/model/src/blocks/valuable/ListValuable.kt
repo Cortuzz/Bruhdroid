@@ -2,12 +2,19 @@ package com.example.bruhdroid.model.src.blocks.valuable
 
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
 
 class ListValuable(
     varValue: Any,
 ): Valuable(varValue, Type.LIST) {
+    override fun clone(): Valuable {
+        val valuable = ListValuable(value)
+        valuable.array = array
+        return valuable
+    }
+
     override fun getLength(): Valuable {
-        return Valuable(array.size, Type.INT)
+        return IntegerValuable(array.size)
     }
 
     override fun convertToBool(valuable: Valuable): Boolean {
@@ -23,7 +30,7 @@ class ListValuable(
     }
 
     override fun sorted(): Valuable {
-        val valuable = Valuable(value, type)
+        val valuable = ListValuable(value)
         valuable.array = srt()
         return valuable
     }

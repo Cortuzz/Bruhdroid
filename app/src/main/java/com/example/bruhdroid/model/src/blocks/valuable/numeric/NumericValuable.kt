@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import kotlin.math.abs
 import kotlin.math.exp
 
-open class NumericValuable(
+abstract class NumericValuable(
     varValue: Any,
     type: Type
 ): Valuable(varValue, type) {
@@ -16,9 +16,9 @@ open class NumericValuable(
         }
 
         if (checkFloating(this, operand)) {
-            return Valuable(value.toFloat() + operand.value.toFloat(), Type.FLOAT)
+            return FloatValuable(value.toFloat() + operand.value.toFloat())
         }
-        return Valuable(value.toInt() + operand.value.toInt(), Type.INT)
+        return IntegerValuable(value.toInt() + operand.value.toInt())
     }
 
     override operator fun minus(operand: Valuable): Valuable {
@@ -27,20 +27,9 @@ open class NumericValuable(
         }
 
         if (checkFloating(this, operand)) {
-            return Valuable(value.toFloat() - operand.value.toFloat(), Type.FLOAT)
+            return FloatValuable(value.toFloat() - operand.value.toFloat())
         }
-        return Valuable(value.toInt() - operand.value.toInt(), Type.INT)
-    }
-
-    override operator fun times(operand: Valuable): Valuable {
-        if (operand !is NumericValuable) {
-            throw TypeError("Expected $type but found ${operand.type}")
-        }
-
-        if (checkFloating(this, operand)) {
-            return Valuable(value.toFloat() * operand.value.toFloat(), Type.FLOAT)
-        }
-        return Valuable(value.toInt() * operand.value.toInt(), Type.INT)
+        return IntegerValuable(value.toInt() - operand.value.toInt())
     }
 
     override operator fun div(operand: Valuable): Valuable {
@@ -48,7 +37,7 @@ open class NumericValuable(
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
-        return Valuable(value.toFloat() / operand.value.toFloat(), Type.FLOAT)
+        return FloatValuable(value.toFloat() / operand.value.toFloat())
     }
 
     override fun intDiv(operand: Valuable): Valuable {
@@ -56,7 +45,7 @@ open class NumericValuable(
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
-        return Valuable((value.toFloat() / operand.value.toFloat()).toInt(), Type.INT)
+        return IntegerValuable((value.toFloat() / operand.value.toFloat()).toInt())
     }
 
     override operator fun rem(operand: Valuable): Valuable {
@@ -64,11 +53,23 @@ open class NumericValuable(
             throw TypeError("Expected $type but found ${operand.type}")
         }
 
-        val value = value.toFloat() / operand.value.toFloat()
+        val value = value.toFloat() % operand.value.toFloat()
         return if (value - kotlin.math.floor(value) == 0f) {
-            Valuable(value.toInt(), Type.INT)
+            IntegerValuable(value.toInt())
         } else {
-            Valuable(value, Type.FLOAT)
+            FloatValuable(value)
+        }
+    }
+
+    override operator fun compareTo(operand: Valuable): Int {
+        val dif = value.toFloat() - operand.value.toFloat()
+
+        return if (dif < 0) {
+            -1
+        } else if (dif > 0) {
+            1
+        } else {
+            0
         }
     }
 
@@ -77,7 +78,7 @@ open class NumericValuable(
     }
 
     override fun convertToFloat(valuable: Valuable): Float {
-        return value.toFloat()
+        return valuable.value.toFloat()
     }
 
     override fun convertToString(valuable: Valuable): String {
@@ -88,19 +89,22 @@ open class NumericValuable(
         return valuable.value.toFloat().toInt()
     }
 
-    override fun absolute(): Valuable {
-        return Valuable(abs(value.toFloat()), type)
-    }
-
     override fun exponent(): Valuable {
-        return Valuable(exp(value.toFloat()), Type.FLOAT)
+        return FloatValuable(exp(value.toFloat()))
     }
 
     override fun ceil(): Valuable {
-        return Valuable(kotlin.math.ceil(value.toFloat()), Type.INT)
+        return IntegerValuable(kotlin.math.ceil(value.toFloat()))
     }
 
     override fun floor(): Valuable {
-        return Valuable(kotlin.math.floor(value.toFloat()), Type.INT)
+        return IntegerValuable(kotlin.math.floor(value.toFloat()))
+    }
+
+    protected fun checkFloating(val1: Valuable, val2: Valuable): Boolean {
+        if (val1.type == Type.FLOAT || val2.type == Type.FLOAT) {
+            return true
+        }
+        return false
     }
 }

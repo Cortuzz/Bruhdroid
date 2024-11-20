@@ -9,16 +9,12 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.exp
 
-open class Valuable(varValue: Any, var type: Type) :
+abstract class Valuable protected constructor(varValue: Any, var type: Type) :
     Block(Instruction.VAL, ""), IDataPresenter {
     var value: String = varValue.toString()
     var array: MutableList<Valuable> = mutableListOf()
 
-    fun clone(): Valuable {
-        val valuable = Valuable(value, type)
-        valuable.array = array
-        return valuable
-    }
+    abstract fun clone(): Valuable
 
     override fun getData(): Valuable {
         return this
@@ -41,42 +37,31 @@ open class Valuable(varValue: Any, var type: Type) :
     }
 
     open operator fun plus(operand: Valuable): Valuable {
-        throw TypeError("Expected $type but found ${operand.type}")
+        throw TypeError("Addition can not be applied to types $type and ${operand.type}")
     }
 
     open operator fun minus(operand: Valuable): Valuable {
-        throw TypeError("Expected $type but found ${operand.type}")
+        throw TypeError("Subtraction can not be applied to types $type and ${operand.type}")
     }
 
     open operator fun times(operand: Valuable): Valuable {
-        throw TypeError("Expected INT but found $type")
+        throw TypeError("Multiplication can not be applied to types $type and ${operand.type}")
     }
 
     open operator fun div(operand: Valuable): Valuable {
-        throw TypeError("Expected INT or FLOAT but found ${operand.type}")
+        throw TypeError("Division can not be applied to types $type and ${operand.type}")
     }
 
     open fun intDiv(operand: Valuable): Valuable {
-        throw TypeError("Expected INT or FLOAT but found ${operand.type}")
+        throw TypeError("Integer division can not be applied to types $type and ${operand.type}")
     }
 
     open operator fun rem(operand: Valuable): Valuable {
-        throw TypeError("Expected INT or FLOAT but found ${operand.type}")
+        throw TypeError("Reminder can not be applied to types $type and ${operand.type}")
     }
 
-    operator fun compareTo(operand: Valuable): Int {
-        val dif = try {
-            value.toFloat() - operand.value.toFloat()
-        } catch (e: Exception) {
-            throw TypeError("Expected INT or FLOAT but found $type and ${operand.type}")
-        }
-        return if (dif < 0) {
-            -1
-        } else if (dif > 0) {
-            1
-        } else {
-            0
-        }
+    open operator fun compareTo(operand: Valuable): Int {
+        throw TypeError("Comparing can not be applied to types $type and ${operand.type}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -91,14 +76,14 @@ open class Valuable(varValue: Any, var type: Type) :
         val value1 = convertToBool(operand)
         val value2 = convertToBool(this)
 
-        return Valuable(value1 && value2, Type.BOOL)
+        return BooleanValuable(value1 && value2)
     }
 
     fun or(operand: Valuable): Valuable {
         val value1 = convertToBool(operand)
         val value2 = convertToBool(this)
 
-        return Valuable(value1 || value2, Type.BOOL)
+        return BooleanValuable(value1 || value2)
     }
 
     open fun convertToBool(valuable: Valuable): Boolean {
@@ -106,7 +91,7 @@ open class Valuable(varValue: Any, var type: Type) :
     }
 
     open fun convertToFloat(valuable: Valuable): Float {
-        throw TypeError("Expected convertible to FLOAT type but ${valuable.type} was found")
+        throw TypeError("Type ${valuable.type} can not be convereted to float")
     }
 
     open fun convertToString(valuable: Valuable): String {
@@ -114,41 +99,34 @@ open class Valuable(varValue: Any, var type: Type) :
     }
 
     open fun convertToArray(valuable: Valuable): List<Valuable> {
-        throw TypeError("Expected type STRING but ${valuable.type} was found")
+        throw TypeError("Type ${valuable.type} can not be convreted to array")
     }
 
     open fun convertToInt(valuable: Valuable): Int {
-        throw TypeError("Expected convertible to INT type but ${valuable.type} was found")
+        throw TypeError("Type ${valuable.type} can not be convreted to int")
     }
 
     open fun absolute(): Valuable {
-        throw TypeError("Expected INT or FLOAT but found $type")
+        throw TypeError("Abs can not be applied to type $type")
     }
 
     open fun exponent(): Valuable {
-        throw TypeError("Expected INT or FLOAT but found $type")
+        throw TypeError("Exp can not be applied to type $type")
     }
 
     open fun ceil(): Valuable {
-        throw TypeError("Expected INT or FLOAT but found $type")
+        throw TypeError("Ceil can not be applied to type $type")
     }
 
     open fun floor(): Valuable {
-        throw TypeError("Expected INT or FLOAT but found $type")
+        throw TypeError("Floor can not be applied to type $type")
     }
 
     open fun sorted(): Valuable {
-        throw TypeError("Expected LIST but found $type")
+        throw TypeError("Sorted can not be applied to type $type")
     }
 
     open fun sort(): Valuable {
-        throw TypeError("Expected LIST but found $type")
-    }
-
-    protected fun checkFloating(val1: Valuable, val2: Valuable): Boolean {
-        if (val1.type == Type.FLOAT || val2.type == Type.FLOAT) {
-            return true
-        }
-        return false
+        throw TypeError("Sort can not be applied to type $type")
     }
 }

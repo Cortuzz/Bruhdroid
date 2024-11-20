@@ -4,7 +4,12 @@ import com.example.bruhdroid.model.operation.operand.OperandBuilder
 import com.example.bruhdroid.model.operation.operator.builder.*
 import com.example.bruhdroid.model.src.IndexOutOfRangeError
 import com.example.bruhdroid.model.src.Type
+import com.example.bruhdroid.model.src.blocks.valuable.BooleanValuable
+import com.example.bruhdroid.model.src.blocks.valuable.ListValuable
+import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
 import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.FloatValuable
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
 
 class OperationBuilderFactory {
     fun getOperatorBuilders(): List<IOperationBuilder> {
@@ -12,24 +17,24 @@ class OperationBuilderFactory {
 
         return listOf(
             OperatorBuilder(".toInt()", 10, unary = true,
-                action = { operand1, _ ->  Valuable(operand1.convertToInt(operand1), Type.INT) },
+                action = { operand1, _ ->  IntegerValuable(operand1.convertToInt(operand1)) },
             ),
             OperatorBuilder(".toString()", 10, unary = true,
-                action = { operand1, _ -> Valuable(operand1.convertToString(operand1), Type.STRING) },
+                action = { operand1, _ -> StringValuable(operand1.convertToString(operand1)) },
             ),
             OperatorBuilder(".toFloat()", 10, unary = true,
-                action = { operand1, _ -> Valuable(operand1.convertToFloat(operand1), Type.FLOAT) },
+                action = { operand1, _ -> FloatValuable(operand1.convertToFloat(operand1)) },
             ),
             OperatorBuilder(".toList()", 10, unary = true,
                 action = { operand1, _ ->
                     val array = operand1.convertToArray(operand1).toMutableList()
-                    val listVal = Valuable(array.size, Type.LIST)
+                    val listVal = ListValuable(array.size)
                     listVal.array = array
                     listVal
                  },
             ),
             OperatorBuilder(".toBool()", 10, unary = true,
-                action = { operand1, _ -> Valuable(operand1.convertToBool(operand1), Type.BOOL) },
+                action = { operand1, _ -> BooleanValuable(operand1.convertToBool(operand1)) },
             ),
             OperatorBuilder(".sort()", 10, unary = true,
                 action = { operand1, _ -> operand1.sort() },
@@ -63,22 +68,22 @@ class OperationBuilderFactory {
                 action = { operand1, operand2 -> operand1 + operand2!! }
             ),
             OperatorBuilder("==", 5,
-                action = { operand1, operand2 -> Valuable(operand1 == operand2, Type.BOOL) }
+                action = { operand1, operand2 -> BooleanValuable(operand1 == operand2) }
             ),
             OperatorBuilder("!=", 5,
-                action = { operand1, operand2 -> Valuable(operand1 != operand2, Type.BOOL) }
+                action = { operand1, operand2 -> BooleanValuable(operand1 != operand2) }
             ),
             OperatorBuilder("<", 5,
-                action = { operand1, operand2 -> Valuable(operand1 < operand2!!, Type.BOOL) }
+                action = { operand1, operand2 -> BooleanValuable(operand1 < operand2!!) }
             ),
             OperatorBuilder(">", 5,
-                action = { operand1, operand2 -> Valuable(operand1 > operand2!!, Type.BOOL) }
+                action = { operand1, operand2 -> BooleanValuable(operand1 > operand2!!) }
             ),
             OperatorBuilder("<=", 5,
-                action = { operand1, operand2 -> Valuable(operand1 <= operand2!!, Type.BOOL) }
+                action = { operand1, operand2 -> BooleanValuable(operand1 <= operand2!!) }
             ),
             OperatorBuilder(">=", 5,
-                action = { operand1, operand2 -> Valuable(operand1 >= operand2!!, Type.BOOL) }
+                action = { operand1, operand2 -> BooleanValuable(operand1 >= operand2!!) }
             ),
             OperatorBuilder("!", 4,
                 action = { operand1, operand2 -> TODO() }

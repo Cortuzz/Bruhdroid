@@ -3,9 +3,11 @@ package com.example.bruhdroid.model.src.blocks.valuable
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
 
-class NullValuable(
-    varValue: Any,
-): Valuable(varValue, Type.UNDEFINED) {
+class NullValuable: Valuable("", Type.UNDEFINED) {
+    override fun clone(): Valuable {
+        return NullValuable()
+    }
+
     override operator fun unaryPlus(): Valuable {
         throw TypeError("Unary plus can't be applied to type $type")
     }

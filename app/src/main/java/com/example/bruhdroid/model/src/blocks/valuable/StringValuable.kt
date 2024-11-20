@@ -2,24 +2,30 @@ package com.example.bruhdroid.model.src.blocks.valuable
 
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.FloatValuable
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
 
 class StringValuable(
     varValue: Any,
 ): Valuable(varValue, Type.STRING) {
+    override fun clone(): Valuable {
+        return StringValuable(value)
+    }
+
     override operator fun unaryPlus(): Valuable {
         if (value.contains('.')) {
-            return Valuable(convertToFloat(this), Type.FLOAT)
+            return FloatValuable(convertToFloat(this))
         }
-        return Valuable(convertToInt(this), Type.INT)
+        return IntegerValuable(convertToInt(this))
     }
 
     override fun getLength(): Valuable {
-        return Valuable(value.length, Type.INT)
+        return IntegerValuable(value.length)
     }
 
     override operator fun plus(operand: Valuable): Valuable {
         if (operand.type == Type.STRING) {
-            return Valuable(value + operand.value, type)
+            return StringValuable(value + operand.value)
         }
 
         throw TypeError("Expected $type but found ${operand.type}")
@@ -27,7 +33,7 @@ class StringValuable(
 
     override operator fun times(operand: Valuable): Valuable {
         if (operand.type == Type.INT) {
-            return Valuable(value.repeat(operand.value.toInt()), type)
+            return StringValuable(value.repeat(operand.value.toInt()))
         }
 
         throw TypeError("Cannot multiply $type and ${operand.type}")
@@ -49,7 +55,7 @@ class StringValuable(
         val arr = valuable.value.toList()
         val valArr = mutableListOf<Valuable>()
         for (value in arr) {
-            valArr.add(Valuable(value, Type.STRING))
+            valArr.add(StringValuable(value))
         }
         return valArr
     }

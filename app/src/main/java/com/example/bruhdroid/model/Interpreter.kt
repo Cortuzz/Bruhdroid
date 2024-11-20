@@ -8,6 +8,7 @@ import com.example.bruhdroid.model.operation.operator.AssignOperator
 import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.src.*
 import com.example.bruhdroid.model.src.blocks.*
+import com.example.bruhdroid.model.src.blocks.valuable.BooleanValuable
 import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import java.util.*
 
@@ -516,7 +517,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
     private fun checkStatement(statement: String): Boolean {
         var booleanBlock = parseRawBlock(statement)
-        booleanBlock = Valuable(booleanBlock.convertToBool(booleanBlock), Type.BOOL)
+        booleanBlock = BooleanValuable(booleanBlock.convertToBool(booleanBlock))
 
         if (booleanBlock.value == "true") {
             return true

@@ -5,6 +5,7 @@ import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.blocks.Block
 import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import com.example.bruhdroid.model.src.blocks.Variable
+import com.example.bruhdroid.model.src.blocks.valuable.NullValuable
 
 class Memory(val prevMemory: Memory?, val scope: String) {
     private val stack: MutableMap<String, Valuable> = mutableMapOf()
@@ -44,7 +45,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
 
     private fun initArray(value: Valuable, count: Int) {
         for (i in 0 until count) {
-            value.array.add(Valuable("", type = Type.UNDEFINED))
+            value.array.add(NullValuable())
         }
     }
 

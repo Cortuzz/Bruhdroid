@@ -9,8 +9,12 @@ import kotlin.math.exp
 open class FloatValuable(
     varValue: Any,
 ): NumericValuable(varValue, Type.FLOAT) {
+    override fun clone(): Valuable {
+        return FloatValuable(value)
+    }
+
     override operator fun unaryMinus(): Valuable {
-        return Valuable(-value.toFloat(), type)
+        return FloatValuable(-value.toFloat())
     }
 
     override operator fun times(operand: Valuable): Valuable {
@@ -19,9 +23,9 @@ open class FloatValuable(
         }
 
         if (checkFloating(this, operand)) {
-            return Valuable(value.toFloat() * operand.value.toFloat(), Type.FLOAT)
+            return FloatValuable(value.toFloat() * operand.value.toFloat())
         }
-        return Valuable(value.toInt() * operand.value.toInt(), Type.INT)
+        return IntegerValuable(value.toInt() * operand.value.toInt())
     }
 
     override fun convertToBool(valuable: Valuable): Boolean {
@@ -37,18 +41,6 @@ open class FloatValuable(
     }
 
     override fun absolute(): Valuable {
-        return Valuable(abs(value.toFloat()), type)
-    }
-
-    override fun exponent(): Valuable {
-        return Valuable(exp(value.toFloat()), Type.FLOAT)
-    }
-
-    override fun ceil(): Valuable {
-        return Valuable(kotlin.math.ceil(value.toFloat()), Type.INT)
-    }
-
-    override fun floor(): Valuable {
-        return Valuable(kotlin.math.floor(value.toFloat()), Type.INT)
+        return FloatValuable(abs(value.toFloat()))
     }
 }

@@ -2,6 +2,7 @@ package com.example.bruhdroid.model.src.blocks.valuable.numeric
 
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
 import com.example.bruhdroid.model.src.blocks.valuable.Valuable
 import kotlin.math.abs
 import kotlin.math.exp
@@ -9,13 +10,17 @@ import kotlin.math.exp
 class IntegerValuable(
     varValue: Any,
 ): NumericValuable(varValue, Type.INT) {
+    override fun clone(): Valuable {
+        return IntegerValuable(value)
+    }
+
     override operator fun unaryMinus(): Valuable {
-        return Valuable(-value.toInt(), type)
+        return IntegerValuable(-value.toInt())
     }
 
     override operator fun times(operand: Valuable): Valuable {
         if (operand.type == Type.STRING) {
-            return Valuable(operand.value.repeat(value.toInt()), operand.type)
+            return StringValuable(operand.value.repeat(value.toInt()))
         }
 
         if (operand !is NumericValuable) {
@@ -23,9 +28,21 @@ class IntegerValuable(
         }
 
         if (checkFloating(this, operand)) {
-            return Valuable(value.toFloat() * operand.value.toFloat(), Type.FLOAT)
+            return FloatValuable(value.toFloat() * operand.value.toFloat())
         }
-        return Valuable(value.toInt() * operand.value.toInt(), Type.INT)
+        return IntegerValuable(value.toInt() * operand.value.toInt())
+    }
+
+    override operator fun div(operand: Valuable): Valuable {
+        if (operand !is NumericValuable) {
+            throw TypeError("Expected $type but found ${operand.type}")
+        }
+
+        if (operand is IntegerValuable) {
+            return IntegerValuable((value.toFloat() / operand.value.toFloat()).toInt())
+        }
+
+        return FloatValuable(value.toFloat() / operand.value.toFloat())
     }
 
     override fun convertToBool(valuable: Valuable): Boolean {
@@ -41,18 +58,6 @@ class IntegerValuable(
     }
 
     override fun absolute(): Valuable {
-        return Valuable(abs(value.toInt()), type)
-    }
-
-    override fun exponent(): Valuable {
-        return Valuable(exp(value.toFloat()), Type.FLOAT)
-    }
-
-    override fun ceil(): Valuable {
-        return Valuable(kotlin.math.ceil(value.toFloat()), Type.INT)
-    }
-
-    override fun floor(): Valuable {
-        return Valuable(kotlin.math.floor(value.toFloat()), Type.INT)
+        return IntegerValuable(abs(value.toInt()))
     }
 }

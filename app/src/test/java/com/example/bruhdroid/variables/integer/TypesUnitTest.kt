@@ -1,7 +1,9 @@
 package com.example.bruhdroid.variables.integer
 
 import com.example.bruhdroid.model.src.Type
+import com.example.bruhdroid.model.src.blocks.valuable.StringValuable
 import com.example.bruhdroid.model.src.blocks.valuable.Valuable
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
 import org.junit.Assert
 import org.junit.Test
 
@@ -9,14 +11,14 @@ class TypesUnitTest {
     private val value1 = 56
     private val value2 = 31
 
-    private val a = Valuable(value1, Type.INT)
-    private val b = Valuable(value2, Type.INT)
+    private val a = IntegerValuable(value1)
+    private val b = IntegerValuable(value2)
 
-    private val str = Valuable("ab", Type.STRING)
+    private val str = StringValuable("ab")
 
     @Test
     fun typeIsCorrect() {
-        Assert.assertEquals(Type.INT, Valuable(4, Type.INT).type)
+        Assert.assertEquals(Type.INT, IntegerValuable(4).type)
     }
 
     @Test

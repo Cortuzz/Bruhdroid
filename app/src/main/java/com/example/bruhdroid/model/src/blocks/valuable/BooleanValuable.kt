@@ -2,10 +2,15 @@ package com.example.bruhdroid.model.src.blocks.valuable
 
 import com.example.bruhdroid.model.src.Type
 import com.example.bruhdroid.model.src.TypeError
+import com.example.bruhdroid.model.src.blocks.valuable.numeric.IntegerValuable
 
 class BooleanValuable(
     varValue: Any,
 ): Valuable(varValue, Type.BOOL) {
+    override fun clone(): Valuable {
+        return BooleanValuable(value)
+    }
+
     override fun convertToBool(valuable: Valuable): Boolean {
         return valuable.value.toBoolean()
     }
@@ -21,6 +26,4 @@ class BooleanValuable(
             return 1
         return 0
     }
-
-
 }

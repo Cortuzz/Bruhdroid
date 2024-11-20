@@ -10,9 +10,9 @@ import org.junit.Test
 class LogicUnitTest {
     @Test
     fun integerLogic() {
-        val a = Block(Instruction.INIT,"a = 5 | 0")
-        val b = Block(Instruction.INIT,"b = 1 - 1 & 2")
-        val c = Block(Instruction.INIT,"c = a & b")
+        val a = Block(Instruction.INIT,"a = 5 || 0")
+        val b = Block(Instruction.INIT,"b = 1 - 1 && 2")
+        val c = Block(Instruction.INIT,"c = a && b")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -30,8 +30,8 @@ class LogicUnitTest {
 
     @Test
     fun stringLogic() {
-        val a = Block(Instruction.INIT,"a = \"453\" | \"\"")
-        val b = Block(Instruction.INIT,"b = \"76\" & \"\"")
+        val a = Block(Instruction.INIT,"a = \"453\" || \"\"")
+        val b = Block(Instruction.INIT,"b = \"76\" && \"\"")
 
         val interpreter = Interpreter(listOf(a, b))
         interpreter.run()
@@ -43,9 +43,5 @@ class LogicUnitTest {
 
         Assert.assertEquals("true", memory.get("a")?.value)
         Assert.assertEquals("false", memory.get("b")?.value)
-    }
-
-    @Test
-    fun unaryLogic() {
     }
 }
