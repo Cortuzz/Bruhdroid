@@ -1,46 +1,46 @@
-package com.example.bruhdroid.storage
+package com.example.bruhdroid.model.template
 
+import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.Block
 
 
-class TemplateStorage {
-    companion object {
-        enum class Template {
-            BUBBLE_SORT, INFINITY_LOOP, AHEGAO, FACTORIAL, FIBONACCI, ARRAY_TEST
-        }
+class TemplateFactory(binding: ActivityTemplatesBinding) {
+    private val templates = arrayOf(
+    Template(
+        binding.bubbleSort,
+        arrayOf(
+            Block(BlockInstruction.INIT, "n = 10, *arr[n]"),
 
-        private val templates = mutableMapOf(
-            Template.BUBBLE_SORT to arrayOf(
-                Block(BlockInstruction.INIT, "n = 5, *arr[n]"),
+            Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
+                Block(BlockInstruction.SET, "arr[i] = (100 * rand() - 50).toInt()"),
+            Block(BlockInstruction.END_FOR),
 
-                Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
-                    Block(BlockInstruction.SET, "arr[i] = (100 * rand() - 50).toInt()"),
-                    Block(BlockInstruction.SET, "arr[i] = 5 - i"),
+            Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
+                Block(BlockInstruction.FOR, "j = i + 1, j < n, j += 1"),
+                    Block(BlockInstruction.IF, "arr[i] > arr[j]"),
+                        Block(BlockInstruction.INIT, "t = arr[i]"),
+                        Block(BlockInstruction.SET, "arr[i] = arr[j], arr[j] = t"),
+                    Block(BlockInstruction.END),
                 Block(BlockInstruction.END_FOR),
 
-                Block(BlockInstruction.SET, "arr[0] = 99"),
-                Block(BlockInstruction.SET, "arr[4] = 99"),
-
-                Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
-                    Block(BlockInstruction.FOR, "j = i + 1, j < n, j += 1"),
-                        Block(BlockInstruction.IF, "arr[i] > arr[j]"),
-                            Block(BlockInstruction.INIT, "t = arr[i]"),
-                            Block(BlockInstruction.SET, "arr[i] = arr[j], arr[j] = t"),
-                        Block(BlockInstruction.END),
-                    Block(BlockInstruction.END_FOR),
-
-                Block(BlockInstruction.END_FOR),
-                Block(BlockInstruction.PRINT, "arr"),
-            ),
-        Template.INFINITY_LOOP to arrayOf(
+            Block(BlockInstruction.END_FOR),
+            Block(BlockInstruction.PRINT, "arr"),
+        )
+    ),
+    Template(
+        binding.infinityLoop,
+        arrayOf(
             Block(BlockInstruction.INIT, "count = 0"),
             Block(BlockInstruction.WHILE, "1"),
                 Block(BlockInstruction.PRINT, "count"),
                 Block(BlockInstruction.SET, "count += 1"),
             Block(BlockInstruction.END_WHILE)
-        ),
-        Template.AHEGAO to arrayOf(
+        )
+    ),
+    Template(
+        binding.ahegao,
+        arrayOf(
             Block(BlockInstruction.PRAGMA, "IO_LINES = 20, INIT_MESSAGE = false, IO_MESSAGE = false"),
             Block(BlockInstruction.PRINT, "\"⠄⠄⠄⢰⣧⣼⣯⠄⣸⣠⣶⣶⣦⣾⠄⠄⠄⠄⡀⠄⢀⣿⣿⠄⠄⠄⢸⡇⠄⠄\""),
             Block(BlockInstruction.PRINT, "\"⠄⠄⠄⣾⣿⠿⠿⠶⠿⢿⣿⣿⣿⣿⣦⣤⣄⢀⡅⢠⣾⣛⡉⠄⠄⠄⠸⢀⣿⠄\""),
@@ -57,8 +57,11 @@ class TemplateStorage {
             Block(BlockInstruction.PRINT, "\"⠄⠄⠄⠄⠈⠛⢿⣿⣿⣿⠁⠞⢿⣿⣿⡄⢿⣿⡇⣸⣿⣿⠿⠛⠁⠄⠄⠄⠄⠄\""),
             Block(BlockInstruction.PRINT, "\"⠄⠄⠄⠄⠄⠄⠄⠉⠻⣿⣿⣾⣦⡙⠻⣷⣾⣿⠃⠿⠋⠁⠄⠄⠄⠄⠄⢀⣠⣴\""),
             Block(BlockInstruction.PRINT, "\"⣿⣿⣿⣶⣶⣮⣥⣒⠲⢮⣝⡿⣿⣿⡆⣿⡿⠃⠄⠄⠄⠄⠄⠄⠄⣠⣴⣿⣿⣿\""),
-        ),
-        Template.FACTORIAL to arrayOf(
+        )
+    ),
+    Template(
+        binding.factorial,
+        arrayOf(
             Block(BlockInstruction.INIT, "value = 0"),
             Block(BlockInstruction.INPUT, "value"),
             Block(BlockInstruction.SET, "value = value.toInt()"),
@@ -74,8 +77,11 @@ class TemplateStorage {
 
             Block(BlockInstruction.FUNC_CALL, "result = fact(value)"),
             Block(BlockInstruction.PRINT, "result")
-        ),
-        Template.FIBONACCI to arrayOf(
+        )
+    ),
+    Template(
+        binding.fibonacci,
+        arrayOf(
             Block(BlockInstruction.INIT, "value = 0"),
             Block(BlockInstruction.INPUT, "value"),
             Block(BlockInstruction.SET, "value = value.toInt()"),
@@ -93,29 +99,11 @@ class TemplateStorage {
 
             Block(BlockInstruction.FUNC_CALL, "result = fibonacci(value)"),
             Block(BlockInstruction.PRINT, "result")
-        ),
-        Template.ARRAY_TEST to arrayOf(
-            Block(BlockInstruction.INIT, "n = 10, *arr[n]"),
-            Block(BlockInstruction.PRINT, "arr"),
-
-            Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
-                Block(BlockInstruction.SET, "arr[i] = i"),
-            Block(BlockInstruction.END_FOR),
-
-            Block(BlockInstruction.PRINT, "arr"),
-
-            Block(BlockInstruction.FOR, "i = 0, i < 5, i += 1"),
-                Block(BlockInstruction.SET, "arr[i] = arr[n - i - 1]"),
-            Block(BlockInstruction.END_FOR),
-
-            Block(BlockInstruction.PRINT, "arr"),
-            Block(BlockInstruction.SET, "arr[0] = 6"),
-            Block(BlockInstruction.PRINT, "arr"),
         )
-        )
+    )
+    )
 
-        fun getBlocks(template: Template): Array<Block>? {
-            return templates[template]
-        }
+    fun getTemplates(): Array<Template> {
+        return templates
     }
 }

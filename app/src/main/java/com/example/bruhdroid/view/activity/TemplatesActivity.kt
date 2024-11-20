@@ -9,35 +9,23 @@ import com.example.bruhdroid.controller.Controller
 import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.databinding.ButtonBinding
-import com.example.bruhdroid.storage.TemplateStorage
-import com.example.bruhdroid.storage.TemplateStorage.Companion.Template
+import com.example.bruhdroid.model.template.TemplateFactory
 import com.example.bruhdroid.model.blocks.Block
 
 
 class TemplatesActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTemplatesBinding
+    private lateinit var templateFactory: TemplateFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_templates)
+        templateFactory = TemplateFactory(binding)
 
-        binding.bubbleSort.setOnClickListener {
-            openCodingActivity(TemplateStorage.getBlocks(Template.BUBBLE_SORT))
-        }
-        binding.factorial.setOnClickListener {
-            openCodingActivity(TemplateStorage.getBlocks(Template.FACTORIAL))
-        }
-        binding.fibonacci.setOnClickListener {
-            openCodingActivity(TemplateStorage.getBlocks(Template.FIBONACCI))
-        }
-        binding.infinityLoop.setOnClickListener {
-            openCodingActivity(TemplateStorage.getBlocks(Template.INFINITY_LOOP))
-        }
-        binding.ahegao.setOnClickListener {
-            openCodingActivity(TemplateStorage.getBlocks(Template.AHEGAO))
-        }
-        binding.arrayTest.setOnClickListener {
-            openCodingActivity(TemplateStorage.getBlocks(Template.ARRAY_TEST))
+        for (template in templateFactory.getTemplates()) {
+            template.bindingButton.setOnClickListener {
+                openCodingActivity(template.blocks)
+            }
         }
 
         loadSavedProgramsFromStorage()
