@@ -36,6 +36,9 @@ class TemplatesActivity : AppCompatActivity() {
         binding.ahegao.setOnClickListener {
             openCodingActivity(TemplateStorage.getBlocks(Template.AHEGAO))
         }
+        binding.arrayTest.setOnClickListener {
+            openCodingActivity(TemplateStorage.getBlocks(Template.ARRAY_TEST))
+        }
 
         loadSavedProgramsFromStorage()
     }

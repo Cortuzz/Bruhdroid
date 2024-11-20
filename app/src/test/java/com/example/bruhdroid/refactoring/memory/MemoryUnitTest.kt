@@ -40,7 +40,7 @@ class MemoryUnitTest {
     }
 
     @Test
-    fun memoryAccessesPrimitiveVariableType() {
+    fun memoryNotAccessesPrimitiveVariableType() {
         // Базисное тестирование
         val memory = Memory(null, "TEST SCOPE")
         val block = mockk<Valuable>()
@@ -53,9 +53,10 @@ class MemoryUnitTest {
 
         memory.push("test", block)
 
+        // Изменен из-за изменения алгоритма
         assertEquals(
-            true,
-            typeAccessCounter > 0
+            0,
+            typeAccessCounter
         )
     }
 

@@ -2,14 +2,16 @@ package com.example.bruhdroid.model.blocks.valuable.numeric
 
 import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.valuable.ListValuable
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 import kotlin.math.abs
 
 open class FloatValuable(
     varValue: Any,
-): NumericValuable(varValue, ValuableType.FLOAT) {
+    listLink: ListValuable? = null
+): NumericValuable(varValue, ValuableType.FLOAT, listLink) {
     override fun clone(): Valuable {
-        return FloatValuable(value)
+        return FloatValuable(value, listLink)
     }
 
     override operator fun unaryMinus(): Valuable {

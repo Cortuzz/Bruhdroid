@@ -7,9 +7,10 @@ import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 
 class StringValuable(
     varValue: Any,
-): Valuable(varValue, ValuableType.STRING) {
+    listLink: ListValuable? = null
+): Valuable(varValue, ValuableType.STRING, listLink) {
     override fun clone(): Valuable {
-        return StringValuable(value)
+        return StringValuable(value, listLink)
     }
 
     override operator fun unaryPlus(): Valuable {

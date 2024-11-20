@@ -11,6 +11,7 @@ open class OperatorBuilder(
     protected val inputOperator: String = operator,
     protected val action: (operand1: Valuable, operand2: Valuable?) -> Valuable?,
     protected val unary: Boolean = false,
+    protected val parsedUnary: Boolean = unary,
     val unaryChange: Boolean = true,
 ): IOperationBuilder {
     fun getStringOperator(): String {
@@ -52,7 +53,7 @@ open class OperatorBuilder(
         if (!match(inputOperator, mayUnary))
             throw Exception("Unable to create operator. Operator does not match signature.")
 
-        return Operator(operator, priority, unary, action)
+        return Operator(operator, priority, unary, parsedUnary, action)
     }
 
     override fun tryBuild(inputOperator: String, mayUnary: Boolean): Operator? {

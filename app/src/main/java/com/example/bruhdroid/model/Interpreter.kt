@@ -407,7 +407,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 currentLine = funcVarsLines.removeLast()
 
                 removeFunctionMemory()
-                memory.pushToLocalMemory(varName, value.type, value)
+                memory.pushToLocalMemory(varName, value)
             }
             BlockInstruction.INPUT -> {
                 waitingForInput = true
@@ -548,7 +548,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
                 val operand2 = stack.removeLast().getData()
 
-                if (operation.unary) {
+                if (operation.getParsedUnary()) {
                     stack.add(operation.act(operand2, null)!!)
                     continue
                 }
@@ -559,7 +559,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
                 var operand1 = stack.removeLast()
 
                 if (operation is AssignOperator) {
-                    operation.assign(operand1 as Variable, operand2, initialize, memory)
+                    operation.assign(operand1, operand2, initialize, memory)
                     return operand2
                 }
 

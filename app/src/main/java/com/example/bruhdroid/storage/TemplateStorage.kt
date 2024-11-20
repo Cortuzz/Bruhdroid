@@ -7,16 +7,20 @@ import com.example.bruhdroid.model.blocks.Block
 class TemplateStorage {
     companion object {
         enum class Template {
-            BUBBLE_SORT, INFINITY_LOOP, AHEGAO, FACTORIAL, FIBONACCI
+            BUBBLE_SORT, INFINITY_LOOP, AHEGAO, FACTORIAL, FIBONACCI, ARRAY_TEST
         }
 
         private val templates = mutableMapOf(
             Template.BUBBLE_SORT to arrayOf(
-                Block(BlockInstruction.INIT, "n = 10, *arr[n]"),
+                Block(BlockInstruction.INIT, "n = 5, *arr[n]"),
 
                 Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
                     Block(BlockInstruction.SET, "arr[i] = (100 * rand() - 50).toInt()"),
+                    Block(BlockInstruction.SET, "arr[i] = 5 - i"),
                 Block(BlockInstruction.END_FOR),
+
+                Block(BlockInstruction.SET, "arr[0] = 99"),
+                Block(BlockInstruction.SET, "arr[4] = 99"),
 
                 Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
                     Block(BlockInstruction.FOR, "j = i + 1, j < n, j += 1"),
@@ -89,7 +93,26 @@ class TemplateStorage {
 
             Block(BlockInstruction.FUNC_CALL, "result = fibonacci(value)"),
             Block(BlockInstruction.PRINT, "result")
-        ))
+        ),
+        Template.ARRAY_TEST to arrayOf(
+            Block(BlockInstruction.INIT, "n = 10, *arr[n]"),
+            Block(BlockInstruction.PRINT, "arr"),
+
+            Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
+                Block(BlockInstruction.SET, "arr[i] = i"),
+            Block(BlockInstruction.END_FOR),
+
+            Block(BlockInstruction.PRINT, "arr"),
+
+            Block(BlockInstruction.FOR, "i = 0, i < 5, i += 1"),
+                Block(BlockInstruction.SET, "arr[i] = arr[n - i - 1]"),
+            Block(BlockInstruction.END_FOR),
+
+            Block(BlockInstruction.PRINT, "arr"),
+            Block(BlockInstruction.SET, "arr[0] = 6"),
+            Block(BlockInstruction.PRINT, "arr"),
+        )
+        )
 
         fun getBlocks(template: Template): Array<Block>? {
             return templates[template]

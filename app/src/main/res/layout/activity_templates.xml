@@ -62,6 +62,12 @@
                 style="@style/custom_button"
                 android:layout_marginTop="12dp"
                 android:text="@string/ahegao_button" />
+
+            <Button
+                android:id="@+id/arrayTest"
+                style="@style/custom_button"
+                android:layout_marginTop="12dp"
+                android:text="Array test" />
         </LinearLayout>
 
     </ScrollView>

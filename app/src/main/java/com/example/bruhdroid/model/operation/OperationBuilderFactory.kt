@@ -14,27 +14,24 @@ class OperationBuilderFactory {
         val indexCheckOperatorBuilder = getIndexCheckOperator()
 
         return listOf(
-            OperatorBuilder(".toInt()", 10, unary = true,
+            OperatorBuilder(".toInt()", 10, unary = false, parsedUnary = true,
                 action = { operand1, _ ->  IntegerValuable(operand1.convertToInt(operand1)) },
             ),
-            OperatorBuilder(".toString()", 10, unary = true,
+            OperatorBuilder(".toString()", 10, unary = false, parsedUnary = true,
                 action = { operand1, _ -> StringValuable(operand1.convertToString(operand1)) },
             ),
-            OperatorBuilder(".toFloat()", 10, unary = true,
+            OperatorBuilder(".toFloat()", 10, unary = false, parsedUnary = true,
                 action = { operand1, _ -> FloatValuable(operand1.convertToFloat(operand1)) },
             ),
-            OperatorBuilder(".toList()", 10, unary = true,
+            OperatorBuilder(".toList()", 10, unary = false, parsedUnary = true,
                 action = { operand1, _ ->
-                    val array = operand1.convertToArray(operand1).toMutableList()
-                    val listVal = ListValuable(array.size)
-                    listVal.array = array
-                    listVal
+                    ListValuable(operand1)
                  },
             ),
-            OperatorBuilder(".toBool()", 10, unary = true,
+            OperatorBuilder(".toBool()", 10, unary = false, parsedUnary = true,
                 action = { operand1, _ -> BooleanValuable(operand1.convertToBool(operand1)) },
             ),
-            OperatorBuilder(".sort()", 10, unary = true,
+            OperatorBuilder(".sort()", 10, unary = false, parsedUnary = true,
                 action = { operand1, _ -> operand1.sort() },
             ),
 
@@ -117,7 +114,10 @@ class OperationBuilderFactory {
             CloseIndexOperatorBuilder("]", 0, "[",
                 indexCheckOperatorBuilder
             ),
-            AssignmentOperatorBuilder("#", -1, "*", unary = true,
+            AssignmentOperatorBuilder("#", -1, "*",
+                unary = true,
+                parsedUnary = false,
+                isArrayInitializer = true,
                 assignment = { _, operand2 -> operand2 }
             ),
             AssignmentOperatorBuilder("=", -2,

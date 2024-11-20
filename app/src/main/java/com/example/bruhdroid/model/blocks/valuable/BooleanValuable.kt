@@ -4,9 +4,10 @@ import com.example.bruhdroid.model.blocks.ValuableType
 
 class BooleanValuable(
     varValue: Any,
-): Valuable(varValue, ValuableType.BOOL) {
+    listLink: ListValuable? = null
+): Valuable(varValue, ValuableType.BOOL, listLink) {
     override fun clone(): Valuable {
-        return BooleanValuable(value)
+        return BooleanValuable(value, listLink)
     }
 
     override fun convertToBool(valuable: Valuable): Boolean {

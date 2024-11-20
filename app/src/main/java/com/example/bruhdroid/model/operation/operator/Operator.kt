@@ -9,6 +9,7 @@ open class Operator (
     val operator: String,
     val priority: Int,
     val unary: Boolean = false,
+    private val parsedUnary: Boolean = unary,
     private val action: (operand1: Valuable, operand2: Valuable?) -> Valuable?,
 ): Operation(operator) {
     override fun act(operand1: Valuable, operand2: Valuable?): Valuable? {
@@ -17,5 +18,9 @@ open class Operator (
 
     override fun evaluateExpressionToBlock(currentMemoryScope: Memory): IDataPresenter? {
         return null
+    }
+
+    fun getParsedUnary(): Boolean {
+        return parsedUnary
     }
 }

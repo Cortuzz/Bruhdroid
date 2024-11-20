@@ -3,9 +3,10 @@ package com.example.bruhdroid.model.blocks.valuable
 import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.exception.TypeError
 
-class NullValuable: Valuable("", ValuableType.UNDEFINED) {
+class NullValuable(listLink: ListValuable? = null):
+    Valuable("", ValuableType.UNDEFINED, listLink) {
     override fun clone(): Valuable {
-        return NullValuable()
+        return NullValuable(listLink)
     }
 
     override operator fun unaryPlus(): Valuable {

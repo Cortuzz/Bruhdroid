@@ -2,13 +2,15 @@ package com.example.bruhdroid.model.blocks.valuable.numeric
 
 import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.exception.TypeError
+import com.example.bruhdroid.model.blocks.valuable.ListValuable
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 import kotlin.math.exp
 
 abstract class NumericValuable(
     varValue: Any,
-    type: ValuableType
-): Valuable(varValue, type) {
+    type: ValuableType,
+    listLink: ListValuable?
+): Valuable(varValue, type, listLink) {
     override operator fun plus(operand: Valuable): Valuable {
         if (operand !is NumericValuable) {
             throw TypeError("Expected $type but found ${operand.type}")

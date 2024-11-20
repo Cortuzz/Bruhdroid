@@ -6,10 +6,14 @@ import com.example.bruhdroid.exception.TypeError
 import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.IDataPresenter
 
-abstract class Valuable protected constructor(varValue: Any, var type: ValuableType) :
+abstract class Valuable protected constructor(
+    varValue: Any,
+    var type: ValuableType,
+    var listLink: ListValuable?
+) :
     Block(BlockInstruction.VAL, ""), IDataPresenter {
     var value: String = varValue.toString()
-    var array: MutableList<Valuable> = mutableListOf()
+    open var array: MutableList<Valuable> = mutableListOf()
 
     abstract fun clone(): Valuable
 
