@@ -5,7 +5,8 @@ import com.example.bruhdroid.exception.*
 import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.IDataPresenter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.Variable
+import com.example.bruhdroid.model.blocks.instruction.InputInstruction
+import com.example.bruhdroid.model.blocks.instruction.Instruction
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.memory.MemoryPresentor
 import com.example.bruhdroid.model.operation.Operation
@@ -18,33 +19,31 @@ import java.util.*
 class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
     var output = ""
-        private set
     var waitingForInput = false
-        private set
     var memory = Memory(null, "GLOBAL SCOPE")
-        private set
 
     private var blocks = _blocks?.toMutableList()
-    private val memoryPresentor = MemoryPresentor()
+    val memoryPresentor = MemoryPresentor()
     private var input = ""
-    private var currentLine = -1
+    var currentLine = -1
 
-    private var pragma: MutableMap<String, String> = mutableMapOf(
+    var pragma: MutableMap<String, String> = mutableMapOf(
         "INIT_MESSAGE" to "true",
         "IO_MESSAGE" to "true",
         "IO_LINES" to "10"
     )
 
     private var parseMap: MutableMap<String, List<Operation>> = mutableMapOf()
-    private var ioLines = 0
-    private var appliedConditions: MutableList<Boolean> = mutableListOf()
-    private var cycleLines: MutableList<Int> = mutableListOf()
-    private var functionLines = mutableMapOf<String, MutableList<Int>>()
-    private var currentFunction = mutableListOf("GLOBAL")
-    private var functionsVarsMap = mutableMapOf<String, MutableList<String>>()
-    private var funcVarsLines = mutableListOf<Int>()
-    private var args = mutableListOf<List<String>>()
-    private var forLines = mutableListOf<Int>()
+    var ioLines = 0
+        private set
+    var appliedConditions: MutableList<Boolean> = mutableListOf()
+    var cycleLines: MutableList<Int> = mutableListOf()
+    var functionLines = mutableMapOf<String, MutableList<Int>>()
+    var currentFunction = mutableListOf("GLOBAL")
+    var functionsVarsMap = mutableMapOf<String, MutableList<String>>()
+    var funcVarsLines = mutableListOf<Int>()
+    var args = mutableListOf<List<String>>()
+    var forLines = mutableListOf<Int>()
 
     fun initBlocks(_blocks: List<Block>) {
         clear()
@@ -52,14 +51,14 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     fun getBlockAtCurrentLine(): Block? {
-        return blocks?.get(getCurrentLine())
+        return blocks?.get(getLine())
     }
 
     fun getBlocksSize(): Int? {
         return blocks?.size
     }
 
-    fun getCurrentLine(): Int {
+    fun getLine(): Int {
         return currentLine + 1
     }
 
@@ -81,7 +80,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     @SuppressLint("SuspiciousIndentation")
-    private fun pragmaUpdate() {
+    fun pragmaUpdate() {
         output = if (pragma["INIT_MESSAGE"] == "true") {
             ioLines = 5
                     "⢸⣿⡟⠛⢿⣷⠀⢸⣿⡟⠛⢿⣷⡄⢸⣿⡇⠀⢸⣿⡇⢸⣿⡇⠀⢸⣿⡇\n" +
@@ -173,7 +172,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         }
     }
 
-    private fun skipCycle() {
+    fun skipCycle() {
         var count = 1
         memory = memory.prevMemory!!
         while (currentLine < blocks!!.size - 1) {
@@ -192,7 +191,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         }
     }
 
-    private fun split(str: String): List<String> {
+    fun split(str: String): List<String> {
         var isString = false
         val parsed = mutableListOf<String>()
         var tempStr = ""
@@ -229,7 +228,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         input = ""
     }
 
-    private fun parsePragma(raw: String) {
+    fun parsePragma(raw: String) {
         val split = raw.replace(" ", "").split("=")
         if (split[1] !in listOf("true", "false") && split[0] !in listOf("IO_LINES")) {
             throw RuntimeError("Bad preprocessor directive value")
@@ -243,12 +242,12 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         pragma[split[0]] = split[1]
     }
 
-    private fun notifyClients() {
+    fun notifyClients() {
         setChanged()
         notifyObservers()
     }
 
-    private fun parseFunc(expression: String): Map<String, List<String>> {
+    fun parseFunc(expression: String): Map<String, List<String>> {
         val split = expression.replace(")", "").replace(" ", "").split("(").toMutableList()
 
         val name = listOf(split.removeFirst())
@@ -260,7 +259,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return mapOf("name" to name, "args" to args)
     }
 
-    private fun skipFunc() {
+    fun skipFunc() {
         var count = 1
         memory = memory.prevMemory!!
         while (currentLine < blocks!!.size - 1) {
@@ -279,7 +278,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         }
     }
 
-    private fun removeFunctionMemory() {
+    fun removeFunctionMemory() {
         while (true) {
             if (memory.scope.contains("METHOD")) {
                 break
@@ -289,200 +288,21 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         memory = memory.prevMemory!!
     }
 
-    private fun parse(block: Block): Boolean {
-        when (block.instruction) {
-            BlockInstruction.PRAGMA -> {
-                val rawList = split(block.expression)
-                for (raw in rawList) {
-                    parsePragma(raw)
-                }
-                pragmaUpdate()
-                notifyClients()
-            }
-            BlockInstruction.PRINT -> {
-                val rawList = split(block.expression)
-                if (pragma["IO_MESSAGE"] == "true") {
-                    output += "I/O: "
-                }
-
-                for (raw in rawList) {
-                    output += "${memoryPresentor.getVisibleValue(parseRawBlock(raw))} "
-                }
-                ++ioLines
-                output += "\n"
-                val lines = pragma["IO_LINES"]
-                if (lines != null) {
-                    if (lines != "inf" && ioLines > lines.toInt()) {
-                        --ioLines
-                        val ind = output.indexOf("\n")
-                        output = output.substring(ind + 1)
-                    }
-                }
-                notifyClients()
-            }
-            BlockInstruction.FUNC -> {
-                val name = parseFunc(block.expression)["name"]?.get(0)
-                val argNames = parseFunc(block.expression)["args"]!!
-                memory = Memory(memory, "METHOD $name SCOPE")
-
-                if (name in functionLines) {
-                    functionLines[name]!!.add(currentLine)
-                } else {
-                    functionLines[name!!] = mutableListOf(currentLine)
-                }
-
-                if (currentFunction.last() != name) {
-                    skipFunc()
-                    return false
-                }
-                val args = args.removeLast()
-                for (i in args.indices) {
-                    val value = args[i]
-                    val arg = argNames[i]
-                    parseRawBlock("$arg = $value", true)
-                }
-            }
-            BlockInstruction.FUNC_CALL -> {
-                val exp = block.expression.split("=").toMutableList()
-
-                val name = exp.removeFirst().replace(" ", "")
-                val data = parseFunc(exp.joinToString())
-
-                if (exp.isEmpty()) {
-                    val parsed = parseFunc(name)
-                    val parsedName = parsed["name"]!![0]
-                    args.add(parsed["args"]!!)
-
-                    funcVarsLines.add(currentLine)
-                    currentFunction.add(parsedName)
-                    currentLine = functionLines[parsedName]!!.removeLast() - 1
-                } else {
-                    val funcName = data["name"]!![0]
-                    args.add(data["args"]!!)
-
-                    funcVarsLines.add(currentLine)
-                    if (funcName in functionsVarsMap) {
-                        functionsVarsMap[funcName]!!.add(name)
-                    } else {
-                        functionsVarsMap[funcName] = mutableListOf(name)
-                    }
-
-                    currentFunction.add(funcName)
-                    currentLine = functionLines[funcName]!!.removeLast() - 1
-                }
-            }
-            BlockInstruction.FUNC_END -> {}
-            BlockInstruction.RETURN -> {
-                val value = parseRawBlock(block.expression)
-                val funcName = currentFunction.removeLast()
-                val varName = functionsVarsMap[funcName]!!.removeLast()
-                currentLine = funcVarsLines.removeLast()
-
-                removeFunctionMemory()
-                memory.pushToLocalMemory(varName, value)
-            }
-            BlockInstruction.INPUT -> {
-                waitingForInput = true
-            }
-            BlockInstruction.INIT -> {
-                val rawList = split(block.expression)
-
-                for (raw in rawList) {
-                    parseRawBlock(raw, true)
-                }
-            }
-            BlockInstruction.SET -> {
-                val rawList = split(block.expression)
-
-                for (raw in rawList) {
-                    parseRawBlock(raw)
-                }
-            }
-            BlockInstruction.IF -> {
-                val statement = checkStatement(block.expression)
-                appliedConditions.add(statement)
-                memory = Memory(memory, "IF SCOPE")
-                return !statement
-            }
-            BlockInstruction.ELIF -> {
-                if (appliedConditions.last()) {
-                    return true
-                }
-                val statement = checkStatement(block.expression)
-                appliedConditions[appliedConditions.lastIndex] = statement
-                memory = memory.prevMemory!!
-                memory = Memory(memory, "ELIF SCOPE")
-                return !statement
-            }
-            BlockInstruction.ELSE -> {
-                if (appliedConditions.last()) {
-                    return true
-                }
-                memory = memory.prevMemory!!
-                memory = Memory(memory, "ELSE SCOPE")
-                return false
-            }
-            BlockInstruction.WHILE -> {
-                memory = Memory(memory, "WHILE ITERATION SCOPE")
-                if (checkStatement(block.expression)) {
-                    cycleLines.add(currentLine)
-                } else {
-                    skipCycle()
-                }
-            }
-            BlockInstruction.FOR -> {
-                val raw = block.expression.split(",")
-                if (currentLine !in forLines) {
-                    memory = Memory(memory, "FOR SCOPE")
-                    parseRawBlock(raw[0], true)
-                    forLines.add(currentLine)
-                } else {
-                    parseRawBlock(raw[2])
-                }
-
-                memory = Memory(memory, "FOR ITERATION SCOPE")
-                if (checkStatement(raw[1])) {
-                    cycleLines.add(currentLine)
-                } else {
-                    memory = memory.prevMemory!!
-                    forLines.remove(currentLine)
-                    skipCycle()
-                }
-            }
-            BlockInstruction.END -> {
-                appliedConditions.removeLast()
-                memory = memory.prevMemory!!
-            }
-            BlockInstruction.END_WHILE -> {
-                currentLine = cycleLines.removeLast() - 1
-                memory = memory.prevMemory!!
-            }
-            BlockInstruction.END_FOR -> {
-                currentLine = cycleLines.removeLast() - 1
-                memory = memory.prevMemory!!
-            }
-            BlockInstruction.BREAK -> {
-                try {
-                    skipCycle()
-                } catch (e: Exception) {
-                    throwOutOfCycleError("It is not possible to use BREAK outside the context of a loop")
-                }
-            }
-            BlockInstruction.CONTINUE -> {
-                try {
-                    currentLine = cycleLines.removeLast() - 1
-                    memory = memory.prevMemory!!
-                } catch (e: Exception) {
-                    throwOutOfCycleError("It is not possible to use CONTINUE block outside the context of a loop")
-                }
-            }
-            else -> parseRawBlock(block.expression)
-        }
-
-        return false
+    fun increaseIoLines() {
+        ++ioLines
     }
 
-    private fun throwOutOfCycleError(message: String) {
+    fun decreaseIoLines() {
+        --ioLines
+    }
+
+    private fun parse(block: Block): Boolean {
+        block as Instruction
+        block.initInterpreter(this)
+        return block.evaluate()
+    }
+
+    fun throwOutOfCycleError(message: String) {
         try {
             throw BlockOutOfCycleContextError(message)
         } catch (e: BlockOutOfCycleContextError) {
@@ -490,7 +310,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         }
     }
 
-    private fun checkStatement(statement: String): Boolean {
+    fun checkStatement(statement: String): Boolean {
         var booleanBlock = parseRawBlock(statement)
         booleanBlock = BooleanValuable(booleanBlock.convertToBool(booleanBlock))
 
@@ -500,7 +320,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         return false
     }
 
-    private fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
+    fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
         val data = parseMap[raw] ?: Notation.convertInfixToPostfixNotation(Notation.tokenizeString(raw))
         parseMap[raw] = data
 

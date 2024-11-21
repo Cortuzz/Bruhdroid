@@ -3,6 +3,7 @@ package com.example.bruhdroid.model.template
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.instruction.*
 
 
 class TemplateFactory(binding: ActivityTemplatesBinding) {
@@ -10,95 +11,95 @@ class TemplateFactory(binding: ActivityTemplatesBinding) {
     Template(
         binding.bubbleSort,
         arrayOf(
-            Block(BlockInstruction.INIT, "n = 10, *arr[n]"),
+            SetInstruction("n = 10, *arr[n]", true),
 
-            Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
-                Block(BlockInstruction.SET, "arr[i] = (100 * rand() - 50).toInt()"),
-            Block(BlockInstruction.END_FOR),
+            ForInstruction("i = 0, i < n, i += 1"),
+            SetInstruction("arr[i] = (100 * rand() - 50).toInt()"),
+            EndForInstruction(),
 
-            Block(BlockInstruction.FOR, "i = 0, i < n, i += 1"),
-                Block(BlockInstruction.FOR, "j = i + 1, j < n, j += 1"),
-                    Block(BlockInstruction.IF, "arr[i] > arr[j]"),
-                        Block(BlockInstruction.INIT, "t = arr[i]"),
-                        Block(BlockInstruction.SET, "arr[i] = arr[j], arr[j] = t"),
-                    Block(BlockInstruction.END),
-                Block(BlockInstruction.END_FOR),
+            ForInstruction("i = 0, i < n, i += 1"),
+                ForInstruction("j = i + 1, j < n, j += 1"),
+                    IfInstruction("arr[i] > arr[j]"),
+                        SetInstruction("t = arr[i]", true),
+                        SetInstruction("arr[i] = arr[j], arr[j] = t"),
+                    EndInstruction(),
+                EndForInstruction(),
 
-            Block(BlockInstruction.END_FOR),
-            Block(BlockInstruction.PRINT, "arr"),
+            EndForInstruction(),
+            PrintInstruction("arr"),
         )
     ),
     Template(
         binding.infinityLoop,
         arrayOf(
-            Block(BlockInstruction.INIT, "count = 0"),
-            Block(BlockInstruction.WHILE, "1"),
-                Block(BlockInstruction.PRINT, "count"),
-                Block(BlockInstruction.SET, "count += 1"),
-            Block(BlockInstruction.END_WHILE)
+            SetInstruction("count = 0", true),
+            WhileInstruction("1"),
+                PrintInstruction("count"),
+            SetInstruction("count += 1"),
+            EndWhileInstruction()
         )
     ),
     Template(
         binding.ahegao,
         arrayOf(
-            Block(BlockInstruction.PRAGMA, "IO_LINES = 20, INIT_MESSAGE = false, IO_MESSAGE = false"),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⠄⢰⣧⣼⣯⠄⣸⣠⣶⣶⣦⣾⠄⠄⠄⠄⡀⠄⢀⣿⣿⠄⠄⠄⢸⡇⠄⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⠄⣾⣿⠿⠿⠶⠿⢿⣿⣿⣿⣿⣦⣤⣄⢀⡅⢠⣾⣛⡉⠄⠄⠄⠸⢀⣿⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⢀⡋⣡⣴⣶⣶⡀⠄⠄⠙⢿⣿⣿⣿⣿⣿⣴⣿⣿⣿⢃⣤⣄⣀⣥⣿⣿⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⢸⣇⠻⣿⣿⣿⣧⣀⢀⣠⡌⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⣿⣿⣿⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⢀⢸⣿⣷⣤⣤⣤⣬⣙⣛⢿⣿⣿⣿⣿⣿⣿⡿⣿⣿⡍⠄⠄⢀⣤⣄⠉⠋⣰\""),
-            Block(BlockInstruction.PRINT, "\"⠄⣼⣖⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⢇⣿⣿⡷⠶⠶⢿⣿⣿⠇⢀⣤\""),
-            Block(BlockInstruction.PRINT, "\"⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣽⣿⣿⣿⡇⣿⣿⣿⣿⣿⣿⣷⣶⣥⣴⣿⡗\""),
-            Block(BlockInstruction.PRINT, "\"⢀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠄\""),
-            Block(BlockInstruction.PRINT, "\"⢸⣿⣦⣌⣛⣻⣿⣿⣧⠙⠛⠛⡭⠅⠒⠦⠭⣭⡻⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠘⣿⣿⣿⣿⣿⣿⣿⣿⡆⠄⠄⠄⠄⠄⠄⠄⠄⠹⠈⢋⣽⣿⣿⣿⣿⣵⣾⠃⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠘⣿⣿⣿⣿⣿⣿⣿⣿⠄⣴⣿⣶⣄⠄⣴⣶⠄⢀⣾⣿⣿⣿⣿⣿⣿⠃⠄⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⠈⠻⣿⣿⣿⣿⣿⣿⡄⢻⣿⣿⣿⠄⣿⣿⡀⣾⣿⣿⣿⣿⣛⠛⠁⠄⠄⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⠄⠄⠈⠛⢿⣿⣿⣿⠁⠞⢿⣿⣿⡄⢿⣿⡇⣸⣿⣿⠿⠛⠁⠄⠄⠄⠄⠄\""),
-            Block(BlockInstruction.PRINT, "\"⠄⠄⠄⠄⠄⠄⠄⠉⠻⣿⣿⣾⣦⡙⠻⣷⣾⣿⠃⠿⠋⠁⠄⠄⠄⠄⠄⢀⣠⣴\""),
-            Block(BlockInstruction.PRINT, "\"⣿⣿⣿⣶⣶⣮⣥⣒⠲⢮⣝⡿⣿⣿⡆⣿⡿⠃⠄⠄⠄⠄⠄⠄⠄⣠⣴⣿⣿⣿\""),
+            PragmaInstruction("IO_LINES = 20, INIT_MESSAGE = false, IO_MESSAGE = false"),
+            PrintInstruction("\"⠄⠄⢰⣧⣼⣯⠄⣸⣠⣶⣶⣦⣾⠄⠄⠄⠄⡀⠄⢀⣿⣿⠄⠄⠄⢸⡇⠄⠄\""),
+            PrintInstruction("\"⠄⠄⣾⣿⠿⠿⠶⠿⢿⣿⣿⣿⣿⣦⣤⣄⢀⡅⢠⣾⣛⡉⠄⠄⠄⠸⢀⣿⠄\""),
+            PrintInstruction("\"⠄⢀⡋⣡⣴⣶⣶⡀⠄⠄⠙⢿⣿⣿⣿⣿⣿⣴⣿⣿⣿⢃⣤⣄⣀⣥⣿⣿⠄\""),
+            PrintInstruction("\"⠄⢸⣇⠻⣿⣿⣿⣧⣀⢀⣠⡌⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⣿⣿⣿⠄\""),
+            PrintInstruction("\"⢀⢸⣿⣷⣤⣤⣤⣬⣙⣛⢿⣿⣿⣿⣿⣿⣿⡿⣿⣿⡍⠄⠄⢀⣤⣄⠉⠋⣰\""),
+            PrintInstruction("\"⣼⣖⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⢇⣿⣿⡷⠶⠶⢿⣿⣿⠇⢀⣤\""),
+            PrintInstruction( "\"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣽⣿⣿⣿⡇⣿⣿⣿⣿⣿⣿⣷⣶⣥⣴⣿⡗\""),
+            PrintInstruction("\"⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠄\""),
+            PrintInstruction("\"⣿⣦⣌⣛⣻⣿⣿⣧⠙⠛⠛⡭⠅⠒⠦⠭⣭⡻⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠄\""),
+            PrintInstruction("\"⣿⣿⣿⣿⣿⣿⣿⣿⡆⠄⠄⠄⠄⠄⠄⠄⠄⠹⠈⢋⣽⣿⣿⣿⣿⣵⣾⠃⠄\""),
+            PrintInstruction("\"⠘⣿⣿⣿⣿⣿⣿⣿⣿⠄⣴⣿⣶⣄⠄⣴⣶⠄⢀⣾⣿⣿⣿⣿⣿⣿⠃⠄⠄\""),
+            PrintInstruction("\"⠄⠈⠻⣿⣿⣿⣿⣿⣿⡄⢻⣿⣿⣿⠄⣿⣿⡀⣾⣿⣿⣿⣿⣛⠛⠁⠄⠄⠄\""),
+            PrintInstruction("\"⠄⠄⠄⠈⠛⢿⣿⣿⣿⠁⠞⢿⣿⣿⡄⢿⣿⡇⣸⣿⣿⠿⠛⠁⠄⠄⠄⠄⠄\""),
+            PrintInstruction("\"⠄⠄⠄⠄⠄⠄⠉⠻⣿⣿⣾⣦⡙⠻⣷⣾⣿⠃⠿⠋⠁⠄⠄⠄⠄⠄⢀⣠⣴\""),
+            PrintInstruction("\"⣿⣿⣶⣶⣮⣥⣒⠲⢮⣝⡿⣿⣿⡆⣿⡿⠃⠄⠄⠄⠄⠄⠄⠄⣠⣴⣿⣿⣿\""),
         )
     ),
     Template(
         binding.factorial,
         arrayOf(
-            Block(BlockInstruction.INIT, "value = 0"),
-            Block(BlockInstruction.INPUT, "value"),
-            Block(BlockInstruction.SET, "value = value.toInt()"),
+            SetInstruction("value = 0", true),
+            InputInstruction("value"),
+            SetInstruction("value = value.toInt()"),
 
-            Block(BlockInstruction.FUNC, "fact(x)"),
-                Block(BlockInstruction.IF, "x <= 1"),
-                    Block(BlockInstruction.RETURN, "1"),
-                Block(BlockInstruction.END),
+            FuncInstruction("fact(x)"),
+                IfInstruction("x <= 1"),
+                    ReturnInstruction("1"),
+                EndInstruction(),
 
-                Block(BlockInstruction.FUNC_CALL, "t = fact(x - 1)"),
-                Block(BlockInstruction.RETURN, "x * t"),
-            Block(BlockInstruction.FUNC_END),
+                CallInstruction("t = fact(x - 1)"),
+                ReturnInstruction("x * t"),
+            FuncEndInstruction(),
 
-            Block(BlockInstruction.FUNC_CALL, "result = fact(value)"),
-            Block(BlockInstruction.PRINT, "result")
+            CallInstruction("result = fact(value)"),
+            PrintInstruction("result")
         )
     ),
     Template(
         binding.fibonacci,
         arrayOf(
-            Block(BlockInstruction.INIT, "value = 0"),
-            Block(BlockInstruction.INPUT, "value"),
-            Block(BlockInstruction.SET, "value = value.toInt()"),
+            SetInstruction("value = 0", true),
+            InputInstruction("value"),
+            SetInstruction("value = value.toInt()"),
 
-            Block(BlockInstruction.FUNC, "fibonacci(x)"),
-                Block(BlockInstruction.IF, "x <= 2"),
-                    Block(BlockInstruction.RETURN, "1"),
-                Block(BlockInstruction.END),
+            FuncInstruction("fibonacci(x)"),
+                IfInstruction("x <= 2"),
+                    ReturnInstruction("1"),
+                EndInstruction(),
 
-                Block(BlockInstruction.FUNC_CALL, "a = fibonacci(x - 1)"),
-                Block(BlockInstruction.FUNC_CALL, "b = fibonacci(x - 2)"),
+                CallInstruction("a = fibonacci(x - 1)"),
+            CallInstruction( "b = fibonacci(x - 2)"),
 
-                Block(BlockInstruction.RETURN, "a + b"),
-            Block(BlockInstruction.FUNC_END),
+                ReturnInstruction("a + b"),
+            FuncEndInstruction(),
 
-            Block(BlockInstruction.FUNC_CALL, "result = fibonacci(value)"),
-            Block(BlockInstruction.PRINT, "result")
+            CallInstruction("result = fibonacci(value)"),
+            PrintInstruction("result")
         )
     )
     )
