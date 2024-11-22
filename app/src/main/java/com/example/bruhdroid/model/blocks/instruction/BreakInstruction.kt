@@ -1,12 +1,12 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.memory.Memory
 
 class BreakInstruction:
     Instruction(BlockInstruction.BREAK, "") {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         try {
             interpreter.skipCycle()
         } catch (e: Exception) {

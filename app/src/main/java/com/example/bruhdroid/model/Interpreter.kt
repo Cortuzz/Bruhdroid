@@ -135,7 +135,7 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         val block = instructions!![++currentLine]
 
         try {
-            if (parse(block))
+            if (block.evaluate(this))
                 skipFalseBranches()
         } catch (e: RuntimeError) {
             throw RuntimeError(
@@ -292,11 +292,6 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
 
     fun decreaseIoLines() {
         --ioLines
-    }
-
-    private fun parse(block: Instruction): Boolean {
-        block.initInterpreter(this)
-        return block.evaluate()
     }
 
     fun throwOutOfCycleError(message: String) {

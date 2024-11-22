@@ -1,12 +1,13 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.memory.Memory
 
 class ElifInstruction(expression: String = ""):
     Instruction(BlockInstruction.ELIF, expression) {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         if (interpreter.appliedConditions.last()) {
             return true
         }

@@ -1,12 +1,13 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.memory.Memory
 
 class IfInstruction(expression: String = ""):
     Instruction(BlockInstruction.IF, expression) {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         val statement = interpreter.checkStatement(expression)
         interpreter.appliedConditions.add(statement)
         interpreter.memory = Memory(interpreter.memory, "IF SCOPE")

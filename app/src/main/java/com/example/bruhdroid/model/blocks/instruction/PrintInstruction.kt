@@ -1,11 +1,12 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 
 class PrintInstruction(expression: String = ""):
     Instruction(BlockInstruction.PRINT, expression) {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         val rawList = interpreter.split(expression)
         if (interpreter.pragma["IO_MESSAGE"] == "true") {
             interpreter.output += "I/O: "

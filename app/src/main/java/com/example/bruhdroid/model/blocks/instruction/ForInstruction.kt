@@ -1,12 +1,13 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.memory.Memory
 
 class ForInstruction(expression: String = ""):
     Instruction(BlockInstruction.FOR, expression) {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         val raw = expression.split(",")
         if (interpreter.currentLine !in interpreter.forLines) {
             interpreter.memory = Memory(interpreter.memory, "FOR SCOPE")

@@ -1,12 +1,12 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.memory.Memory
 
 class CallInstruction(expression: String = ""):
     Instruction(BlockInstruction.FUNC_CALL, expression) {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         val exp = expression.split("=").toMutableList()
 
         val name = exp.removeFirst().replace(" ", "")

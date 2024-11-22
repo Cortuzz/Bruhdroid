@@ -1,12 +1,12 @@
 package com.example.bruhdroid.model.blocks.instruction
 
+import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.memory.Memory
 
 class ReturnInstruction(expression: String = ""):
     Instruction(BlockInstruction.RETURN, expression) {
 
-    override fun evaluate(): Boolean {
+    override fun evaluate(interpreter: Interpreter): Boolean {
         val value = interpreter.parseRawBlock(expression)
         val funcName =  interpreter.currentFunction.removeLast()
         val varName =  interpreter.functionsVarsMap[funcName]!!.removeLast()
