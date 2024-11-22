@@ -2,13 +2,11 @@ package com.example.bruhdroid.model
 
 import android.annotation.SuppressLint
 import com.example.bruhdroid.exception.*
-import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.IDataPresenter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.instruction.InputInstruction
 import com.example.bruhdroid.model.blocks.instruction.Instruction
 import com.example.bruhdroid.model.memory.Memory
-import com.example.bruhdroid.model.memory.MemoryPresentor
+import com.example.bruhdroid.model.memory.MemoryPresenter
 import com.example.bruhdroid.model.operation.Operation
 import com.example.bruhdroid.model.operation.operator.AssignOperator
 import com.example.bruhdroid.model.operation.operator.Operator
@@ -16,14 +14,14 @@ import com.example.bruhdroid.model.blocks.valuable.BooleanValuable
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 import java.util.*
 
-class Interpreter(_blocks: List<Block>? = null) : Observable() {
+class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
 
     var output = ""
     var waitingForInput = false
     var memory = Memory(null, "GLOBAL SCOPE")
 
-    private var blocks = _blocks?.toMutableList()
-    val memoryPresentor = MemoryPresentor()
+    private var instructions = instructions_?.toMutableList()
+    val memoryPresenter = MemoryPresenter()
     private var input = ""
     var currentLine = -1
 
@@ -45,17 +43,17 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     var args = mutableListOf<List<String>>()
     var forLines = mutableListOf<Int>()
 
-    fun initBlocks(_blocks: List<Block>) {
+    fun initBlocks(instructions: List<Instruction>) {
         clear()
-        blocks = _blocks.toMutableList()
+        this.instructions = instructions.toMutableList()
     }
 
-    fun getBlockAtCurrentLine(): Block? {
-        return blocks?.get(getLine())
+    fun getBlockAtCurrentLine(): Instruction? {
+        return instructions?.get(getLine())
     }
 
     fun getBlocksSize(): Int? {
-        return blocks?.size
+        return instructions?.size
     }
 
     fun getLine(): Int {
@@ -68,7 +66,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     fun getMemoryData(): String {
-        return memoryPresentor.getMemoryData(memory)
+        return memoryPresenter.getMemoryData(memory)
     }
 
     private fun pragmaClear() {
@@ -98,7 +96,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         waitingForInput = false
         appliedConditions.clear()
         cycleLines.clear()
-        blocks?.clear()
+        instructions?.clear()
 
         functionLines.clear()
         currentFunction = mutableListOf("GLOBAL")
@@ -119,14 +117,14 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         if (currentLine == -1)
             notifyClients()
 
-        while (currentLine < blocks!!.size - 1 && !waitingForInput)
+        while (currentLine < instructions!!.size - 1 && !waitingForInput)
             runOnce()
     }
 
     fun runOnce(): Boolean {
         tryParseInput()
 
-        if (currentLine >= blocks!!.size - 1)
+        if (currentLine >= instructions!!.size - 1)
             return false
 
         runIteration()
@@ -134,7 +132,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     }
 
     private fun runIteration() {
-        val block = blocks!![++currentLine]
+        val block = instructions!![++currentLine]
 
         try {
             if (parse(block))
@@ -153,8 +151,8 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
 
     private fun skipFalseBranches() {
         var count = 1
-        while (currentLine < blocks!!.size - 1) {
-            val block = blocks!![++currentLine]
+        while (currentLine < instructions!!.size - 1) {
+            val block = instructions!![++currentLine]
 
             if (block.instruction == BlockInstruction.IF) {
                 count++
@@ -175,8 +173,8 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     fun skipCycle() {
         var count = 1
         memory = memory.prevMemory!!
-        while (currentLine < blocks!!.size - 1) {
-            val block = blocks!![++currentLine]
+        while (currentLine < instructions!!.size - 1) {
+            val block = instructions!![++currentLine]
 
             if (block.instruction in listOf(BlockInstruction.WHILE, BlockInstruction.FOR)) {
                 count++
@@ -216,7 +214,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         if (input.isEmpty())
             return
 
-        val block = blocks!![currentLine]
+        val block = instructions!![currentLine]
         val rawList = input.split(",")
         val rawCommands = block.expression.split(",")
         if (rawList.size != rawCommands.size) {
@@ -262,8 +260,8 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
     fun skipFunc() {
         var count = 1
         memory = memory.prevMemory!!
-        while (currentLine < blocks!!.size - 1) {
-            val block = blocks!![++currentLine]
+        while (currentLine < instructions!!.size - 1) {
+            val block = instructions!![++currentLine]
 
             if (block.instruction == BlockInstruction.FUNC) {
                 count++
@@ -296,8 +294,7 @@ class Interpreter(_blocks: List<Block>? = null) : Observable() {
         --ioLines
     }
 
-    private fun parse(block: Block): Boolean {
-        block as Instruction
+    private fun parse(block: Instruction): Boolean {
         block.initInterpreter(this)
         return block.evaluate()
     }

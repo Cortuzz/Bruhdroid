@@ -3,7 +3,7 @@ package com.example.bruhdroid.model.memory
 import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 
-class MemoryPresentor {
+class MemoryPresenter {
     fun getVisibleValue(valuable: Valuable): String {
         val rawValue = valuable.value
 

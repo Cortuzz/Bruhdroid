@@ -2,7 +2,6 @@ package com.example.bruhdroid.model.memory
 
 import com.example.bruhdroid.exception.StackCorruptionError
 import com.example.bruhdroid.model.blocks.ValuableType
-import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 import com.example.bruhdroid.model.blocks.Variable
 import com.example.bruhdroid.model.blocks.valuable.ListValuable
@@ -30,8 +29,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
         return tryFindInMemory(name, memory.prevMemory)
     }
 
-    fun push(address: String, value: Block) {
-        value as Valuable
+    fun push(address: String, value: Valuable) {
         stack[address] = value
     }
 
@@ -73,10 +71,8 @@ class Memory(val prevMemory: Memory?, val scope: String) {
     private fun tryPushToAnyMemory(
         memory: Memory,
         name: String,
-        valueBlock: Block
+        valueBlock: Valuable
     ): Boolean {
-        valueBlock as Valuable
-
         if (memory.get(name) != null) {
             memory.push(name, valueBlock)
             return true

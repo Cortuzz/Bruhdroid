@@ -8,7 +8,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.bruhdroid.R
-import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.instruction.Instruction
 
 open class InstructionView(

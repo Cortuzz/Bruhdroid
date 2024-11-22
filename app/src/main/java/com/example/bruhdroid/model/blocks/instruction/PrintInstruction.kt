@@ -13,7 +13,7 @@ class PrintInstruction(expression: String = ""):
 
         for (raw in rawList) {
             interpreter.output +=
-                "${interpreter.memoryPresentor.getVisibleValue(interpreter.parseRawBlock(raw))} "
+                "${interpreter.memoryPresenter.getVisibleValue(interpreter.parseRawBlock(raw))} "
         }
         interpreter.increaseIoLines()
         interpreter.output += "\n"

@@ -1,15 +1,13 @@
 package com.example.bruhdroid.controller
 
 import android.content.res.Configuration
-import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.R
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.exception.RuntimeError
 import com.example.bruhdroid.exception.UnhandledError
-import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.instruction.*
 import com.example.bruhdroid.view.instruction.InstructionView
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -40,30 +38,30 @@ class Controller : Observable() {
             }
         }
 
-        fun loadProgram(file: File): Array<Block> {
+        fun loadProgram(file: File): Array<Instruction> {
             val blocksMap = mapOf(
-                "SET" to BlockInstruction.SET,
-                "INIT" to BlockInstruction.INIT,
-                "PRINT" to BlockInstruction.PRINT,
-                "PRAGMA" to BlockInstruction.PRAGMA,
-                "INPUT" to BlockInstruction.INPUT,
-                "IF" to BlockInstruction.IF,
-                "ELIF" to BlockInstruction.ELIF,
-                "ELSE" to BlockInstruction.ELSE,
-                "WHILE" to BlockInstruction.WHILE,
-                "END" to BlockInstruction.END,
-                "END_WHILE" to BlockInstruction.END_WHILE,
-                "BREAK" to BlockInstruction.BREAK,
-                "CONTINUE" to BlockInstruction.CONTINUE,
-                "FUNC" to BlockInstruction.FUNC,
-                "FUNC_END" to BlockInstruction.FUNC_END,
-                "FUNC_CALL" to BlockInstruction.FUNC_CALL,
-                "RETURN" to BlockInstruction.RETURN,
-                "FOR" to BlockInstruction.FOR,
-                "END_FOR" to BlockInstruction.END_FOR
+                "SET" to SetInstruction(),
+                "INIT" to InitInstruction(),
+                "PRINT" to PrintInstruction(),
+                "PRAGMA" to PragmaInstruction(),
+                "INPUT" to InputInstruction(),
+                "IF" to IfInstruction(),
+                "ELIF" to ElifInstruction(),
+                "ELSE" to ElseInstruction(),
+                "WHILE" to WhileInstruction(),
+                "END" to EndInstruction(),
+                "END_WHILE" to EndWhileInstruction(),
+                "BREAK" to BreakInstruction(),
+                "CONTINUE" to ContinueInstruction(),
+                "FUNC" to FuncInstruction(),
+                "FUNC_END" to FuncEndInstruction(),
+                "FUNC_CALL" to CallInstruction(),
+                "RETURN" to ReturnInstruction(),
+                "FOR" to ForInstruction(),
+                "END_FOR" to EndForInstruction()
             )
 
-            val blocks = mutableListOf<Block>()
+            val instructions = mutableListOf<Instruction>()
             val text = file.readText()
 
             try {
@@ -71,16 +69,17 @@ class Controller : Observable() {
                 for (i in 0 until jsonArray.length()) {
                     val jsonObject = jsonArray[i] as JSONObject
 
-                    val instruction = blocksMap[jsonObject["instruction"]]
+                    val instruction = blocksMap[jsonObject["instruction"]]!!
                     val expression = jsonObject["expression"] as String
 
-                    blocks.add(Block(instruction!!, expression))
+                    instruction.expression = expression
+                    instructions.add(instruction)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
-            return blocks.toTypedArray()
+            return instructions.toTypedArray()
         }
 
         private fun parseBlocks(

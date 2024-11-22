@@ -24,7 +24,6 @@ import com.example.bruhdroid.view.category.Category
 import com.example.bruhdroid.view.category.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.instruction.*
 import com.example.bruhdroid.view.instruction.InstructionHelper
 import com.example.bruhdroid.view.instruction.InstructionView
@@ -42,7 +41,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         NEXT, BREAKPOINT
     }
 
-    private var viewToBlock = mutableMapOf<View, Block>()
+    private var viewToBlock = mutableMapOf<View, Instruction>()
     private var viewInstructions = mutableListOf<InstructionView>()
     private var binViewList = LinkedList<InstructionView>()
     private var connectorsMap = mutableMapOf<View, View>()
@@ -303,23 +302,23 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
-    private fun parseBlocks(blocks: Array<*>) {
+    private fun parseBlocks(instructions: Array<*>) {
         val ctx = this
 
         GlobalScope.launch {
-            for (block in blocks) {
-                block as Instruction
+            for (instruction in instructions) {
+                instruction as Instruction
 
-                val viewBlock = instructionHelper.getViewByInstruction(block)!!
+                val viewBlock = instructionHelper.getViewByInstruction(instruction)!!
                 val view = viewBlock.updateBlockView(ctx)
 
                 view.id = View.generateViewId()
                 viewBlock.generateBreakpoint()
-                view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
+                view.findViewById<EditText>(R.id.expression)?.setText(instruction.expression)
 
                 viewInstructions.add(viewBlock)
                 prevBlock = view
-                viewToBlock[view] = block
+                viewToBlock[view] = instruction
 
                 if (viewInstructions.size != 1) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
@@ -922,7 +921,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         viewInstructions.add(instructionView)
 
         if (connect) {
-            val endInstruction: Block
+            val endInstruction: Instruction
 
             when (instructionView.instruction) {
                 is WhileInstruction -> {
@@ -944,7 +943,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
             }
 
-            val endInstructionView = instructionHelper.getViewByInstruction(endInstruction as Instruction)!!
+            val endInstructionView = instructionHelper.getViewByInstruction(endInstruction)!!
             endInstructionView.view = endBlock // TODO: Перенести в объект
             viewInstructions.add(endInstructionView)
             getViewInstructionByView(endBlock).generateBreakpoint()

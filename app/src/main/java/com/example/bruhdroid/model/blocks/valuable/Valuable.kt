@@ -3,15 +3,14 @@ package com.example.bruhdroid.model.blocks.valuable
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.exception.TypeError
-import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.IDataPresenter
 
 abstract class Valuable protected constructor(
     varValue: Any,
     var type: ValuableType,
-    var listLink: ListValuable?
-) :
-    Block(BlockInstruction.VAL, ""), IDataPresenter {
+    var listLink: ListValuable?,
+    var expression: String = ""
+) : IDataPresenter {
     var value: String = varValue.toString()
     open var array: MutableList<Valuable> = mutableListOf()
 

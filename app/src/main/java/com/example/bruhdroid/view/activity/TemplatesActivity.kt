@@ -10,7 +10,7 @@ import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.databinding.ButtonBinding
 import com.example.bruhdroid.view.template.TemplateFactory
-import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.instruction.Instruction
 
 
 class TemplatesActivity : AppCompatActivity() {
@@ -66,7 +66,7 @@ class TemplatesActivity : AppCompatActivity() {
         }
     }
 
-    private fun openCodingActivity(blocks: Array<Block>?, filename: String? = null) {
+    private fun openCodingActivity(blocks: Array<Instruction>?, filename: String? = null) {
         val intent = Intent(this, CodingActivity::class.java)
         intent.putExtra("blocks", blocks)
         intent.putExtra("filename", filename)

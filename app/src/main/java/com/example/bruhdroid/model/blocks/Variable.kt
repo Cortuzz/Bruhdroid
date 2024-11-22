@@ -8,7 +8,7 @@ import com.example.bruhdroid.model.blocks.valuable.Valuable
 class Variable(
     val name: String = "",
     private val memory: Memory
-    ) : Block(BlockInstruction.VAR, ""), IDataPresenter {
+    ): IDataPresenter {
     override fun getData(): Valuable {
         try {
             return memory.tryFindInMemory(name)
