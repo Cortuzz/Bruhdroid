@@ -3,16 +3,16 @@ package com.example.bruhdroid.interpreter.instructions
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.ValuableType
-import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.instruction.InitInstruction
 import org.junit.Assert
 import org.junit.Test
 
 class InitializationUnitTest {
     @Test
     fun variableInit() {
-        val a = Block(BlockInstruction.INIT,"a = 1")
-        val b = Block(BlockInstruction.INIT,"b = 2")
-        val c = Block(BlockInstruction.INIT,"a = 3")
+        val a = InitInstruction("a = 1")
+        val b = InitInstruction("b = 2")
+        val c = InitInstruction("a = 3")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -25,7 +25,7 @@ class InitializationUnitTest {
 
     @Test
     fun multiplyVariableInit() {
-        val a = Block(BlockInstruction.INIT,"a = 1, b = 2.45, c = \"45\", d = \"3,2\"")
+        val a = InitInstruction("a = 1, b = 2.45, c = \"45\", d = \"3,2\"")
 
         val interpreter = Interpreter(listOf(a))
         interpreter.run()
@@ -45,9 +45,9 @@ class InitializationUnitTest {
 
     @Test
     fun variableInitByValuable() {
-        val a = Block(BlockInstruction.INIT,"a = 5")
-        val b = Block(BlockInstruction.INIT,"b = 423")
-        val c = Block(BlockInstruction.INIT,"a = 75")
+        val a = InitInstruction("a = 5")
+        val b = InitInstruction("b = 423")
+        val c = InitInstruction("a = 75")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -60,8 +60,8 @@ class InitializationUnitTest {
 
     @Test
     fun variableInitByPreviousValue() {
-        val a = Block(BlockInstruction.INIT,"a = 6 * (1 + 3)")
-        val b = Block(BlockInstruction.INIT,"a =  a - 10")
+        val a = InitInstruction("a = 6 * (1 + 3)")
+        val b = InitInstruction("a =  a - 10")
 
         val interpreter = Interpreter(listOf(a, b))
         interpreter.run()
@@ -73,9 +73,9 @@ class InitializationUnitTest {
 
     @Test
     fun variableInitWithUnaryMinus() {
-        val a = Block(BlockInstruction.INIT,"a = -5")
-        val b = Block(BlockInstruction.INIT,"b = -a")
-        val c = Block(BlockInstruction.INIT,"c = -b * -a")
+        val a = InitInstruction("a = -5")
+        val b = InitInstruction("b = -a")
+        val c = InitInstruction("c = -b * -a")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()

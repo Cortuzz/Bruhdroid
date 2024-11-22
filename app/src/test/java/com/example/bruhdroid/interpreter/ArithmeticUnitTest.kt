@@ -3,16 +3,16 @@ package com.example.bruhdroid.interpreter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.ValuableType
-import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.instruction.InitInstruction
 import org.junit.Assert
 import org.junit.Test
 
 class ArithmeticUnitTest {
     @Test
     fun valuableArithmetic() {
-        val a = Block(BlockInstruction.INIT,"a = 5 * 2")
-        val b = Block(BlockInstruction.INIT,"b = 5 + 1 * 2")
-        val c = Block(BlockInstruction.INIT,"c = 9 * (1 - 5)")
+        val a = InitInstruction("a = 5 * 2")
+        val b = InitInstruction("b = 5 + 1 * 2")
+        val c = InitInstruction("c = 9 * (1 - 5)")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -26,9 +26,9 @@ class ArithmeticUnitTest {
 
     @Test
     fun variableArithmetic() {
-        val a = Block(BlockInstruction.INIT,"a = 6 * (1 + 3)")
-        val b = Block(BlockInstruction.INIT,"b = a - 20")
-        val c = Block(BlockInstruction.INIT,"c = b * a - 50")
+        val a = InitInstruction("a = 6 * (1 + 3)")
+        val b = InitInstruction("b = a - 20")
+        val c = InitInstruction("c = b * a - 50")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -42,9 +42,9 @@ class ArithmeticUnitTest {
 
     @Test
     fun unaryArithmetic() {
-        val a = Block(BlockInstruction.INIT,"a = -1 * -5")
-        val b = Block(BlockInstruction.INIT,"b = (-3 + -a) * -9")
-        val c = Block(BlockInstruction.INIT,"c = 100 * (-12 / -a * -(b)) / -(-3) / a / b")
+        val a = InitInstruction("a = -1 * -5")
+        val b = InitInstruction("b = (-3 + -a) * -9")
+        val c = InitInstruction("c = 100 * (-12 / -a * -(b)) / -(-3) / a / b")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -58,10 +58,10 @@ class ArithmeticUnitTest {
 
     @Test
     fun basicInequalityArithmetic() {
-        val a = Block(BlockInstruction.INIT,"a = -5")
-        val b = Block(BlockInstruction.INIT,"b = 3")
-        val c = Block(BlockInstruction.INIT,"c = a < b")
-        val d = Block(BlockInstruction.INIT,"d = a > b")
+        val a = InitInstruction("a = -5")
+        val b = InitInstruction("b = 3")
+        val c = InitInstruction("c = a < b")
+        val d = InitInstruction("d = a > b")
 
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()

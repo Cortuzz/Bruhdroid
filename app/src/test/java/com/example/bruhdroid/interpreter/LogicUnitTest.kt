@@ -3,16 +3,16 @@ package com.example.bruhdroid.interpreter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.ValuableType
-import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.model.blocks.instruction.InitInstruction
 import org.junit.Assert
 import org.junit.Test
 
 class LogicUnitTest {
     @Test
     fun integerLogic() {
-        val a = Block(BlockInstruction.INIT,"a = 5 || 0")
-        val b = Block(BlockInstruction.INIT,"b = 1 - 1 && 2")
-        val c = Block(BlockInstruction.INIT,"c = a && b")
+        val a = InitInstruction("a = 5 || 0")
+        val b = InitInstruction("b = 1 - 1 && 2")
+        val c = InitInstruction("c = a && b")
 
         val interpreter = Interpreter(listOf(a, b, c))
         interpreter.run()
@@ -30,8 +30,8 @@ class LogicUnitTest {
 
     @Test
     fun stringLogic() {
-        val a = Block(BlockInstruction.INIT,"a = \"453\" || \"\"")
-        val b = Block(BlockInstruction.INIT,"b = \"76\" && \"\"")
+        val a = InitInstruction("a = \"453\" || \"\"")
+        val b = InitInstruction("b = \"76\" && \"\"")
 
         val interpreter = Interpreter(listOf(a, b))
         interpreter.run()

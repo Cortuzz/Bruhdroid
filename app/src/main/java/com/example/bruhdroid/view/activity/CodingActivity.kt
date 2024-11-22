@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.properties.Delegates
 
+// TODO: Пофиксить дебагер и тесты
 
 class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
     private enum class Debug {
