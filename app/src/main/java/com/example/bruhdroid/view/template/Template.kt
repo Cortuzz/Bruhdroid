@@ -1,4 +1,4 @@
-package com.example.bruhdroid.model.template
+package com.example.bruhdroid.view.template
 
 import android.widget.TextView
 import com.example.bruhdroid.model.blocks.Block

@@ -16,4 +16,8 @@ class ElifInstruction(expression: String = ""):
         interpreter.memory = Memory(interpreter.memory, "ELIF SCOPE")
         return !statement
     }
+
+    override fun clone(): ElifInstruction {
+        return ElifInstruction(expression)
+    }
 }

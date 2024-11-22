@@ -1,9 +1,11 @@
-package com.example.bruhdroid.model.template
+package com.example.bruhdroid.view.template
 
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
-import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.model.blocks.instruction.ForInstruction
+import com.example.bruhdroid.model.blocks.instruction.FuncInstruction
+import com.example.bruhdroid.model.blocks.instruction.IfInstruction
+import com.example.bruhdroid.model.blocks.instruction.WhileInstruction
 
 
 class TemplateFactory(binding: ActivityTemplatesBinding) {
@@ -11,7 +13,7 @@ class TemplateFactory(binding: ActivityTemplatesBinding) {
     Template(
         binding.bubbleSort,
         arrayOf(
-            SetInstruction("n = 10, *arr[n]", true),
+            InitInstruction("n = 10, *arr[n]"),
 
             ForInstruction("i = 0, i < n, i += 1"),
             SetInstruction("arr[i] = (100 * rand() - 50).toInt()"),
@@ -20,7 +22,7 @@ class TemplateFactory(binding: ActivityTemplatesBinding) {
             ForInstruction("i = 0, i < n, i += 1"),
                 ForInstruction("j = i + 1, j < n, j += 1"),
                     IfInstruction("arr[i] > arr[j]"),
-                        SetInstruction("t = arr[i]", true),
+                        InitInstruction("t = arr[i]"),
                         SetInstruction("arr[i] = arr[j], arr[j] = t"),
                     EndInstruction(),
                 EndForInstruction(),
@@ -32,7 +34,7 @@ class TemplateFactory(binding: ActivityTemplatesBinding) {
     Template(
         binding.infinityLoop,
         arrayOf(
-            SetInstruction("count = 0", true),
+            InitInstruction("count = 0"),
             WhileInstruction("1"),
                 PrintInstruction("count"),
             SetInstruction("count += 1"),
@@ -63,7 +65,7 @@ class TemplateFactory(binding: ActivityTemplatesBinding) {
     Template(
         binding.factorial,
         arrayOf(
-            SetInstruction("value = 0", true),
+            InitInstruction("value = 0"),
             InputInstruction("value"),
             SetInstruction("value = value.toInt()"),
 
@@ -83,7 +85,7 @@ class TemplateFactory(binding: ActivityTemplatesBinding) {
     Template(
         binding.fibonacci,
         arrayOf(
-            SetInstruction("value = 0", true),
+            InitInstruction("value = 0"),
             InputInstruction("value"),
             SetInstruction("value = value.toInt()"),
 

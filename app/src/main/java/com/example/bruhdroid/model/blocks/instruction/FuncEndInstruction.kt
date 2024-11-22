@@ -9,4 +9,8 @@ class FuncEndInstruction:
     override fun evaluate(): Boolean {
         return false
     }
+
+    override fun clone(): FuncEndInstruction {
+        return FuncEndInstruction()
+    }
 }

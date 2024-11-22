@@ -10,6 +10,7 @@ import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.exception.RuntimeError
 import com.example.bruhdroid.exception.UnhandledError
 import com.example.bruhdroid.model.blocks.Block
+import com.example.bruhdroid.view.instruction.InstructionView
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
@@ -27,13 +28,12 @@ class Controller : Observable() {
         fun saveProgram(
             name: String,
             dir: File,
-            blockMap: MutableMap<View, Block>,
-            viewBlocks: List<View>
+            viewInstructions: MutableList<InstructionView>,
         ): Boolean {
             return try {
                 val file = File(dir, "$name.lapp")
                 file.setWritable(true)
-                file.writeText(parseBlocks(blockMap, viewBlocks).toString())
+                file.writeText(parseBlocks(viewInstructions).toString())
                 true
             } catch (e: Exception) {
                 false
@@ -84,16 +84,15 @@ class Controller : Observable() {
         }
 
         private fun parseBlocks(
-            blockMap: MutableMap<View, Block>,
-            viewBlocks: List<View>
+            viewInstructions: MutableList<InstructionView>
         ): JSONArray {
             val jsonArray = JSONArray()
-            for (i in viewBlocks) {
+            for (vi in viewInstructions) {
                 val jsonObject = JSONObject()
-                val expression = i.findViewById<EditText>(R.id.expression)?.text ?: ""
+                // TODO
 
-                jsonObject.put("instruction", blockMap[i]!!.instruction)
-                jsonObject.put("expression", expression)
+                jsonObject.put("instruction", vi.instruction.instruction)
+                jsonObject.put("expression", vi.instruction.expression)
                 jsonArray.put(jsonObject)
             }
             return jsonArray
@@ -108,18 +107,15 @@ class Controller : Observable() {
     @OptIn(DelicateCoroutinesApi::class)
     fun runProgram(
         ip: Interpreter,
-        blockMap: MutableMap<View, Block>,
-        viewBlocks: List<View>,
+        viewInstructions: MutableList<InstructionView>,
         debug: Boolean = false
     ) {
         interpreter = ip
 
-        val blocks: MutableList<Block> = mutableListOf()
-        for (i in viewBlocks) {
-            val expression = i.findViewById<EditText>(R.id.expression)?.text ?: ""
-            blockMap[i]!!.expression = expression.toString()
-            blocks.add(blockMap[i]!!)
+        viewInstructions.forEach { vi -> vi.instruction.expression =
+            vi.view.findViewById<EditText>(R.id.expression)?.text.toString()
         }
+        val blocks = viewInstructions.map { vi -> vi.instruction } // TODO
 
         try {
             interpreter.initBlocks(blocks)

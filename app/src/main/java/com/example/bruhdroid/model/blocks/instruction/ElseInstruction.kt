@@ -14,4 +14,8 @@ class ElseInstruction:
         interpreter.memory = Memory(interpreter.memory, "ELSE SCOPE")
         return false
     }
+
+    override fun clone(): ElseInstruction {
+        return ElseInstruction()
+    }
 }

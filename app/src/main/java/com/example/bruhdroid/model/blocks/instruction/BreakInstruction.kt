@@ -14,4 +14,8 @@ class BreakInstruction:
         }
         return false
     }
+
+    override fun clone(): BreakInstruction {
+        return BreakInstruction()
+    }
 }

@@ -29,4 +29,8 @@ class FuncInstruction(expression: String = ""):
         }
         return false
     }
+
+    override fun clone(): FuncInstruction {
+        return FuncInstruction(expression)
+    }
 }

@@ -37,4 +37,8 @@ class CallInstruction(expression: String = ""):
         }
         return false
     }
+
+    override fun clone(): CallInstruction {
+        return CallInstruction(expression)
+    }
 }

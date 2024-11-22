@@ -26,4 +26,8 @@ class ForInstruction(expression: String = ""):
         }
         return false
     }
+
+    override fun clone(): ForInstruction {
+        return ForInstruction(expression)
+    }
 }

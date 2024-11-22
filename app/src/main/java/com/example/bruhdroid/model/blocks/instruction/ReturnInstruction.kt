@@ -17,4 +17,8 @@ class ReturnInstruction(expression: String = ""):
 
         return false
     }
+
+    override fun clone(): ReturnInstruction {
+        return ReturnInstruction(expression)
+    }
 }

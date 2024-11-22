@@ -11,4 +11,8 @@ class InputInstruction(expression: String = ""):
 
         return false
     }
+
+    override fun clone(): InputInstruction {
+        return InputInstruction(expression)
+    }
 }

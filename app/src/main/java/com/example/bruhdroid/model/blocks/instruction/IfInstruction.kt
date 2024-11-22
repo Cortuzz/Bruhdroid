@@ -12,4 +12,8 @@ class IfInstruction(expression: String = ""):
         interpreter.memory = Memory(interpreter.memory, "IF SCOPE")
         return !statement
     }
+
+    override fun clone(): IfInstruction {
+        return IfInstruction(expression)
+    }
 }

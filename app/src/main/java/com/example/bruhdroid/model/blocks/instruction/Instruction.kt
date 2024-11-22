@@ -13,4 +13,6 @@ abstract class Instruction(instruction: BlockInstruction, expression: String):
     }
 
     abstract fun evaluate(): Boolean
+
+    abstract fun clone(): Instruction
 }

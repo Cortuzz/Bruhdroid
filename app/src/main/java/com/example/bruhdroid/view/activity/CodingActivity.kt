@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.DialogInterface
+import android.content.res.Resources.NotFoundException
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.DragEvent
@@ -13,7 +14,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,9 +24,10 @@ import com.example.bruhdroid.view.category.Category
 import com.example.bruhdroid.view.category.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.view.ViewBlock
 import com.example.bruhdroid.model.blocks.Block
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.view.instruction.InstructionHelper
+import com.example.bruhdroid.view.instruction.InstructionView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -42,8 +43,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private var viewToBlock = mutableMapOf<View, Block>()
-    private var codingViewList = LinkedList<View>()
-    private var binViewList = LinkedList<View>()
+    private var viewInstructions = mutableListOf<InstructionView>()
+    private var binViewList = LinkedList<InstructionView>()
     private var connectorsMap = mutableMapOf<View, View>()
     private var categoryBlocks = LinkedList<LinkedList<View>>()
     private var prevBlock: View? = null
@@ -63,9 +64,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
+    private lateinit var instructionHelper: InstructionHelper
     private var dp by Delegates.notNull<Float>()
 
-    private var layoutMap = mapOf<Block, ViewBlock>()
     private val interpreter = Interpreter()
     private val controller = Controller()
     private val startConnectingInstructions = listOf(
@@ -82,22 +83,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dp = this.resources.displayMetrics.density
-        layoutMap = mapOf(
-            PragmaInstruction() to ViewBlock("Pragma", R.drawable.ic_block_pragma),
-            PrintInstruction() to ViewBlock("Print", R.drawable.ic_block_print),
-            InputInstruction() to ViewBlock("Input", R.drawable.ic_block_input),
-            SetInstruction(initialization = true) to ViewBlock("Init", R.drawable.ic_block_init),
-            WhileInstruction() to ViewBlock("While", R.drawable.ic_block_while),
-            IfInstruction() to ViewBlock("If", R.drawable.ic_block_if),
-            SetInstruction() to ViewBlock("Set", R.drawable.ic_block_set),
-            BreakInstruction() to ViewBlock("Break", R.drawable.ic_block_break, false),
-            ContinueInstruction() to ViewBlock("Continue", R.drawable.ic_block_continue, false),
-            FuncInstruction() to ViewBlock("Method", R.drawable.ic_block_func),
-            ReturnInstruction() to ViewBlock("Return", R.drawable.ic_block_return),
-            CallInstruction() to ViewBlock("Call", R.drawable.ic_block_call),
-            ForInstruction() to ViewBlock("For", R.drawable.ic_block_for)
-        )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
+        instructionHelper = InstructionHelper(layoutInflater)
 
         setBindingSheetBlocks()
 
@@ -146,11 +133,11 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             debugMode = false
             bindingSheetConsole.console.text = ""
 
-            controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
+            controller.runProgram(interpreter, viewInstructions, debugMode)
         }
         binding.saveButton.setOnClickListener {
             if (filename is String) {
-                if (Controller.saveProgram(filename, this.filesDir, viewToBlock, codingViewList)) {
+                if (Controller.saveProgram(filename, this.filesDir, viewInstructions)) {
                     Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
@@ -167,7 +154,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             binding.debugPanel.visibility = View.VISIBLE
             binding.mainPanel.visibility = View.INVISIBLE
 
-            controller.runProgram(interpreter, viewToBlock, codingViewList, debugMode)
+            controller.runProgram(interpreter, viewInstructions, debugMode)
         }
 
         binding.nextButton.setOnClickListener {
@@ -199,18 +186,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    @SuppressLint("InflateParams")
-    private fun makeBlockView(viewBlock: ViewBlock): View {
-        val block = when (viewBlock.hasText) {
-            true -> layoutInflater.inflate(R.layout.block, null)
-            false -> layoutInflater.inflate(R.layout.block_non_text, null)
-        }
-
-        block.findViewById<TextView>(R.id.textView).text = viewBlock.label
-        block.background = ContextCompat.getDrawable(this, viewBlock.drawable)
-        return block
-    }
-
     private fun setBindingSheetBlocks() {
         bindingSheetMenu =
             DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
@@ -233,16 +208,17 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         val fourthBlockCategory = LinkedList<View>()
         val fifthBlockCategory = LinkedList<View>()
 
-        for (instr in layoutMap.keys) {
-            val view = makeBlockView(copyBlock(instr)!!)
+        for (instructionView in instructionHelper.getInstructionViews()) {
+            val view = instructionView.updateBlockView(this)
 
             view.setOnClickListener {
+                instructionView.updateBlockView(this)
                 buildBlock(
-                    prevBlock, makeBlockView(copyBlock(instr)!!), instr,
-                    instr.instruction in startConnectingInstructions
+                    prevBlock, instructionView,
+                    instructionView.instruction.instruction in startConnectingInstructions
                 )
             }
-            when (instr.instruction) {
+            when (instructionView.instruction.instruction) {
                 in listOf(BlockInstruction.INIT, BlockInstruction.SET) -> firstBlockCategory.add(view)
                 in listOf(
                     BlockInstruction.PRAGMA,
@@ -296,12 +272,8 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
     private fun updateDebugger() {
         val view = getViewByLine()
-        val button = view?.findViewById<ImageButton>(R.id.breakpoint)
 
-        if (button != null) {
-            val block = viewToBlock[view] ?: return
-            drawBreakpoint(button, block)
-        }
+        getViewInstructionByView(view!!).drawBreakpoint()
     }
 
     private fun getDebuggerView(): View? {
@@ -329,47 +301,27 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    private fun copyBlock(block: Block): ViewBlock? {
-        for (bl in layoutMap.keys) {
-            if (bl.instruction == block.instruction)
-                return layoutMap[bl]!!
-        }
-        return null
-    }
-
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(blocks: Array<*>) {
-        val subsequentInstructionsViews = mapOf(
-            BlockInstruction.END_WHILE to R.layout.empty_block,
-            BlockInstruction.END to R.layout.condition_block_end,
-            BlockInstruction.ELSE to R.layout.block_else,
-            BlockInstruction.ELIF to R.layout.block_elif,
-            BlockInstruction.FUNC_END to R.layout.block_func_end,
-            BlockInstruction.END_FOR to R.layout.block_end_for
-        )
+        val ctx = this
 
         GlobalScope.launch {
             for (block in blocks) {
-                block as Block
+                block as Instruction
 
-                val instructions = layoutMap.keys.map { b -> b.instruction }
-
-                val view = if (block.instruction in instructions) {
-                    makeBlockView(copyBlock(block)!!)
-                } else {
-                    layoutInflater.inflate(subsequentInstructionsViews[block.instruction]!!, null)
-                }
+                val viewBlock = instructionHelper.getViewByInstruction(block)!!
+                val view = viewBlock.updateBlockView(ctx)
 
                 view.id = View.generateViewId()
-                generateBreakpoint(view)
+                viewBlock.generateBreakpoint()
                 view.findViewById<EditText>(R.id.expression)?.setText(block.expression)
 
-                codingViewList.add(view)
+                viewInstructions.add(viewBlock)
                 prevBlock = view
                 viewToBlock[view] = block
 
-                if (codingViewList.size != 1) {
+                if (viewInstructions.size != 1) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
                     connector.id = View.generateViewId()
                     connectorsMap[view] = connector
@@ -400,7 +352,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             delay(500)
 
             runOnUiThread {
-                buildConstraints(binding.container, codingViewList)
+                buildConstraints(binding.container, viewInstructions)
             }
         }
     }
@@ -453,15 +405,16 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             }
 
             DragEvent.ACTION_DROP -> {
+                val instructionView = getViewInstructionByView(currentDrag)
                 val index = -1
                 val instr = viewToBlock[currentDrag]!!.instruction
 
                 if (instr in startConnectingInstructions) {
                     addBlocksToBin(currentDrag, true)
-                    reBuildBlocks(index, currentDrag, true)
+                    reBuildBlocks(index, instructionView, true)
                 } else {
                     addBlocksToBin(currentDrag)
-                    reBuildBlocks(index, currentDrag)
+                    reBuildBlocks(index, instructionView)
                 }
 
                 v.invalidate()
@@ -471,7 +424,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             DragEvent.ACTION_DRAG_ENDED -> {
                 GlobalScope.launch {
                     runOnUiThread {
-                        if (codingViewList.contains(currentDrag)) {
+                        if (viewInstructions.firstOrNull { vi -> vi.view == currentDrag } != null) {
                             makeBlocksVisible(currentDrag)
                         }
                     }
@@ -494,17 +447,17 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
 
         GlobalScope.launch {
             for (block in addedBlocks) {
-                if (connectorsMap[block] != null) {
+                if (connectorsMap[block.view] != null) {
                     runOnUiThread {
-                        bindingSheetBin.deletedList.addView(connectorsMap[block])
+                        bindingSheetBin.deletedList.addView(connectorsMap[block.view])
                     }
                 }
 
                 runOnUiThread {
-                    bindingSheetBin.deletedList.addView(block)
+                    bindingSheetBin.deletedList.addView(block.view)
                 }
-                binViewList.add(block)
-                prevBlockInBin = block
+                binViewList.add(getViewInstructionByView(block.view))
+                prevBlockInBin = block.view
             }
             delay(100)
 
@@ -517,25 +470,28 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     @SuppressLint("InflateParams")
-    private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<View> {
-        val tempList = mutableListOf<View>()
+    private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<InstructionView> {
+        val tempList = mutableListOf<InstructionView>()
         view.setOnLongClickListener(null)
-        tempList.add(view)
+        tempList.add(getViewInstructionByView(view))
         binding.container.removeView(view)
         if (connectorsMap[view] != null) {
             binding.container.removeView(connectorsMap[view])
             connectorsMap.remove(view)
         }
 
-        var index = codingViewList.indexOf(view) + 1
+        val viewInstruction = getViewInstructionByView(view)
+        var index = viewInstructions.indexOf(viewInstruction) + 1
 
         if (isConnected) {
             var count = 1
 
             do {
-                val currView = codingViewList[index]
+                val currViewInstr = viewInstructions[index]
+                val currView = currViewInstr.view
+
                 currView.setOnLongClickListener(null)
-                tempList.add(currView)
+                tempList.add(currViewInstr)
                 binding.container.removeView(currView)
                 binding.container.removeView(connectorsMap[currView])
 
@@ -549,44 +505,44 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             } while (count > 0)
         }
 
-        if (codingViewList.indexOf(view) == 0 && index <= codingViewList.lastIndex) {
-            binding.container.removeView(connectorsMap[codingViewList[index]])
-            connectorsMap.remove(codingViewList[index])
+        if (viewInstructions.indexOf(getViewInstructionByView(view)) == 0 && index <= viewInstructions.lastIndex) {
+            binding.container.removeView(connectorsMap[viewInstructions[index].view])
+            connectorsMap.remove(viewInstructions[index].view)
         }
 
         view.setOnClickListener {
             for (tempView in tempList) {
-                bindingSheetBin.deletedList.removeView(tempView)
-                if (connectorsMap[tempView] != null) {
-                    bindingSheetBin.deletedList.removeView(connectorsMap[tempView])
+                bindingSheetBin.deletedList.removeView(tempView.view)
+                if (connectorsMap[tempView.view] != null) {
+                    bindingSheetBin.deletedList.removeView(connectorsMap[tempView.view])
                 }
-                binViewList.remove(tempView)
+                binViewList.remove(getViewInstructionByViewInBin(tempView.view))
 
-                binding.container.addView(tempView)
-                if (connectorsMap[tempView] != null) {
-                    binding.container.addView(connectorsMap[tempView])
-                } else if (!codingViewList.isEmpty()) {
+                binding.container.addView(tempView.view)
+                if (connectorsMap[tempView.view] != null) {
+                    binding.container.addView(connectorsMap[tempView.view])
+                } else if (viewInstructions.isNotEmpty()) {
                     val connector = layoutInflater.inflate(R.layout.block_connector, null)
                     connector.id = View.generateViewId()
                     binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-                    connectorsMap[tempView] = connector
+                    connectorsMap[tempView.view] = connector
                 }
 
-                tempView.bringToFront()
-                codingViewList.add(tempView)
-                if (viewToBlock[tempView]!!.instruction !in connectingInstructions &&
-                    viewToBlock[tempView]!!.instruction !in listOf(
+                tempView.view.bringToFront()
+                viewInstructions.add(tempView)
+                if (viewToBlock[tempView.view]!!.instruction !in connectingInstructions &&
+                    viewToBlock[tempView.view]!!.instruction !in listOf(
                         BlockInstruction.ELSE,
                         BlockInstruction.ELIF
                     )
                 ) {
-                    generateDragArea(tempView)
+                    generateDragArea(tempView.view)
                 }
             }
             buildConstraints(bindingSheetBin.deletedList, binViewList)
-            buildConstraints(binding.container, codingViewList)
+            buildConstraints(binding.container, viewInstructions)
 
-            prevBlock = codingViewList.last
+            prevBlock = viewInstructions.last().view
         }
 
         return tempList
@@ -605,9 +561,9 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 if (currentDrag === receiverView) {
                     return false
                 }
-                var newIndex = codingViewList.indexOf(receiverView)
+                var newIndex = viewInstructions.indexOf(getViewInstructionByView(receiverView))
 
-                newIndex = when (newIndex > codingViewList.indexOf(currentDrag)) {
+                newIndex = when (newIndex > viewInstructions.indexOf(getViewInstructionByView(currentDrag))) {
                     true -> newIndex - 1
                     false -> newIndex
                 }
@@ -616,11 +572,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     else -> newIndex + 1
                 }
 
+                val instructionView = getViewInstructionByView(currentDrag)
                 val instr = viewToBlock[currentDrag]!!.instruction
                 if (instr in startConnectingInstructions) {
-                    reBuildBlocks(newIndex, currentDrag, true)
+                    reBuildBlocks(newIndex, instructionView, true)
                 } else {
-                    reBuildBlocks(newIndex, currentDrag)
+                    reBuildBlocks(newIndex, instructionView)
                 }
 
                 v.invalidate()
@@ -634,16 +591,16 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     }
 
     private fun replaceUntilEnd(indexFrom: Int, indexTo: Int) {
-        val tempViews = mutableListOf<View>()
+        val tempViews = mutableListOf<InstructionView>()
         var count = 0
 
         do {
-            when (viewToBlock[codingViewList[indexFrom]]!!.instruction) {
+            when (viewInstructions[indexFrom].instruction.instruction) {
                 in connectingInstructions -> --count
                 in startConnectingInstructions -> ++count
                 else -> {}
             }
-            val view = codingViewList.removeAt(indexFrom)
+            val view = viewInstructions.removeAt(indexFrom)
             tempViews.add(view)
         } while (count > 0)
 
@@ -651,33 +608,32 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if (indexFrom == 0 || indexTo == 0) {
                 when {
                     indexFrom == 0 -> {
-                        val connector = connectorsMap[codingViewList[0]]
-                        connectorsMap[tempViews[0]] = connector as View
+                        val connector = connectorsMap[viewInstructions[0].view]
+                        connectorsMap[tempViews[0].view] = connector as View
                     }
-                    indexTo == 0 -> {
-                        val connector = connectorsMap[tempViews[0]]
-                        connectorsMap[codingViewList[0]] = connector as View
+                    else -> {
+                        val connector = connectorsMap[tempViews[0].view]
+                        connectorsMap[viewInstructions[0].view] = connector as View
                     }
-                    else -> {}
                 }
             }
             if (indexTo <= indexFrom) {
-                codingViewList.addAll(indexTo, tempViews)
+                viewInstructions.addAll(indexTo, tempViews)
             } else {
-                codingViewList.addAll(indexTo + 1 - tempViews.size, tempViews)
+                viewInstructions.addAll(indexTo + 1 - tempViews.size, tempViews)
             }
         }
     }
 
-    private fun clearConstraints(set: ConstraintSet, view: View) {
-        val id = view.id
+    private fun clearConstraints(set: ConstraintSet, view: InstructionView) {
+        val id = view.view.id
 
         set.clear(id, ConstraintSet.TOP)
         set.clear(id, ConstraintSet.BOTTOM)
         set.clear(id, ConstraintSet.LEFT)
         set.clear(id, ConstraintSet.RIGHT)
 
-        val connector = connectorsMap[view]?.id
+        val connector = connectorsMap[view.view]?.id
         if (connector != null) {
             set.clear(connector, ConstraintSet.TOP)
             set.clear(connector, ConstraintSet.BOTTOM)
@@ -686,12 +642,12 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    private fun buildConstraints(container: ConstraintLayout, viewList: List<View>) {
+    private fun buildConstraints(container: ConstraintLayout, viewList: List<InstructionView>) {
         val set = ConstraintSet()
         set.clone(container)
         for (view in viewList) {
             if (container == binding.container) {
-                view.setOnClickListener(null)
+                view.view.setOnClickListener(null)
             }
             clearConstraints(set, view)
         }
@@ -711,104 +667,104 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             val view = viewList[i]
             val prevView = viewList[i - 1]
 
-            if (viewToBlock[prevView]!!.instruction in startInstructions) {
-                nestViews.add(prevView)
-                nestCount.add(prevView.height)
+            if (viewToBlock[prevView.view]!!.instruction in startInstructions) {
+                nestViews.add(prevView.view)
+                nestCount.add(prevView.view.height)
             }
 
-            if (viewToBlock[view]!!.instruction in endInstructions) {
+            if (viewToBlock[view.view]!!.instruction in endInstructions) {
                 val nest = nestViews.removeLast()
                 val nestId = nest.id
-                val connector = connectorsMap[view]!!
+                val connector = connectorsMap[view.view]!!
                 val connectorId = connector.id
                 val ratio = (nestCount.removeLast()) / (connector.height).toFloat()
                 set.setScaleY(connectorId, ratio)
 
                 nest.bringToFront()
                 set.connect(connectorId, ConstraintSet.TOP, nestId, ConstraintSet.BOTTOM, -15)
-                set.connect(connectorId, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
+                set.connect(connectorId, ConstraintSet.BOTTOM, view.view.id, ConstraintSet.TOP, 0)
                 set.connect(connectorId, ConstraintSet.LEFT, nestId, ConstraintSet.LEFT, 80)
-            } else if (connectorsMap[view] != null) {
-                prevView.bringToFront()
+            } else if (connectorsMap[view.view] != null) {
+                prevView.view.bringToFront()
                 set.connect(
-                    connectorsMap[view]!!.id,
+                    connectorsMap[view.view]!!.id,
                     ConstraintSet.TOP,
-                    prevView.id,
+                    prevView.view.id,
                     ConstraintSet.BOTTOM,
                     -15
                 )
                 set.connect(
-                    connectorsMap[view]!!.id,
+                    connectorsMap[view.view]!!.id,
                     ConstraintSet.BOTTOM,
-                    view.id,
+                    view.view.id,
                     ConstraintSet.TOP,
                     0
                 )
                 set.connect(
-                    connectorsMap[view]!!.id,
+                    connectorsMap[view.view]!!.id,
                     ConstraintSet.LEFT,
-                    view.id,
+                    view.view.id,
                     ConstraintSet.LEFT,
                     80
                 )
             }
 
             if (nestViews.isNotEmpty()) {
-                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.height - 15 }
+                nestCount.forEachIndexed { ind, _ -> nestCount[ind] += view.view.height - 15 }
                 set.connect(
-                    view.id,
+                    view.view.id,
                     ConstraintSet.LEFT,
                     nestViews.last().id,
                     ConstraintSet.LEFT,
                     80
                 )
             }
-            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
+            set.connect(view.view.id, ConstraintSet.TOP, prevView.view.id, ConstraintSet.BOTTOM, -15)
         }
         set.applyTo(container)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun reBuildBlocks(index: Int, drag: View, untilEnd: Boolean = false) {
+    private fun reBuildBlocks(index: Int, drag: InstructionView, untilEnd: Boolean = false) {
         GlobalScope.launch {
             if (untilEnd) {
-                replaceUntilEnd(codingViewList.indexOf(drag), index)
+                replaceUntilEnd(viewInstructions.indexOf(drag), index)
             } else {
-                if (index != -1 && (codingViewList.indexOf(drag) == 0 || index == 0)) {
+                if (index != -1 && ((viewInstructions.indexOf(drag)) == 0 || index == 0)) {
                     val connector = when {
-                        codingViewList.indexOf(drag) == 0 -> connectorsMap[codingViewList[1]]
-                        index == 0 -> connectorsMap[drag]
+                        (viewInstructions.indexOf(drag)) == 0 -> connectorsMap[viewInstructions[1].view]
+                        index == 0 -> connectorsMap[drag.view]
                         else -> {
                             throw Exception()
                         }
                     }
-                    connectorsMap[codingViewList[0]] = connector as View
+                    connectorsMap[viewInstructions[0].view] = connector as View
                 }
 
-                codingViewList.remove(drag)
+                viewInstructions.remove(getViewInstructionByView(drag.view))
                 when {
                     index == -1 -> {}
-                    index > codingViewList.lastIndex -> {
-                        codingViewList.add(drag)
+                    index > viewInstructions.lastIndex -> {
+                        viewInstructions.add(drag)
                     }
                     else -> {
-                        codingViewList.add(index, drag)
+                        viewInstructions.add(index, drag)
                     }
                 }
             }
 
-            if (!codingViewList.isEmpty()) {
-                connectorsMap.remove(codingViewList[0])
+            if (viewInstructions.isNotEmpty()) {
+                connectorsMap.remove(viewInstructions[0].view)
             }
 
             runOnUiThread {
-                buildConstraints(binding.container, codingViewList)
+                buildConstraints(binding.container, viewInstructions)
             }
 
-            prevBlock = if (codingViewList.isEmpty()) {
+            prevBlock = if (viewInstructions.isEmpty()) {
                 null
             } else {
-                codingViewList.last()
+                viewInstructions.last().view
             }
         }
     }
@@ -816,51 +772,52 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private fun makeBlocksInvisible(v: View) {
         v.visibility = View.INVISIBLE
 
-        if (viewToBlock[v]!!.instruction in startConnectingInstructions) {
+        if (viewToBlock[v]!!.instruction !in startConnectingInstructions)
+            return
 
-            var index = codingViewList.indexOf(v) + 1
-            var count = 1
-            val ifList = mutableListOf<View>()
-            if (viewToBlock[v]!!.instruction == BlockInstruction.IF) {
-                ifList.add(v)
-            }
-            var connector: View? = null
 
-            while (count != 0) {
-                val currentView = codingViewList[index]
-                currentView.visibility = View.INVISIBLE
-                val block = viewToBlock[currentView]
+        var index = viewInstructions.indexOf(getViewInstructionByView(v)) + 1
+        var count = 1
+        val ifList = mutableListOf<View>()
+        if (viewToBlock[v]!!.instruction == BlockInstruction.IF) {
+            ifList.add(v)
+        }
+        var connector: View? = null
 
-                if (ifList.isNotEmpty()) {
-                    when (block!!.instruction) {
-                        BlockInstruction.IF -> ifList.add(currentView)
-                        in listOf(BlockInstruction.ELSE, BlockInstruction.ELIF) -> {
-                            val checkIf = ifList.removeLast()
-                            if (checkIf == v) {
-                                connector = connectorsMap[currentView]
-                            }
+        while (count != 0) {
+            val currentView = viewInstructions[index].view
+            currentView.visibility = View.INVISIBLE
+            val block = viewToBlock[currentView]
+
+            if (ifList.isNotEmpty()) {
+                when (block!!.instruction) {
+                    BlockInstruction.IF -> ifList.add(currentView)
+                    in listOf(BlockInstruction.ELSE, BlockInstruction.ELIF) -> {
+                        val checkIf = ifList.removeLast()
+                        if (checkIf == v) {
+                            connector = connectorsMap[currentView]
                         }
-                        else -> {}
                     }
+                    else -> {}
                 }
-
-                if (connectorsMap[currentView] != null) {
-                    connectorsMap[currentView]!!.visibility = View.INVISIBLE
-                }
-
-                if (block!!.instruction in connectingInstructions) {
-                    count--
-                } else if (block.instruction in startConnectingInstructions) {
-                    count++
-                }
-                index++
             }
 
-            if ((codingViewList.indexOf(v) != 0) && (index <= codingViewList.lastIndex)) {
-                connectorsMap[codingViewList[index - 1]]!!.visibility = View.VISIBLE
-                if (connector != null) {
-                    connector.visibility = View.VISIBLE
-                }
+            if (connectorsMap[currentView] != null) {
+                connectorsMap[currentView]!!.visibility = View.INVISIBLE
+            }
+
+            if (block!!.instruction in connectingInstructions) {
+                count--
+            } else if (block.instruction in startConnectingInstructions) {
+                count++
+            }
+            index++
+        }
+
+        if ((viewInstructions.indexOf(getViewInstructionByView(v)) != 0) && (index <= viewInstructions.lastIndex)) {
+            connectorsMap[viewInstructions[index - 1].view]!!.visibility = View.VISIBLE
+            if (connector != null) {
+                connector.visibility = View.VISIBLE
             }
         }
     }
@@ -869,14 +826,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         v.visibility = View.VISIBLE
 
         if (viewToBlock[v]!!.instruction in startConnectingInstructions) {
-            var index = codingViewList.indexOf(v) + 1
+            var index = viewInstructions.indexOf(getViewInstructionByView(v)) + 1
             var count = 1
 
             while (count != 0) {
-                codingViewList[index].visibility = View.VISIBLE
-                val block = viewToBlock[codingViewList[index]]
-                if (connectorsMap[codingViewList[index]] != null) {
-                    connectorsMap[codingViewList[index]]!!.visibility = View.VISIBLE
+                viewInstructions[index].view.visibility = View.VISIBLE
+                val block = viewToBlock[viewInstructions[index].view]
+                if (connectorsMap[viewInstructions[index].view] != null) {
+                    connectorsMap[viewInstructions[index].view]!!.visibility = View.VISIBLE
                 }
 
                 if (block!!.instruction in connectingInstructions) {
@@ -900,64 +857,51 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         }
     }
 
-    private fun drawBreakpoint(button: ImageButton, block: Block) {
-        button.setBackgroundResource(
-            when (block.breakpoint) {
-                true -> android.R.drawable.presence_online
-                false -> android.R.drawable.presence_invisible
-            }
-        )
-    }
-
-    private fun generateBreakpoint(view: View) {
-        val button = view.findViewById<ImageButton>(R.id.breakpoint)
-        button?.setOnClickListener {
-            val block = viewToBlock[view] ?: return@setOnClickListener
-            block.breakpoint = !block.breakpoint
-            drawBreakpoint(button, block)
-        }
-    }
-
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
-    private fun addStatementBlock(endBlock: View, block: Block, blockId: Int, full: Boolean) {
-        val elseView = layoutInflater.inflate(blockId, null)
-        generateBreakpoint(elseView)
-        val index = codingViewList.indexOf(endBlock)
-        codingViewList[index] = elseView
+    private fun addStatementBlock(endBlock: View, instructionView: InstructionView, newBlock: InstructionView, full: Boolean) {
+        instructionView.updateBlockView(this)
+        newBlock.updateBlockView(this)
+        newBlock.generateBreakpoint()
+
+        val index = viewInstructions.indexOf(getViewInstructionByView(endBlock))
+        val endBlockInstruction = viewInstructions[index]
+
+        viewInstructions[index] = newBlock
+
         try {
-            codingViewList.add(index + 1, endBlock)
+            viewInstructions.add(index + 1, endBlockInstruction)
         } catch (e: Exception) {
-            codingViewList.add(endBlock)
+            viewInstructions.add(endBlockInstruction)
         }
 
-        viewToBlock[elseView] = block
-        elseView.id = View.generateViewId()
+        viewToBlock[newBlock.view] = instructionView.instruction
+        newBlock.view.id = View.generateViewId()
 
         val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
-        connectorsMap[elseView] = elseConnector
+        connectorsMap[newBlock.view] = elseConnector
         elseConnector.id = View.generateViewId()
         binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
         if (full) {
             binding.container.addView(
-                elseView,
+                newBlock.view,
                 ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
             )
         } else {
             binding.container.addView(
-                elseView,
+                newBlock.view,
                 ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt())
             )
         }
 
-        elseView.setOnDragListener { v, event ->
+        newBlock.view.setOnDragListener { v, event ->
             generateDropArea(v, event)
         }
 
         GlobalScope.launch {
             delay(100)
             runOnUiThread {
-                buildConstraints(binding.container, codingViewList)
+                buildConstraints(binding.container, viewInstructions)
             }
         }
     }
@@ -965,23 +909,22 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     @SuppressLint("InflateParams")
     private fun buildBlock(
         prevView: View?,
-        view: View,
-        block: Block,
+        instructionView: InstructionView,
         connect: Boolean = false
     ) {
         var endBlock: View? = null
         var nestedConnector: View? = null
         val connector = layoutInflater.inflate(R.layout.block_connector, null)
-        view.id = View.generateViewId()
+        instructionView.view.id = View.generateViewId()
         connector.id = View.generateViewId()
 
-        generateBreakpoint(view)
-        codingViewList.add(view)
+        instructionView.generateBreakpoint()
+        viewInstructions.add(instructionView)
 
         if (connect) {
             val endInstruction: Block
 
-            when (block) {
+            when (instructionView.instruction) {
                 is WhileInstruction -> {
                     endBlock = layoutInflater.inflate(R.layout.empty_block, null)
                     endInstruction = EndWhileInstruction()
@@ -995,27 +938,34 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                     endInstruction = FuncEndInstruction()
                 }
                 else -> {
+                    // IfInstruction
                     endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
-
-                    val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
-                    val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
-                    addElse.setOnClickListener {
-                        addElif.visibility = View.INVISIBLE
-                        addElse.visibility = View.INVISIBLE
-
-                        addStatementBlock(endBlock, ElseInstruction(), R.layout.block_else, false)
-                    }
-                    addElif.setOnClickListener {
-                        addStatementBlock(endBlock, ElifInstruction(""), R.layout.block_elif, true)
-                    }
                     endInstruction = EndInstruction()
                 }
             }
 
-            generateBreakpoint(endBlock)
+            val endInstructionView = instructionHelper.getViewByInstruction(endInstruction as Instruction)!!
+            endInstructionView.view = endBlock // TODO: Перенести в объект
+            viewInstructions.add(endInstructionView)
+            getViewInstructionByView(endBlock).generateBreakpoint()
+
+            if (instructionView.instruction is IfInstruction) {
+                val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
+                val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
+                addElse.setOnClickListener {
+                    addElif.visibility = View.INVISIBLE
+                    addElse.visibility = View.INVISIBLE
+
+                    addStatementBlock(endBlock, instructionHelper.getElseView(), instructionHelper.getElseView(), false)
+                }
+                addElif.setOnClickListener {
+                    addStatementBlock(endBlock, instructionHelper.getElifView(), instructionHelper.getElifView(), true)
+                }
+            }
+
+
             nestedConnector = layoutInflater.inflate(R.layout.block_connector, null)
 
-            codingViewList.add(endBlock)
             viewToBlock[endBlock] = endInstruction
             endBlock.id = View.generateViewId()
             nestedConnector.id = View.generateViewId()
@@ -1030,55 +980,55 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             prevView.bringToFront()
         }
 
-        if (block is BreakInstruction || block is ContinueInstruction) {
+        if (instructionView.instruction is BreakInstruction || instructionView.instruction  is ContinueInstruction) {
             binding.container.addView(
-                view,
+                instructionView.view,
                 ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt())
             )
         } else {
             binding.container.addView(
-                view,
+                instructionView.view,
                 ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
             )
         }
 
         if (nestedConnector != null) {
             binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
-            view.bringToFront()
+            instructionView.view.bringToFront()
             binding.container.addView(endBlock)
         }
 
         val set = ConstraintSet()
         set.clone(binding.container)
 
-        generateDragArea(view)
-        view.setOnDragListener { v, event ->
+        generateDragArea(instructionView.view)
+        instructionView.view.setOnDragListener { v, event ->
             generateDropArea(v, event)
         }
 
         if (prevView != null) {
-            connectorsMap[view] = connector
-            set.connect(view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
+            connectorsMap[instructionView.view] = connector
+            set.connect(instructionView.view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
 
             set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 0)
-            set.connect(connector.id, ConstraintSet.BOTTOM, view.id, ConstraintSet.TOP, 0)
-            set.connect(connector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
+            set.connect(connector.id, ConstraintSet.BOTTOM, instructionView.view.id, ConstraintSet.TOP, 0)
+            set.connect(connector.id, ConstraintSet.LEFT, instructionView.view.id, ConstraintSet.LEFT, 80)
         }
 
-        prevBlock = view
+        prevBlock = instructionView.view
 
         if (nestedConnector != null) {
             connectorsMap[endBlock!!] = nestedConnector
-            set.connect(nestedConnector.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 0)
+            set.connect(nestedConnector.id, ConstraintSet.TOP, instructionView.view.id, ConstraintSet.BOTTOM, 0)
             set.connect(nestedConnector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
-            set.connect(nestedConnector.id, ConstraintSet.LEFT, view.id, ConstraintSet.LEFT, 80)
+            set.connect(nestedConnector.id, ConstraintSet.LEFT, instructionView.view.id, ConstraintSet.LEFT, 80)
 
-            set.connect(endBlock.id, ConstraintSet.TOP, view.id, ConstraintSet.BOTTOM, 10)
+            set.connect(endBlock.id, ConstraintSet.TOP, instructionView.view.id, ConstraintSet.BOTTOM, 10)
             prevBlock = endBlock
         }
 
         set.applyTo(binding.container)
-        viewToBlock[view] = block
+        viewToBlock[instructionView.view] = instructionView.instruction
     }
 
     private fun buildAlertDialog(label: String?, message: String?): AlertDialog.Builder {
@@ -1142,8 +1092,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             if (Controller.saveProgram(
                     inputVal.text.toString(),
                     this.filesDir,
-                    viewToBlock,
-                    codingViewList
+                    viewInstructions
                 )
             ) {
                 Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
@@ -1218,5 +1167,21 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
                 }
             }
         }
+    }
+
+    private fun getViewInstructionByView(view: View): InstructionView {
+        for (vi in viewInstructions) {
+            if (vi.view == view)
+                return vi
+        }
+        throw NotFoundException("Not found")
+    }
+
+    private fun getViewInstructionByViewInBin(view: View): InstructionView {
+        for (vi in binViewList) {
+            if (vi.view == view)
+                return vi
+        }
+        throw NotFoundException("Not found")
     }
 }

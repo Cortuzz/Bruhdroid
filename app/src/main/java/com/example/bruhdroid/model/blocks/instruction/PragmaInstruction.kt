@@ -16,4 +16,8 @@ class PragmaInstruction(expression: String = ""):
 
         return false
     }
+
+    override fun clone(): PragmaInstruction {
+        return PragmaInstruction(expression)
+    }
 }

@@ -11,4 +11,8 @@ class EndWhileInstruction:
         interpreter.memory = interpreter.memory.prevMemory!!
         return false
     }
+
+    override fun clone(): EndWhileInstruction {
+        return EndWhileInstruction()
+    }
 }

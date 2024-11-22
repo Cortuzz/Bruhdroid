@@ -15,4 +15,8 @@ class WhileInstruction(expression: String = ""):
         }
         return false
     }
+
+    override fun clone(): WhileInstruction {
+        return WhileInstruction(expression)
+    }
 }

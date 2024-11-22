@@ -9,7 +9,7 @@ import com.example.bruhdroid.controller.Controller
 import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.databinding.ButtonBinding
-import com.example.bruhdroid.model.template.TemplateFactory
+import com.example.bruhdroid.view.template.TemplateFactory
 import com.example.bruhdroid.model.blocks.Block
 
 

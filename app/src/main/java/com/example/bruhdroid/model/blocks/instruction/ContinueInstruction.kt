@@ -14,4 +14,8 @@ class ContinueInstruction:
         }
         return false
     }
+
+    override fun clone(): ContinueInstruction {
+        return ContinueInstruction()
+    }
 }

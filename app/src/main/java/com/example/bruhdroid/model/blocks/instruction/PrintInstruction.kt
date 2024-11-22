@@ -28,4 +28,8 @@ class PrintInstruction(expression: String = ""):
         interpreter.notifyClients()
         return false
     }
+
+    override fun clone(): PrintInstruction {
+        return PrintInstruction(expression)
+    }
 }
