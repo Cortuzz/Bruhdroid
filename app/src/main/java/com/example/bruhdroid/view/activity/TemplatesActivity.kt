@@ -11,6 +11,7 @@ import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.databinding.ButtonBinding
 import com.example.bruhdroid.view.template.TemplateFactory
 import com.example.bruhdroid.model.blocks.instruction.Instruction
+import com.example.bruhdroid.view.instruction.InstructionHelper
 
 
 class TemplatesActivity : AppCompatActivity() {
@@ -59,7 +60,14 @@ class TemplatesActivity : AppCompatActivity() {
 
             buttonBinding.root.layoutParams = params
             button.setOnClickListener {
-                openCodingActivity(Controller.loadProgram(file), file.nameWithoutExtension)
+                openCodingActivity(
+                    Controller.loadProgram(
+                        file,
+                        InstructionHelper(layoutInflater).getInstructionViews()
+                            .map { vi -> vi.instruction }
+                    ),
+                    file.nameWithoutExtension
+                )
             }
 
             binding.savedPrograms.addView(buttonBinding.root)

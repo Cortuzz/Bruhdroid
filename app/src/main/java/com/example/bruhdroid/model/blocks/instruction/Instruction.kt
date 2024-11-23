@@ -6,10 +6,18 @@ import java.io.Serializable
 
 abstract class Instruction(
     val instruction: BlockInstruction,
-    var expression: String
+    var expression: String,
 ) : Serializable {
     var breakpoint: Boolean = false
     abstract fun evaluate(interpreter: Interpreter): Boolean
 
     abstract fun clone(): Instruction
+
+    fun getJsonEncoding(): String {
+        return this.javaClass.name
+    }
+
+    fun compareJsonEncoding(name: String): Boolean {
+        return getJsonEncoding() == name
+    }
 }

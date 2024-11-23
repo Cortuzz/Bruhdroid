@@ -1,6 +1,7 @@
 package com.example.bruhdroid.controller
 
 import android.content.res.Configuration
+import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.R
@@ -8,6 +9,7 @@ import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.exception.RuntimeError
 import com.example.bruhdroid.exception.UnhandledError
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.view.instruction.InstructionHelper
 import com.example.bruhdroid.view.instruction.InstructionView
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -31,6 +33,11 @@ class Controller : Observable() {
             return try {
                 val file = File(dir, "$name.lapp")
                 file.setWritable(true)
+
+                viewInstructions.forEach { vi -> vi.instruction.expression =
+                    vi.view.findViewById<EditText>(R.id.expression)?.text.toString()
+                }
+
                 file.writeText(parseBlocks(viewInstructions).toString())
                 true
             } catch (e: Exception) {
@@ -38,29 +45,7 @@ class Controller : Observable() {
             }
         }
 
-        fun loadProgram(file: File): Array<Instruction> {
-            val blocksMap = mapOf(
-                "SET" to SetInstruction(),
-                "INIT" to InitInstruction(),
-                "PRINT" to PrintInstruction(),
-                "PRAGMA" to PragmaInstruction(),
-                "INPUT" to InputInstruction(),
-                "IF" to IfInstruction(),
-                "ELIF" to ElifInstruction(),
-                "ELSE" to ElseInstruction(),
-                "WHILE" to WhileInstruction(),
-                "END" to EndInstruction(),
-                "END_WHILE" to EndWhileInstruction(),
-                "BREAK" to BreakInstruction(),
-                "CONTINUE" to ContinueInstruction(),
-                "FUNC" to FuncInstruction(),
-                "FUNC_END" to FuncEndInstruction(),
-                "FUNC_CALL" to CallInstruction(),
-                "RETURN" to ReturnInstruction(),
-                "FOR" to ForInstruction(),
-                "END_FOR" to EndForInstruction()
-            )
-
+        fun loadProgram(file: File, allInstructions: List<Instruction>): Array<Instruction> {
             val instructions = mutableListOf<Instruction>()
             val text = file.readText()
 
@@ -69,7 +54,10 @@ class Controller : Observable() {
                 for (i in 0 until jsonArray.length()) {
                     val jsonObject = jsonArray[i] as JSONObject
 
-                    val instruction = blocksMap[jsonObject["instruction"]]!!
+                    val instruction = getInstructionByName(
+                        jsonObject["instruction"].toString(),
+                        allInstructions
+                    )!!
                     val expression = jsonObject["expression"] as String
 
                     instruction.expression = expression
@@ -82,6 +70,17 @@ class Controller : Observable() {
             return instructions.toTypedArray()
         }
 
+        private fun getInstructionByName(
+            instructionName: String,
+            allInstructions: List<Instruction>
+        ): Instruction? {
+            for (instruction in allInstructions) {
+                if (instruction.compareJsonEncoding(instructionName))
+                    return instruction
+            }
+            return null
+        }
+
         private fun parseBlocks(
             viewInstructions: MutableList<InstructionView>
         ): JSONArray {
@@ -90,7 +89,7 @@ class Controller : Observable() {
                 val jsonObject = JSONObject()
                 // TODO
 
-                jsonObject.put("instruction", vi.instruction.instruction)
+                jsonObject.put("instruction", vi.instruction.getJsonEncoding())
                 jsonObject.put("expression", vi.instruction.expression)
                 jsonArray.put(jsonObject)
             }
@@ -114,7 +113,7 @@ class Controller : Observable() {
         viewInstructions.forEach { vi -> vi.instruction.expression =
             vi.view.findViewById<EditText>(R.id.expression)?.text.toString()
         }
-        val blocks = viewInstructions.map { vi -> vi.instruction } // TODO
+        val blocks = viewInstructions.map { vi -> vi.instruction }
 
         try {
             interpreter.initBlocks(blocks)
