@@ -18,10 +18,14 @@ import androidx.databinding.DataBindingUtil
 import com.example.bruhdroid.controller.Controller
 import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.*
-import com.example.bruhdroid.view.category.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.model.blocks.instruction.condition.EndInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.IfInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.*
+import com.example.bruhdroid.model.blocks.instruction.function.FuncEndInstruction
+import com.example.bruhdroid.model.blocks.instruction.function.FuncInstruction
 import com.example.bruhdroid.view.category.CategoryHelper
 import com.example.bruhdroid.view.instruction.InstructionHelper
 import com.example.bruhdroid.view.instruction.InstructionView

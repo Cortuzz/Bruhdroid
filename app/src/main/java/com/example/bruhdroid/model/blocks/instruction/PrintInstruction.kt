@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.blocks.BlockInstruction
 class PrintInstruction(expression: String = ""):
     Instruction(BlockInstruction.PRINT, expression) {
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         val rawList = interpreter.split(expression)
         if (interpreter.pragma["IO_MESSAGE"] == "true") {
             interpreter.output += "I/O: "
@@ -27,7 +27,6 @@ class PrintInstruction(expression: String = ""):
             }
         }
         interpreter.notifyClients()
-        return false
     }
 
     override fun clone(): PrintInstruction {

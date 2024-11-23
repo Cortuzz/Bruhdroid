@@ -6,10 +6,8 @@ import com.example.bruhdroid.model.blocks.BlockInstruction
 class InputInstruction(expression: String = ""):
     Instruction(BlockInstruction.INPUT, expression) {
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         interpreter.waitingForInput = true
-
-        return false
     }
 
     override fun clone(): InputInstruction {

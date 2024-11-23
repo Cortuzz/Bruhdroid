@@ -1,18 +1,20 @@
-package com.example.bruhdroid.model.blocks.instruction
+package com.example.bruhdroid.model.blocks.instruction.cycle
 
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 
 class BreakInstruction:
-    Instruction(BlockInstruction.BREAK, "") {
+    CycleInstruction(BlockInstruction.BREAK, "") {
+    override fun cycleSkipChange(): Int {
+        return 0
+    }
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         try {
-            interpreter.skipCycle()
+            skipCycle(interpreter)
         } catch (e: Exception) {
             interpreter.throwOutOfCycleError("It is not possible to use BREAK outside the context of a loop")
         }
-        return false
     }
 
     override fun clone(): BreakInstruction {

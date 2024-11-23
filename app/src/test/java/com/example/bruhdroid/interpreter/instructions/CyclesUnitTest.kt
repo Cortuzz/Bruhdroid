@@ -1,11 +1,10 @@
 package com.example.bruhdroid.interpreter.instructions
 
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.instruction.EndWhileInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.EndWhileInstruction
 import com.example.bruhdroid.model.blocks.instruction.InitInstruction
 import com.example.bruhdroid.model.blocks.instruction.SetInstruction
-import com.example.bruhdroid.model.blocks.instruction.WhileInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.WhileInstruction
 import org.junit.Assert
 import org.junit.Test
 

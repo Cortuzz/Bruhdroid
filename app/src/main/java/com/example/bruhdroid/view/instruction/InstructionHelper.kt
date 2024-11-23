@@ -3,6 +3,15 @@ package com.example.bruhdroid.view.instruction
 import android.view.LayoutInflater
 import com.example.bruhdroid.R
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.model.blocks.instruction.condition.ElifInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.ElseInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.EndInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.IfInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.*
+import com.example.bruhdroid.model.blocks.instruction.CallInstruction
+import com.example.bruhdroid.model.blocks.instruction.function.FuncEndInstruction
+import com.example.bruhdroid.model.blocks.instruction.function.FuncInstruction
+import com.example.bruhdroid.model.blocks.instruction.ReturnInstruction
 import com.example.bruhdroid.view.category.CategoryHelper
 
 class InstructionHelper(private val layoutInflater: LayoutInflater) {

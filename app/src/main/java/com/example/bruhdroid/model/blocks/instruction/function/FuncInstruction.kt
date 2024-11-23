@@ -1,13 +1,17 @@
-package com.example.bruhdroid.model.blocks.instruction
+package com.example.bruhdroid.model.blocks.instruction.function
 
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
+import com.example.bruhdroid.model.blocks.instruction.Instruction
 import com.example.bruhdroid.model.memory.Memory
 
 class FuncInstruction(expression: String = ""):
-    Instruction(BlockInstruction.FUNC, expression) {
+    FunctionInstruction(BlockInstruction.FUNC, expression) {
+    override fun funcSkipChange(): Int {
+        return 1
+    }
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         val name = interpreter.parseFunc(expression)["name"]?.get(0)
         val argNames = interpreter.parseFunc(expression)["args"]!!
         interpreter.memory = Memory(interpreter.memory, "METHOD $name SCOPE")
@@ -19,8 +23,8 @@ class FuncInstruction(expression: String = ""):
         }
 
         if (interpreter.currentFunction.last() != name) {
-            interpreter.skipFunc()
-            return false
+            skipFunc(interpreter)
+            return
         }
         val args = interpreter.args.removeLast()
         for (i in args.indices) {
@@ -28,7 +32,6 @@ class FuncInstruction(expression: String = ""):
             val arg = argNames[i]
             interpreter.parseRawBlock("$arg = $value", true)
         }
-        return false
     }
 
     override fun clone(): FuncInstruction {

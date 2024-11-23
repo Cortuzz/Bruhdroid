@@ -9,7 +9,7 @@ abstract class Instruction(
     var expression: String,
 ) : Serializable {
     var breakpoint: Boolean = false
-    abstract fun evaluate(interpreter: Interpreter): Boolean
+    abstract fun evaluate(interpreter: Interpreter)
 
     abstract fun clone(): Instruction
 

@@ -20,7 +20,7 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
     var waitingForInput = false
     var memory = Memory(null, "GLOBAL SCOPE")
 
-    private var instructions = instructions_?.toMutableList()
+    var instructions = instructions_?.toMutableList()
     val memoryPresenter = MemoryPresenter()
     private var input = ""
     var currentLine = -1
@@ -135,8 +135,7 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         val block = instructions!![++currentLine]
 
         try {
-            if (block.evaluate(this))
-                skipFalseBranches()
+            block.evaluate(this)
         } catch (e: RuntimeError) {
             throw RuntimeError(
                 "${e.message}\nAt line: ${currentLine + 1}, " +
@@ -146,46 +145,6 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
             throw UnhandledError(
                 "At line: ${currentLine + 1}, At instruction: ${block.instruction}\n\n${e.stackTraceToString()}"
             )
-        }
-    }
-
-    private fun skipFalseBranches() {
-        var count = 1
-        while (currentLine < instructions!!.size - 1) {
-            val block = instructions!![++currentLine]
-
-            if (block.instruction == BlockInstruction.IF) {
-                count++
-            }
-            if (block.instruction == BlockInstruction.END) {
-                count--
-            }
-
-            if (count == 0 || (count == 1 && (block.instruction == BlockInstruction.ELIF ||
-                        block.instruction == BlockInstruction.ELSE))
-            ) {
-                currentLine--
-                return
-            }
-        }
-    }
-
-    fun skipCycle() {
-        var count = 1
-        memory = memory.prevMemory!!
-        while (currentLine < instructions!!.size - 1) {
-            val block = instructions!![++currentLine]
-
-            if (block.instruction in listOf(BlockInstruction.WHILE, BlockInstruction.FOR)) {
-                count++
-            }
-            if (block.instruction in listOf(BlockInstruction.END_WHILE, BlockInstruction.END_FOR)) {
-                count--
-            }
-
-            if (count == 0) {
-                return
-            }
         }
     }
 
@@ -255,25 +214,6 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         }
 
         return mapOf("name" to name, "args" to args)
-    }
-
-    fun skipFunc() {
-        var count = 1
-        memory = memory.prevMemory!!
-        while (currentLine < instructions!!.size - 1) {
-            val block = instructions!![++currentLine]
-
-            if (block.instruction == BlockInstruction.FUNC) {
-                count++
-            }
-            if (block.instruction == BlockInstruction.FUNC_END) {
-                count--
-            }
-
-            if (count == 0) {
-                return
-            }
-        }
     }
 
     fun removeFunctionMemory() {

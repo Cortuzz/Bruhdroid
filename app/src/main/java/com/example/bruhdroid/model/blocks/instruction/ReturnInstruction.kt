@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.blocks.BlockInstruction
 class ReturnInstruction(expression: String = ""):
     Instruction(BlockInstruction.RETURN, expression) {
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         val value = interpreter.parseRawBlock(expression)
         val funcName =  interpreter.currentFunction.removeLast()
         val varName =  interpreter.functionsVarsMap[funcName]!!.removeLast()
@@ -14,8 +14,6 @@ class ReturnInstruction(expression: String = ""):
 
         interpreter.removeFunctionMemory()
         interpreter.memory.pushToLocalMemory(varName, value)
-
-        return false
     }
 
     override fun clone(): ReturnInstruction {

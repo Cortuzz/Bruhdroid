@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.blocks.BlockInstruction
 class CallInstruction(expression: String = ""):
     Instruction(BlockInstruction.FUNC_CALL, expression) {
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         val exp = expression.split("=").toMutableList()
 
         val name = exp.removeFirst().replace(" ", "")
@@ -33,9 +33,7 @@ class CallInstruction(expression: String = ""):
 
             interpreter.currentFunction.add(funcName)
             interpreter.currentLine = interpreter.functionLines[funcName]!!.removeLast() - 1
-
         }
-        return false
     }
 
     override fun clone(): CallInstruction {

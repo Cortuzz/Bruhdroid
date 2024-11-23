@@ -1,15 +1,17 @@
-package com.example.bruhdroid.model.blocks.instruction
+package com.example.bruhdroid.model.blocks.instruction.cycle
 
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 
 class EndForInstruction:
-    Instruction(BlockInstruction.END_FOR, "") {
+    CycleInstruction(BlockInstruction.END_FOR, "") {
+    override fun cycleSkipChange(): Int {
+        return -1
+    }
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         interpreter.currentLine = interpreter.cycleLines.removeLast() - 1
         interpreter.memory = interpreter.memory.prevMemory!!
-        return false
     }
 
     override fun clone(): EndForInstruction {

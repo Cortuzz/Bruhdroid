@@ -1,15 +1,17 @@
-package com.example.bruhdroid.model.blocks.instruction
+package com.example.bruhdroid.model.blocks.instruction.condition
 
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 
 class EndInstruction:
-    Instruction(BlockInstruction.END, "") {
+    ConditionInstruction(BlockInstruction.END, "") {
+    override fun conditionSkipChange(count: Int, interpreter: Interpreter): ConditionSkipDto {
+        return ConditionSkipDto(-1, false)
+    }
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         interpreter.appliedConditions.removeLast()
         interpreter.memory = interpreter.memory.prevMemory!!
-        return false
     }
 
     override fun clone(): EndInstruction {

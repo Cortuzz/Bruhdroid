@@ -2,10 +2,16 @@ package com.example.bruhdroid.view.template
 
 import com.example.bruhdroid.databinding.ActivityTemplatesBinding
 import com.example.bruhdroid.model.blocks.instruction.*
-import com.example.bruhdroid.model.blocks.instruction.ForInstruction
-import com.example.bruhdroid.model.blocks.instruction.FuncInstruction
-import com.example.bruhdroid.model.blocks.instruction.IfInstruction
-import com.example.bruhdroid.model.blocks.instruction.WhileInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.ForInstruction
+import com.example.bruhdroid.model.blocks.instruction.function.FuncInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.EndInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.IfInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.EndForInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.EndWhileInstruction
+import com.example.bruhdroid.model.blocks.instruction.cycle.WhileInstruction
+import com.example.bruhdroid.model.blocks.instruction.CallInstruction
+import com.example.bruhdroid.model.blocks.instruction.function.FuncEndInstruction
+import com.example.bruhdroid.model.blocks.instruction.ReturnInstruction
 
 
 class TemplateFactory(binding: ActivityTemplatesBinding) {

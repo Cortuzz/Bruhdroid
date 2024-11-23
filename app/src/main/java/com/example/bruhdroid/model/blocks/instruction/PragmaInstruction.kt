@@ -6,7 +6,7 @@ import com.example.bruhdroid.model.blocks.BlockInstruction
 class PragmaInstruction(expression: String = ""):
     Instruction(BlockInstruction.PRAGMA, expression) {
 
-    override fun evaluate(interpreter: Interpreter): Boolean {
+    override fun evaluate(interpreter: Interpreter) {
         val rawList = interpreter.split(expression)
         for (raw in rawList) {
             interpreter.parsePragma(raw)
@@ -14,8 +14,6 @@ class PragmaInstruction(expression: String = ""):
 
         interpreter.pragmaUpdate()
         interpreter.notifyClients()
-
-        return false
     }
 
     override fun clone(): PragmaInstruction {
