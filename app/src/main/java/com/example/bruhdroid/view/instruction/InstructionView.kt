@@ -15,6 +15,7 @@ open class InstructionView(
     val drawable: Int,
     val layoutInflater: LayoutInflater,
     val instruction: Instruction,
+    val categoryType: Int?,
     val endInstructionView: InstructionView? = null,
     val hasText: Boolean = true,
 ) {
@@ -27,6 +28,7 @@ open class InstructionView(
             drawable,
             layoutInflater,
             instruction.clone(),
+            categoryType,
             endInstructionView?.clone(),
             hasText
         )

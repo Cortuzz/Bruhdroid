@@ -1,3 +1,9 @@
 package com.example.bruhdroid.view.category
 
-class Category(var id: Int, var title: String)
+import com.example.bruhdroid.view.instruction.InstructionView
+
+class Category(
+    var id: Int,
+    var title: String,
+    val instructionViews: MutableList<InstructionView> = mutableListOf()
+)

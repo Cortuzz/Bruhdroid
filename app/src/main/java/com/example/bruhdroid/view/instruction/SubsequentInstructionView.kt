@@ -16,7 +16,7 @@ class SubsequentInstructionView(
     instruction: Instruction,
     hasText: Boolean = true,
     endInstructionView: InstructionView? = null,
-): InstructionView(label, drawable, layoutInflater, instruction, endInstructionView, hasText) {
+): InstructionView(label, drawable, layoutInflater, instruction, null, endInstructionView, hasText) {
     override fun clone(): InstructionView {
         return SubsequentInstructionView(
             label,

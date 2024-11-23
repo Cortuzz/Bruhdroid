@@ -3,50 +3,53 @@ package com.example.bruhdroid.view.instruction
 import android.view.LayoutInflater
 import com.example.bruhdroid.R
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.view.category.CategoryHelper
 
 class InstructionHelper(private val layoutInflater: LayoutInflater) {
     private val instructionViews = listOf(
         InstructionView("Pragma", R.drawable.ic_block_pragma,
-            layoutInflater, PragmaInstruction()
+            layoutInflater, PragmaInstruction(), CategoryHelper.getIoCategory().id
         ),
         InstructionView("Print", R.drawable.ic_block_print,
-            layoutInflater, PrintInstruction()
+            layoutInflater, PrintInstruction(), CategoryHelper.getIoCategory().id
         ),
         InstructionView("Input", R.drawable.ic_block_input,
-            layoutInflater, InputInstruction()
+            layoutInflater, InputInstruction(), CategoryHelper.getIoCategory().id
         ),
         InstructionView("Init", R.drawable.ic_block_init,
-            layoutInflater, InitInstruction()
+            layoutInflater, InitInstruction(), CategoryHelper.getVarCategory().id
         ),
         InstructionView("While", R.drawable.ic_block_while,
-            layoutInflater, WhileInstruction(),
+            layoutInflater, WhileInstruction(), CategoryHelper.getCycleCategory().id,
             getEndWhileView()
         ),
         InstructionView("If", R.drawable.ic_block_if,
-            layoutInflater, IfInstruction(),
+            layoutInflater, IfInstruction(), CategoryHelper.getConditionCategory().id
             // TODO
         ),
         InstructionView("Set", R.drawable.ic_block_set,
-            layoutInflater, SetInstruction()
+            layoutInflater, SetInstruction(), CategoryHelper.getVarCategory().id
         ),
         InstructionView("Break", R.drawable.ic_block_break,
-            layoutInflater, BreakInstruction(), hasText = false
+            layoutInflater, BreakInstruction(),
+            CategoryHelper.getCycleCategory().id, hasText = false
         ),
         InstructionView("Continue", R.drawable.ic_block_continue,
-            layoutInflater, ContinueInstruction(), hasText = false
+            layoutInflater, ContinueInstruction(),
+            CategoryHelper.getCycleCategory().id, hasText = false
         ),
         InstructionView("Method", R.drawable.ic_block_func,
-            layoutInflater, FuncInstruction(),
+            layoutInflater, FuncInstruction(), CategoryHelper.getFuncCategory().id,
             getEndFuncView()
         ),
         InstructionView("Return", R.drawable.ic_block_return,
-            layoutInflater, ReturnInstruction()
+            layoutInflater, ReturnInstruction(), CategoryHelper.getFuncCategory().id
         ),
         InstructionView("Call", R.drawable.ic_block_call,
-            layoutInflater, CallInstruction()
+            layoutInflater, CallInstruction(), CategoryHelper.getFuncCategory().id
         ),
         InstructionView("For", R.drawable.ic_block_for,
-            layoutInflater, ForInstruction(),
+            layoutInflater, ForInstruction(), CategoryHelper.getCycleCategory().id,
             getEndForView()
         ),
         SubsequentInstructionView("", R.layout.condition_block_end,

@@ -15,16 +15,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.bruhdroid.controller.Controller
 import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.*
-import com.example.bruhdroid.view.category.Category
 import com.example.bruhdroid.view.category.CategoryAdapter
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.view.category.CategoryHelper
 import com.example.bruhdroid.view.instruction.InstructionHelper
 import com.example.bruhdroid.view.instruction.InstructionView
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -35,9 +33,9 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.properties.Delegates
 
-// TODO: Пофиксить дебагер и тесты
+// TODO: Пофиксить дебагер
 
-class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategoryListener {
+class CodingActivity : AppCompatActivity(), Observer {
     private enum class Debug {
         NEXT, BREAKPOINT
     }
@@ -46,7 +44,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private var viewInstructions = mutableListOf<InstructionView>()
     private var binViewList = LinkedList<InstructionView>()
     private var connectorsMap = mutableMapOf<View, View>()
-    private var categoryBlocks = LinkedList<LinkedList<View>>()
     private var prevBlock: View? = null
     private var prevBlockInBin: View? = null
     private var debugMode = false
@@ -55,16 +52,14 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
     private lateinit var currentDrag: View
 
     private lateinit var binding: ActivityCodingBinding
-    private lateinit var bindingSheetMenu: BottomsheetFragmentBinding
     private lateinit var bindingSheetBin: BottomsheetBinBinding
     private lateinit var bindingSheetConsole: BottomsheetConsoleBinding
-    private lateinit var categoryRecycler: RecyclerView
-    private lateinit var categoryAdapter: CategoryAdapter
 
     private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
     private lateinit var instructionHelper: InstructionHelper
+    private lateinit var categoryHelper: CategoryHelper
     private var dp by Delegates.notNull<Float>()
 
     private val interpreter = Interpreter()
@@ -85,8 +80,20 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
         dp = this.resources.displayMetrics.density
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
         instructionHelper = InstructionHelper(layoutInflater)
+        categoryHelper = CategoryHelper(this, layoutInflater, dp)
 
-        setBindingSheetBlocks()
+        categoryHelper.updateCategories(instructionHelper.getInstructionViews())
+
+        for (instructionView in categoryHelper.getInstructionViews()) {
+            instructionView.view.setOnClickListener {
+                val newView = instructionView.clone()
+                newView.updateBlockView(this)
+                buildBlock(
+                    prevBlock, newView,
+                    newView.instruction.instruction in startConnectingInstructions
+                )
+            }
+        }
 
         bindingSheetConsole =
             DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_console, null, false)
@@ -118,7 +125,7 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             Controller().changeTheme(resources.configuration.uiMode)
         }
         binding.menuButton.setOnClickListener {
-            bottomSheetMenu.show()
+            categoryHelper.show()
         }
         binding.binButton.setOnClickListener {
             bottomSheetBin.show()
@@ -183,90 +190,6 @@ class CodingActivity : AppCompatActivity(), Observer, CategoryAdapter.OnCategory
             binding.debugPanel.visibility = View.INVISIBLE
             binding.mainPanel.visibility = View.VISIBLE
             interpreter.clear()
-        }
-    }
-
-    private fun setBindingSheetBlocks() {
-        bindingSheetMenu =
-            DataBindingUtil.inflate(layoutInflater, R.layout.bottomsheet_fragment, null, false)
-        bottomSheetMenu = BottomSheetDialog(this@CodingActivity)
-        bottomSheetMenu.setContentView(bindingSheetMenu.root)
-
-        val categoryList = LinkedList<Category>()
-
-        categoryList.add(Category(0, "Variables | "))
-        categoryList.add(Category(1, "Standard io | "))
-        categoryList.add(Category(2, "Cycles | "))
-        categoryList.add(Category(3, "Conditions | "))
-        categoryList.add(Category(4, "Functions"))
-
-        categoryRecycler(categoryList)
-
-        val firstBlockCategory = LinkedList<View>()
-        val secondBlockCategory = LinkedList<View>()
-        val thirdBlockCategory = LinkedList<View>()
-        val fourthBlockCategory = LinkedList<View>()
-        val fifthBlockCategory = LinkedList<View>()
-
-        for (instructionView in instructionHelper.getInstructionViews()) {
-            val view = instructionView.updateBlockView(this)
-
-            view.setOnClickListener {
-                instructionView.updateBlockView(this)
-                buildBlock(
-                    prevBlock, instructionView,
-                    instructionView.instruction.instruction in startConnectingInstructions
-                )
-            }
-            when (instructionView.instruction.instruction) {
-                in listOf(BlockInstruction.INIT, BlockInstruction.SET) -> firstBlockCategory.add(view)
-                in listOf(
-                    BlockInstruction.PRAGMA,
-                    BlockInstruction.INPUT,
-                    BlockInstruction.PRINT
-                ) -> secondBlockCategory.add(view)
-                in listOf(
-                    BlockInstruction.FOR,
-                    BlockInstruction.WHILE,
-                    BlockInstruction.BREAK,
-                    BlockInstruction.CONTINUE
-                ) -> thirdBlockCategory.add(view)
-                in listOf(BlockInstruction.IF) -> fourthBlockCategory.add(view)
-                in listOf(
-                    BlockInstruction.FUNC,
-                    BlockInstruction.RETURN,
-                    BlockInstruction.FUNC_CALL
-                ) -> fifthBlockCategory.add(view)
-                else -> {}
-            }
-        }
-
-        categoryBlocks.add(firstBlockCategory)
-        categoryBlocks.add(secondBlockCategory)
-        categoryBlocks.add(thirdBlockCategory)
-        categoryBlocks.add(fourthBlockCategory)
-        categoryBlocks.add(fifthBlockCategory)
-
-        onCategoryClick(0)
-    }
-
-    private fun categoryRecycler(categoryList: LinkedList<Category>) {
-        val layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
-        categoryRecycler = bindingSheetMenu.categoryRecycler
-        categoryRecycler.layoutManager = layoutManager
-        categoryAdapter = CategoryAdapter(this, categoryList, this)
-        categoryRecycler.adapter = categoryAdapter
-    }
-
-    override fun onCategoryClick(position: Int) {
-        bindingSheetMenu.blocks.removeAllViews()
-        val blockMenuParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            (110 * dp).toInt()
-        )
-
-        for (view in categoryBlocks[position]) {
-            bindingSheetMenu.blocks.addView(view, blockMenuParams)
         }
     }
 
