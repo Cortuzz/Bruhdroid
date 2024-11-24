@@ -3,7 +3,6 @@ package com.example.bruhdroid.model
 import android.annotation.SuppressLint
 import com.example.bruhdroid.exception.*
 import com.example.bruhdroid.model.blocks.IDataPresenter
-import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.instruction.Instruction
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.model.memory.MemoryPresenter
@@ -25,11 +24,7 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
     private var input = ""
     var currentLine = -1
 
-    var pragma: MutableMap<String, String> = mutableMapOf(
-        "INIT_MESSAGE" to "true",
-        "IO_MESSAGE" to "true",
-        "IO_LINES" to "10"
-    )
+    var pragma: MutableMap<String, String> = getPragmaDefaults()
 
     private var parseMap: MutableMap<String, List<Operation>> = mutableMapOf()
     var ioLines = 0
@@ -69,11 +64,11 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         return memoryPresenter.getMemoryData(memory)
     }
 
-    private fun pragmaClear() {
-        pragma = mutableMapOf(
-            "INIT_MESSAGE" to "true",
-            "IO_MESSAGE" to "true",
-            "IO_LINES" to "10"
+    private fun getPragmaDefaults(): MutableMap<String, String> {
+        return mutableMapOf(
+            "INIT_MESSAGE" to "true", // Выводить ли приветственное сообщение при запуске
+            "IO_MESSAGE" to "true", // Выводить ли "I/O:" при каждом консольном выводе
+            "IO_LINES" to "10" // Сколько линий в консоли будет отображаться одновременно
         )
     }
 
@@ -107,7 +102,7 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         memory = Memory(null, "GLOBAL SCOPE")
         currentLine = -1
         ioLines = 0
-        pragmaClear()
+        pragma = getPragmaDefaults()
         pragmaUpdate()
     }
 
@@ -214,6 +209,16 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         }
 
         return mapOf("name" to name, "args" to args)
+    }
+
+    fun removeFunctionMemory() {
+        while (true) {
+            if (memory.scope.contains("METHOD")) {
+                break
+            }
+            memory = memory.prevMemory!!
+        }
+        memory = memory.prevMemory!!
     }
 
     fun increaseIoLines() {
