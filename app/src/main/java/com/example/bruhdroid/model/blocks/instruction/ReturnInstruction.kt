@@ -12,7 +12,7 @@ class ReturnInstruction(expression: String = ""):
         val varName =  interpreter.functionsVarsMap[funcName]!!.removeLast()
         interpreter.currentLine =  interpreter.funcVarsLines.removeLast()
 
-        interpreter.removeFunctionMemory()
+        interpreter.memory = interpreter.memory.exitMemoryFunctionStack()
         interpreter.memory.pushToLocalMemory(varName, value)
     }
 

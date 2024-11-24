@@ -1,11 +1,9 @@
 package com.example.bruhdroid.model.memory
 
 import com.example.bruhdroid.exception.StackCorruptionError
-import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 import com.example.bruhdroid.model.blocks.Variable
 import com.example.bruhdroid.model.blocks.valuable.ListValuable
-import com.example.bruhdroid.model.blocks.valuable.NullValuable
 
 class Memory(val prevMemory: Memory?, val scope: String) {
     private val stack: MutableMap<String, Valuable> = mutableMapOf()
@@ -39,6 +37,18 @@ class Memory(val prevMemory: Memory?, val scope: String) {
 
     fun get(address: String): Valuable? {
         return stack[address]
+    }
+
+    fun exitMemoryFunctionStack(): Memory {
+        var tMemory: Memory = this
+
+        while (true) {
+            if (tMemory.scope.contains("METHOD")) {
+                break
+            }
+            tMemory = prevMemory!!
+        }
+        return tMemory.prevMemory!!
     }
 
     fun throwStackError(address: String) {
