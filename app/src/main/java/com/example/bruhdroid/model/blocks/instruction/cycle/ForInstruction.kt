@@ -10,6 +10,10 @@ class ForInstruction(expression: String = ""):
         return 1
     }
 
+    override fun isStartInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         val raw = expression.split(",")
         if (interpreter.currentLine !in interpreter.forLines) {

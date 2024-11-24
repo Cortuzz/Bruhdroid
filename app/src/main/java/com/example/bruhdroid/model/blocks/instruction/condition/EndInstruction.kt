@@ -9,6 +9,10 @@ class EndInstruction:
         return ConditionSkipDto(-1, false)
     }
 
+    override fun isEndInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         interpreter.appliedConditions.removeLast()
         interpreter.memory = interpreter.memory.prevMemory!!

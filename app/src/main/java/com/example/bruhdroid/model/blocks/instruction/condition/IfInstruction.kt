@@ -10,6 +10,10 @@ class IfInstruction(expression: String = ""):
         return ConditionSkipDto(1, false)
     }
 
+    override fun isStartInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         val statement = interpreter.checkStatement(expression)
         interpreter.appliedConditions.add(statement)

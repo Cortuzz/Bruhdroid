@@ -9,6 +9,10 @@ class EndForInstruction:
         return -1
     }
 
+    override fun isEndInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         interpreter.currentLine = interpreter.cycleLines.removeLast() - 1
         interpreter.memory = interpreter.memory.prevMemory!!

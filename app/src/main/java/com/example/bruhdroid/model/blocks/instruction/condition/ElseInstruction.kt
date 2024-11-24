@@ -13,6 +13,14 @@ class ElseInstruction:
         return ConditionSkipDto(0, true)
     }
 
+    override fun isStartInstruction(): Boolean {
+        return true
+    }
+
+    override fun isEndInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         if (interpreter.appliedConditions.last()) {
             skipFalseBranches(interpreter)

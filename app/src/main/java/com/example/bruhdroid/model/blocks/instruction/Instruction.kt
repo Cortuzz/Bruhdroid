@@ -9,9 +9,18 @@ abstract class Instruction(
     var expression: String,
 ) : Serializable {
     var breakpoint: Boolean = false
+
     abstract fun evaluate(interpreter: Interpreter)
 
     abstract fun clone(): Instruction
+
+    open fun isStartInstruction(): Boolean {
+        return false
+    }
+
+    open fun isEndInstruction(): Boolean {
+        return false
+    }
 
     fun getJsonEncoding(): String {
         return this.javaClass.name

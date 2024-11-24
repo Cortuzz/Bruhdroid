@@ -10,6 +10,10 @@ class FuncEndInstruction:
         return -1
     }
 
+    override fun isEndInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
 
     }

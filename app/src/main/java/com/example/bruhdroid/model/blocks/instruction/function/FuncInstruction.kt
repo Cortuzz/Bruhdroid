@@ -11,6 +11,10 @@ class FuncInstruction(expression: String = ""):
         return 1
     }
 
+    override fun isStartInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         val name = interpreter.parseFunc(expression)["name"]?.get(0)
         val argNames = interpreter.parseFunc(expression)["args"]!!

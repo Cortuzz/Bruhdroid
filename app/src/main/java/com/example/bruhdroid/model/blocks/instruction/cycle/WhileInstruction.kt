@@ -10,6 +10,10 @@ class WhileInstruction(expression: String = ""):
         return 1
     }
 
+    override fun isStartInstruction(): Boolean {
+        return true
+    }
+
     override fun evaluate(interpreter: Interpreter) {
         interpreter.memory = Memory(interpreter.memory, "WHILE ITERATION SCOPE")
         if (interpreter.checkStatement(expression)) {
