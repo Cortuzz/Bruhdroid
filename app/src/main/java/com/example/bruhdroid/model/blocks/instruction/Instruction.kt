@@ -18,6 +18,10 @@ abstract class Instruction(
         return false
     }
 
+    open fun isMiddleInstruction(): Boolean {
+        return false
+    }
+
     open fun isEndInstruction(): Boolean {
         return false
     }

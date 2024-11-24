@@ -13,11 +13,7 @@ class ElifInstruction(expression: String = ""):
         return ConditionSkipDto(0, true)
     }
 
-    override fun isStartInstruction(): Boolean {
-        return true
-    }
-
-    override fun isEndInstruction(): Boolean {
+    override fun isMiddleInstruction(): Boolean {
         return true
     }
 

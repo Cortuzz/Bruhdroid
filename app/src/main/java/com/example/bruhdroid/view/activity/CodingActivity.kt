@@ -21,6 +21,7 @@ import com.example.bruhdroid.databinding.*
 import com.example.bruhdroid.model.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.model.blocks.instruction.condition.ConditionInstruction
 import com.example.bruhdroid.model.blocks.instruction.condition.EndInstruction
 import com.example.bruhdroid.model.blocks.instruction.condition.IfInstruction
 import com.example.bruhdroid.model.blocks.instruction.cycle.*
@@ -68,14 +69,6 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     private val interpreter = Interpreter()
     private val controller = Controller()
-    private val startConnectingInstructions = listOf(
-        BlockInstruction.WHILE, BlockInstruction.IF,
-        BlockInstruction.FUNC, BlockInstruction.FOR
-    )
-    private val connectingInstructions = listOf(
-        BlockInstruction.END, BlockInstruction.END_WHILE,
-        BlockInstruction.FUNC_END, BlockInstruction.END_FOR
-    )
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -94,7 +87,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 newView.updateBlockView(this)
                 buildBlock(
                     prevBlock, newView,
-                    newView.instruction.instruction in startConnectingInstructions
+                    newView.instruction.isStartInstruction()
                 )
             }
         }
@@ -257,7 +250,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                     }
                 }
 
-                if (viewToBlock[view]!!.instruction !in connectingInstructions) {
+                if (!viewToBlock[view]!!.isEndInstruction()) {
                     generateDragArea(view)
                     runOnUiThread {
                         binding.container.addView(
@@ -334,9 +327,9 @@ class CodingActivity : AppCompatActivity(), Observer {
             DragEvent.ACTION_DROP -> {
                 val instructionView = getViewInstructionByView(currentDrag)
                 val index = -1
-                val instr = viewToBlock[currentDrag]!!.instruction
+                val instr = viewToBlock[currentDrag]!!
 
-                if (instr in startConnectingInstructions) {
+                if (instr.isStartInstruction()) {
                     addBlocksToBin(currentDrag, true)
                     reBuildBlocks(index, instructionView, true)
                 } else {
@@ -423,9 +416,9 @@ class CodingActivity : AppCompatActivity(), Observer {
                 binding.container.removeView(connectorsMap[currView])
 
                 val block = viewToBlock[currView]
-                if (block!!.instruction in connectingInstructions) {
+                if (block!!.isEndInstruction()) {
                     count--
-                } else if (block.instruction in startConnectingInstructions) {
+                } else if (block.isStartInstruction()) {
                     count++
                 }
                 index++
@@ -457,12 +450,7 @@ class CodingActivity : AppCompatActivity(), Observer {
 
                 tempView.view.bringToFront()
                 viewInstructions.add(tempView)
-                if (viewToBlock[tempView.view]!!.instruction !in connectingInstructions &&
-                    viewToBlock[tempView.view]!!.instruction !in listOf(
-                        BlockInstruction.ELSE,
-                        BlockInstruction.ELIF
-                    )
-                ) {
+                if (!viewToBlock[tempView.view]!!.isEndInstruction()) {
                     generateDragArea(tempView.view)
                 }
             }
@@ -500,8 +488,8 @@ class CodingActivity : AppCompatActivity(), Observer {
                 }
 
                 val instructionView = getViewInstructionByView(currentDrag)
-                val instr = viewToBlock[currentDrag]!!.instruction
-                if (instr in startConnectingInstructions) {
+                val instr = viewToBlock[currentDrag]!!
+                if (instr.isStartInstruction()) {
                     reBuildBlocks(newIndex, instructionView, true)
                 } else {
                     reBuildBlocks(newIndex, instructionView)
@@ -522,11 +510,12 @@ class CodingActivity : AppCompatActivity(), Observer {
         var count = 0
 
         do {
-            when (viewInstructions[indexFrom].instruction.instruction) {
-                in connectingInstructions -> --count
-                in startConnectingInstructions -> ++count
-                else -> {}
-            }
+            val instr = viewInstructions[indexFrom].instruction
+            if (instr.isStartInstruction())
+                ++count
+            if (instr.isEndInstruction())
+                --count
+
             val view = viewInstructions.removeAt(indexFrom)
             tempViews.add(view)
         } while (count > 0)
@@ -579,14 +568,6 @@ class CodingActivity : AppCompatActivity(), Observer {
             clearConstraints(set, view)
         }
 
-        val endInstructions = listOf(
-            BlockInstruction.END, BlockInstruction.END_WHILE, BlockInstruction.ELSE,
-            BlockInstruction.ELIF, BlockInstruction.FUNC_END, BlockInstruction.END_FOR
-        )
-        val startInstructions = listOf(
-            BlockInstruction.IF, BlockInstruction.WHILE, BlockInstruction.ELSE,
-            BlockInstruction.ELIF, BlockInstruction.FUNC, BlockInstruction.FOR
-        )
         val nestViews = mutableListOf<View>()
         val nestCount = mutableListOf<Int>()
 
@@ -594,12 +575,15 @@ class CodingActivity : AppCompatActivity(), Observer {
             val view = viewList[i]
             val prevView = viewList[i - 1]
 
-            if (viewToBlock[prevView.view]!!.instruction in startInstructions) {
+            val prevInstr = viewToBlock[prevView.view]!!
+            val currInstr = viewToBlock[view.view]!!
+
+            if (prevInstr.isStartInstruction() || prevInstr.isMiddleInstruction()) {
                 nestViews.add(prevView.view)
                 nestCount.add(prevView.view.height)
             }
 
-            if (viewToBlock[view.view]!!.instruction in endInstructions) {
+            if (currInstr.isMiddleInstruction() || currInstr.isEndInstruction()) {
                 val nest = nestViews.removeLast()
                 val nestId = nest.id
                 val connector = connectorsMap[view.view]!!
@@ -699,14 +683,14 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun makeBlocksInvisible(v: View) {
         v.visibility = View.INVISIBLE
 
-        if (viewToBlock[v]!!.instruction !in startConnectingInstructions)
+        if (!viewToBlock[v]!!.isStartInstruction())
             return
 
 
         var index = viewInstructions.indexOf(getViewInstructionByView(v)) + 1
         var count = 1
         val ifList = mutableListOf<View>()
-        if (viewToBlock[v]!!.instruction == BlockInstruction.IF) {
+        if (viewToBlock[v]!! is IfInstruction) {
             ifList.add(v)
         }
         var connector: View? = null
@@ -714,18 +698,17 @@ class CodingActivity : AppCompatActivity(), Observer {
         while (count != 0) {
             val currentView = viewInstructions[index].view
             currentView.visibility = View.INVISIBLE
-            val block = viewToBlock[currentView]
+            val block = viewToBlock[currentView]!!
 
             if (ifList.isNotEmpty()) {
-                when (block!!.instruction) {
-                    BlockInstruction.IF -> ifList.add(currentView)
-                    in listOf(BlockInstruction.ELSE, BlockInstruction.ELIF) -> {
-                        val checkIf = ifList.removeLast()
-                        if (checkIf == v) {
-                            connector = connectorsMap[currentView]
-                        }
+                if (block is IfInstruction)
+                    ifList.add(currentView)
+
+                if (block is ConditionInstruction && block.isMiddleInstruction()) {
+                    val checkIf = ifList.removeLast()
+                    if (checkIf == v) {
+                        connector = connectorsMap[currentView]
                     }
-                    else -> {}
                 }
             }
 
@@ -733,9 +716,9 @@ class CodingActivity : AppCompatActivity(), Observer {
                 connectorsMap[currentView]!!.visibility = View.INVISIBLE
             }
 
-            if (block!!.instruction in connectingInstructions) {
+            if (block.isEndInstruction()) {
                 count--
-            } else if (block.instruction in startConnectingInstructions) {
+            } else if (block.isStartInstruction()) {
                 count++
             }
             index++
@@ -752,7 +735,7 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun makeBlocksVisible(v: View) {
         v.visibility = View.VISIBLE
 
-        if (viewToBlock[v]!!.instruction in startConnectingInstructions) {
+        if (viewToBlock[v]!!.isStartInstruction()) {
             var index = viewInstructions.indexOf(getViewInstructionByView(v)) + 1
             var count = 1
 
@@ -763,9 +746,9 @@ class CodingActivity : AppCompatActivity(), Observer {
                     connectorsMap[viewInstructions[index].view]!!.visibility = View.VISIBLE
                 }
 
-                if (block!!.instruction in connectingInstructions) {
+                if (block!!.isEndInstruction()) {
                     count--
-                } else if (block.instruction in startConnectingInstructions) {
+                } else if (block.isStartInstruction()) {
                     count++
                 }
                 index++
