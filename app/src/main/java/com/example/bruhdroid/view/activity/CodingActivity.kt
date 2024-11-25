@@ -69,18 +69,10 @@ class CodingActivity : AppCompatActivity(), Observer {
     private val interpreter = Interpreter()
     private val controller = Controller()
 
-    private var blockHeight by Delegates.notNull<Float>()
-    private var noStatementBlockHeight by Delegates.notNull<Float>()
-    private var blockWidth by Delegates.notNull<Float>()
-
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dp = this.resources.displayMetrics.density
-
-        blockHeight = 110 * dp
-        blockWidth = 400 * dp
-        noStatementBlockHeight = 80 * dp
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
         instructionHelper = InstructionHelper(layoutInflater)
@@ -228,6 +220,10 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun getDpMetric(value: Float): Int {
+        return (value * dp).toInt()
+    }
+
     private fun setupConnector(view: View) {
         val connector = layoutInflater.inflate(R.layout.block_connector, null)
         connector.id = View.generateViewId()
@@ -253,8 +249,8 @@ class CodingActivity : AppCompatActivity(), Observer {
         binding.container.addView(
             view,
             ConstraintLayout.LayoutParams(
-                blockWidth.toInt(),
-                blockHeight.toInt()
+                getDpMetric(getViewInstructionByView(view).blockWidth),
+                getDpMetric(getViewInstructionByView(view).blockHeight),
             )
         )
     }
@@ -802,12 +798,11 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
-    private fun addStatementBlock(endBlock: View, instructionView: InstructionView, newBlock: InstructionView, full: Boolean) {
-        instructionView.updateBlockView(this)
+    private fun addStatementBlock(endBlock: InstructionView, newBlock: InstructionView, full: Boolean) {
         newBlock.updateBlockView(this)
         newBlock.generateBreakpoint()
 
-        val index = viewInstructions.indexOf(getViewInstructionByView(endBlock))
+        val index = viewInstructions.indexOf(getViewInstructionByView(endBlock.view))
         val endBlockInstruction = viewInstructions[index]
 
         viewInstructions[index] = newBlock
@@ -818,21 +813,22 @@ class CodingActivity : AppCompatActivity(), Observer {
             viewInstructions.add(endBlockInstruction)
         }
 
-        viewToBlock[newBlock.view] = instructionView.instruction
+        viewToBlock[newBlock.view] = newBlock.instruction
         newBlock.view.id = View.generateViewId()
 
         setupConnector(newBlock.view)
         if (full) {
             binding.container.addView(
                 newBlock.view,
-                ConstraintLayout.LayoutParams(blockWidth.toInt(), blockHeight.toInt())
+                getDpMetric(newBlock.blockWidth),
+                getDpMetric(newBlock.blockHeight),
             )
         } else {
             binding.container.addView(
                 newBlock.view,
                 ConstraintLayout.LayoutParams(
-                    (blockWidth / 2).toInt(),
-                    (noStatementBlockHeight).toInt()
+                    getDpMetric(newBlock.blockWidth),
+                    getDpMetric(newBlock.blockHeight),
                 )
             )
         }
@@ -847,15 +843,79 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun setupConnectorConstraints(
+        set: ConstraintSet,
+        currInstructionView: View,
+        prevInstructionView: View,
+        connector: View,
+        connectorMargin: Int
+    ): ConstraintSet {
+        connectorsMap[currInstructionView] = connector
+
+        set.connect(currInstructionView.id, ConstraintSet.TOP, prevInstructionView.id, ConstraintSet.BOTTOM, connectorMargin)
+        set.connect(connector.id, ConstraintSet.TOP, prevInstructionView.id, ConstraintSet.BOTTOM, 0)
+        set.connect(connector.id, ConstraintSet.BOTTOM, currInstructionView.id, ConstraintSet.TOP, 0)
+        set.connect(connector.id, ConstraintSet.LEFT, currInstructionView.id, ConstraintSet.LEFT, 80)
+
+        return set
+    }
+
+    private fun buildBlockConnectors(
+        instructionView: InstructionView,
+        endInstructionView: InstructionView?,
+        prevView: View?,
+        connector: View,
+        nestedConnector: View?
+    ) {
+        if (prevView != null) {
+            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+            prevView.bringToFront()
+        }
+
+        binding.container.addView(
+            instructionView.view,
+            ConstraintLayout.LayoutParams(
+                getDpMetric(instructionView.blockWidth),
+                getDpMetric(instructionView.blockHeight),
+            )
+        )
+
+        if (nestedConnector != null) {
+            binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
+            instructionView.view.bringToFront()
+            binding.container.addView(endInstructionView!!.view)
+        }
+
+        var set = ConstraintSet()
+        set.clone(binding.container)
+
+        generateDragArea(instructionView.view)
+        setBlockOnDragListener(instructionView.view)
+
+        if (prevView != null)
+            set = setupConnectorConstraints(set, instructionView.view, prevView, connector, -15)
+
+        prevBlock = instructionView.view
+
+        if (nestedConnector != null) {
+            set = setupConnectorConstraints(set, endInstructionView!!.view, instructionView.view, nestedConnector, 10)
+            prevBlock = endInstructionView.view
+        }
+
+        set.applyTo(binding.container)
+        viewToBlock[instructionView.view] = instructionView.instruction
+    }
+
     @SuppressLint("InflateParams")
     private fun buildBlock(
         prevView: View?,
         instructionView: InstructionView,
         connect: Boolean = false
     ) {
-        var endBlock: View? = null
         var nestedConnector: View? = null
         val connector = layoutInflater.inflate(R.layout.block_connector, null)
+        var endInstructionView: InstructionView? = null
+
         instructionView.view.id = View.generateViewId()
         connector.id = View.generateViewId()
 
@@ -863,115 +923,25 @@ class CodingActivity : AppCompatActivity(), Observer {
         viewInstructions.add(instructionView)
 
         if (connect) {
-            val endInstruction: Instruction
+            endInstructionView = instructionView.endInstructionView!!.clone()
+            endInstructionView.updateBlockView(this)
+            endInstructionView.generateBreakpoint()
 
-            when (instructionView.instruction) {
-                is WhileInstruction -> {
-                    endBlock = layoutInflater.inflate(R.layout.empty_block, null)
-                    endInstruction = EndWhileInstruction()
-                }
-                is ForInstruction -> {
-                    endBlock = layoutInflater.inflate(R.layout.block_end_for, null)
-                    endInstruction = EndForInstruction()
-                }
-                is FuncInstruction -> {
-                    endBlock = layoutInflater.inflate(R.layout.block_func_end, null)
-                    endInstruction = FuncEndInstruction()
-                }
-                else -> {
-                    // IfInstruction
-                    endBlock = layoutInflater.inflate(R.layout.condition_block_end, null)
-                    endInstruction = EndInstruction()
-                }
-            }
-
-            val endInstructionView = instructionHelper.getViewByInstruction(endInstruction)!!
-            endInstructionView.view = endBlock // TODO: Перенести в объект
             viewInstructions.add(endInstructionView)
-            getViewInstructionByView(endBlock).generateBreakpoint()
 
-            if (instructionView.instruction is IfInstruction) {
-                val addElse = endBlock.findViewById<Button>(R.id.addElseButton)
-                val addElif = endBlock.findViewById<Button>(R.id.addElifButton)
-                addElse.setOnClickListener {
-                    addElif.visibility = View.INVISIBLE
-                    addElse.visibility = View.INVISIBLE
-
-                    addStatementBlock(endBlock, instructionHelper.getElseView(), instructionHelper.getElseView(), false)
-                }
-                addElif.setOnClickListener {
-                    addStatementBlock(endBlock, instructionHelper.getElifView(), instructionHelper.getElifView(), true)
-                }
-            }
-
+            endInstructionView.tryGenerateEndStatementInstruction(instructionHelper)
+            { endVi, newVi, full -> addStatementBlock(endVi, newVi, full) }
 
             nestedConnector = layoutInflater.inflate(R.layout.block_connector, null)
 
-            viewToBlock[endBlock] = endInstruction
-            endBlock.id = View.generateViewId()
+            viewToBlock[endInstructionView.view] = endInstructionView.instruction
+            endInstructionView.view.id = View.generateViewId()
             nestedConnector.id = View.generateViewId()
 
-            setBlockOnDragListener(endBlock)
+            setBlockOnDragListener(endInstructionView.view)
         }
 
-        if (prevView != null) {
-            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-            prevView.bringToFront()
-        }
-
-        if (instructionView.instruction is BreakInstruction || instructionView.instruction is ContinueInstruction) {
-            binding.container.addView(
-                instructionView.view,
-                ConstraintLayout.LayoutParams(
-                    (blockWidth / 2).toInt(),
-                    (noStatementBlockHeight).toInt()
-                )
-            )
-        } else {
-            binding.container.addView(
-                instructionView.view,
-                ConstraintLayout.LayoutParams(
-                    blockWidth.toInt(),
-                    blockHeight.toInt()
-                )
-            )
-        }
-
-        if (nestedConnector != null) {
-            binding.container.addView(nestedConnector, ConstraintLayout.LayoutParams(5, 300))
-            instructionView.view.bringToFront()
-            binding.container.addView(endBlock)
-        }
-
-        val set = ConstraintSet()
-        set.clone(binding.container)
-
-        generateDragArea(instructionView.view)
-        setBlockOnDragListener(instructionView.view)
-
-        if (prevView != null) {
-            connectorsMap[instructionView.view] = connector
-            set.connect(instructionView.view.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, -15)
-
-            set.connect(connector.id, ConstraintSet.TOP, prevView.id, ConstraintSet.BOTTOM, 0)
-            set.connect(connector.id, ConstraintSet.BOTTOM, instructionView.view.id, ConstraintSet.TOP, 0)
-            set.connect(connector.id, ConstraintSet.LEFT, instructionView.view.id, ConstraintSet.LEFT, 80)
-        }
-
-        prevBlock = instructionView.view
-
-        if (nestedConnector != null) {
-            connectorsMap[endBlock!!] = nestedConnector
-            set.connect(nestedConnector.id, ConstraintSet.TOP, instructionView.view.id, ConstraintSet.BOTTOM, 0)
-            set.connect(nestedConnector.id, ConstraintSet.BOTTOM, endBlock.id, ConstraintSet.TOP, 0)
-            set.connect(nestedConnector.id, ConstraintSet.LEFT, instructionView.view.id, ConstraintSet.LEFT, 80)
-
-            set.connect(endBlock.id, ConstraintSet.TOP, instructionView.view.id, ConstraintSet.BOTTOM, 10)
-            prevBlock = endBlock
-        }
-
-        set.applyTo(binding.container)
-        viewToBlock[instructionView.view] = instructionView.instruction
+        buildBlockConnectors(instructionView, endInstructionView, prevView, connector, nestedConnector)
     }
 
     private fun buildAlertDialog(label: String?, message: String?): AlertDialog.Builder {

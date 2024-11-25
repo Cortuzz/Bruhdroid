@@ -11,15 +11,29 @@ import com.example.bruhdroid.model.blocks.instruction.Instruction
 
 class SubsequentInstructionView(
     label: String,
+    blockWidth: Float,
+    blockHeight: Float,
     drawable: Int,
     layoutInflater: LayoutInflater,
     instruction: Instruction,
     hasText: Boolean = true,
     endInstructionView: InstructionView? = null,
-): InstructionView(label, drawable, layoutInflater, instruction, null, endInstructionView, hasText) {
+): InstructionView(
+    label,
+    blockWidth,
+    blockHeight,
+    drawable,
+    layoutInflater,
+    instruction,
+    null,
+    endInstructionView,
+    hasText
+) {
     override fun clone(): InstructionView {
         return SubsequentInstructionView(
             label,
+            blockWidth,
+            blockHeight,
             drawable,
             layoutInflater,
             instruction.clone(),

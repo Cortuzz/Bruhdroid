@@ -15,85 +15,94 @@ import com.example.bruhdroid.model.blocks.instruction.ReturnInstruction
 import com.example.bruhdroid.view.category.CategoryHelper
 
 class InstructionHelper(private val layoutInflater: LayoutInflater) {
+    private val baseBlockWidth = 400f
+    private val baseBlockHeight = 110f
+    private val baseSmallBlockWidth = 200f
+    private val baseSmallBlockHeight = 80f
+
     private val instructionViews = listOf(
-        InstructionView("Pragma", R.drawable.ic_block_pragma,
+        InstructionView("Pragma", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_pragma,
             layoutInflater, PragmaInstruction(), CategoryHelper.getIoCategory().id
         ),
-        InstructionView("Print", R.drawable.ic_block_print,
+        InstructionView("Print", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_print,
             layoutInflater, PrintInstruction(), CategoryHelper.getIoCategory().id
         ),
-        InstructionView("Input", R.drawable.ic_block_input,
+        InstructionView("Input", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_input,
             layoutInflater, InputInstruction(), CategoryHelper.getIoCategory().id
         ),
-        InstructionView("Init", R.drawable.ic_block_init,
+        InstructionView("Init", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_init,
             layoutInflater, InitInstruction(), CategoryHelper.getVarCategory().id
         ),
-        InstructionView("While", R.drawable.ic_block_while,
+        InstructionView("While", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_while,
             layoutInflater, WhileInstruction(), CategoryHelper.getCycleCategory().id,
             getEndWhileView()
         ),
-        InstructionView("If", R.drawable.ic_block_if,
-            layoutInflater, IfInstruction(), CategoryHelper.getConditionCategory().id
-            // TODO
+        InstructionView("If", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_if,
+            layoutInflater, IfInstruction(), CategoryHelper.getConditionCategory().id,
+            getEndConditionView()
         ),
-        InstructionView("Set", R.drawable.ic_block_set,
+        InstructionView("Set", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_set,
             layoutInflater, SetInstruction(), CategoryHelper.getVarCategory().id
         ),
-        InstructionView("Break", R.drawable.ic_block_break,
+        InstructionView("Break", baseSmallBlockWidth, baseSmallBlockHeight, R.drawable.ic_block_break,
             layoutInflater, BreakInstruction(),
             CategoryHelper.getCycleCategory().id, hasText = false
         ),
-        InstructionView("Continue", R.drawable.ic_block_continue,
+        InstructionView("Continue", baseSmallBlockWidth, baseSmallBlockHeight, R.drawable.ic_block_continue,
             layoutInflater, ContinueInstruction(),
             CategoryHelper.getCycleCategory().id, hasText = false
         ),
-        InstructionView("Method", R.drawable.ic_block_func,
+        InstructionView("Method", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_func,
             layoutInflater, FuncInstruction(), CategoryHelper.getFuncCategory().id,
             getEndFuncView()
         ),
-        InstructionView("Return", R.drawable.ic_block_return,
+        InstructionView("Return", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_return,
             layoutInflater, ReturnInstruction(), CategoryHelper.getFuncCategory().id
         ),
-        InstructionView("Call", R.drawable.ic_block_call,
+        InstructionView("Call", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_call,
             layoutInflater, CallInstruction(), CategoryHelper.getFuncCategory().id
         ),
-        InstructionView("For", R.drawable.ic_block_for,
+        InstructionView("For", baseBlockWidth, baseBlockHeight, R.drawable.ic_block_for,
             layoutInflater, ForInstruction(), CategoryHelper.getCycleCategory().id,
             getEndForView()
         ),
-        SubsequentInstructionView("", R.layout.condition_block_end,
-            layoutInflater, EndInstruction()
-        ),
-        getEndWhileView(), getElifView(), getElseView(), getEndForView(), getEndFuncView()
+        getEndConditionView(), getElifView(), getElseView(),
+        getEndWhileView(), getEndForView(), getEndFuncView()
     )
 
+    fun getEndConditionView(): InstructionView {
+        return SubsequentInstructionView("", baseSmallBlockWidth, baseSmallBlockHeight,
+            R.layout.condition_block_end, layoutInflater, EndInstruction()
+        )
+    }
+
     fun getEndFuncView(): InstructionView {
-        return SubsequentInstructionView("", R.layout.block_func_end,
-            layoutInflater, FuncEndInstruction()
+        return SubsequentInstructionView("",baseSmallBlockWidth, baseSmallBlockHeight,
+            R.layout.block_func_end, layoutInflater, FuncEndInstruction()
         )
     }
 
     fun getEndForView(): InstructionView {
-        return SubsequentInstructionView("", R.layout.block_end_for,
-            layoutInflater, EndForInstruction()
+        return SubsequentInstructionView("", baseSmallBlockWidth, baseSmallBlockHeight,
+            R.layout.block_end_for, layoutInflater, EndForInstruction()
         )
     }
 
     fun getElseView(): InstructionView {
-        return SubsequentInstructionView("", R.layout.block_else,
-            layoutInflater, ElseInstruction()
+        return SubsequentInstructionView("", baseSmallBlockWidth, baseSmallBlockHeight,
+            R.layout.block_else, layoutInflater, ElseInstruction()
         )
     }
 
     fun getElifView(): InstructionView {
-        return SubsequentInstructionView("", R.layout.block_elif,
-            layoutInflater, ElifInstruction()
+        return SubsequentInstructionView("", baseBlockWidth, baseBlockHeight,
+            R.layout.block_elif, layoutInflater, ElifInstruction()
         )
     }
 
     fun getEndWhileView(): InstructionView {
-        return SubsequentInstructionView("", R.layout.empty_block,
-            layoutInflater, EndWhileInstruction()
+        return SubsequentInstructionView("", baseSmallBlockWidth, baseSmallBlockHeight,
+            R.layout.empty_block, layoutInflater, EndWhileInstruction()
         )
     }
 
