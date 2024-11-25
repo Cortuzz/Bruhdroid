@@ -37,7 +37,6 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.properties.Delegates
 
-// TODO: Пофиксить дебагер
 
 class CodingActivity : AppCompatActivity(), Observer {
     private enum class Debug {
@@ -205,12 +204,8 @@ class CodingActivity : AppCompatActivity(), Observer {
     }
 
     private fun getViewByLine(): View? {
-        fun <K, V> getKey(hashMap: Map<K, V>, target: V): K {
-            return hashMap.filter { target == it.value }.keys.first()
-        }
-
         return try {
-            getKey(viewToBlock, interpreter.getBlockAtCurrentLine())
+            viewInstructions.first { interpreter.getBlockAtCurrentLine() == it.instruction }.view
         } catch (e: Exception) {
             null
         }
