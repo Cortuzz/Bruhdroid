@@ -54,9 +54,10 @@ class TemplatesActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
 
-            val margin = 12
-            val totalMargin = dp.toInt() * margin
-            params.setMargins(0, totalMargin, 0, 0)
+            // Задает дистанцию между блоками в Saved Programs
+            // Templates не использует эту логику из-за того, что там margin предустановен.
+            // Тут мы обновляем блоки динамически, поэтому и нужно прописывать в коде.
+            params.setMargins(0, dp.toInt() * 12, 0, 0)
 
             buttonBinding.root.layoutParams = params
             button.setOnClickListener {
