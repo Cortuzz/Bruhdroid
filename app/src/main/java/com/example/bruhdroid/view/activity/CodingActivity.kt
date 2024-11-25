@@ -19,7 +19,6 @@ import com.example.bruhdroid.controller.Controller
 import com.example.bruhdroid.R
 import com.example.bruhdroid.databinding.*
 import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.blocks.instruction.*
 import com.example.bruhdroid.model.blocks.instruction.condition.ConditionInstruction
 import com.example.bruhdroid.model.blocks.instruction.condition.EndInstruction
@@ -70,11 +69,19 @@ class CodingActivity : AppCompatActivity(), Observer {
     private val interpreter = Interpreter()
     private val controller = Controller()
 
+    private var blockHeight by Delegates.notNull<Float>()
+    private var noStatementBlockHeight by Delegates.notNull<Float>()
+    private var blockWidth by Delegates.notNull<Float>()
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dp = this.resources.displayMetrics.density
+
+        blockHeight = 110 * dp
+        blockWidth = 400 * dp
+        noStatementBlockHeight = 80 * dp
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_coding)
         instructionHelper = InstructionHelper(layoutInflater)
         categoryHelper = CategoryHelper(this, layoutInflater, dp)
@@ -255,7 +262,10 @@ class CodingActivity : AppCompatActivity(), Observer {
                     runOnUiThread {
                         binding.container.addView(
                             view,
-                            ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
+                            ConstraintLayout.LayoutParams(
+                                blockWidth.toInt(),
+                                blockHeight.toInt()
+                            )
                         )
                     }
                 } else {
@@ -795,12 +805,15 @@ class CodingActivity : AppCompatActivity(), Observer {
         if (full) {
             binding.container.addView(
                 newBlock.view,
-                ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
+                ConstraintLayout.LayoutParams(blockWidth.toInt(), blockHeight.toInt())
             )
         } else {
             binding.container.addView(
                 newBlock.view,
-                ConstraintLayout.LayoutParams((200 * dp).toInt(), (70 * dp).toInt())
+                ConstraintLayout.LayoutParams(
+                    (blockWidth / 2).toInt(),
+                    (noStatementBlockHeight).toInt()
+                )
             )
         }
 
@@ -890,15 +903,21 @@ class CodingActivity : AppCompatActivity(), Observer {
             prevView.bringToFront()
         }
 
-        if (instructionView.instruction is BreakInstruction || instructionView.instruction  is ContinueInstruction) {
+        if (instructionView.instruction is BreakInstruction || instructionView.instruction is ContinueInstruction) {
             binding.container.addView(
                 instructionView.view,
-                ConstraintLayout.LayoutParams((200 * dp).toInt(), (80 * dp).toInt())
+                ConstraintLayout.LayoutParams(
+                    (blockWidth / 2).toInt(),
+                    (noStatementBlockHeight).toInt()
+                )
             )
         } else {
             binding.container.addView(
                 instructionView.view,
-                ConstraintLayout.LayoutParams((400 * dp).toInt(), (110 * dp).toInt())
+                ConstraintLayout.LayoutParams(
+                    blockWidth.toInt(),
+                    blockHeight.toInt()
+                )
             )
         }
 
