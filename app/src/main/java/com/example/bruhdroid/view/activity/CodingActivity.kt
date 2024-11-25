@@ -409,12 +409,54 @@ class CodingActivity : AppCompatActivity(), Observer {
         makeBlocksVisible(view)
     }
 
+    private fun onClickBinBlock(instructionViews: List<InstructionView>) {
+        for (instructionView in instructionViews) {
+            val view = instructionView.view
+
+            bindingSheetBin.deletedList.removeView(view)
+            if (connectorsMap[view] != null) {
+                bindingSheetBin.deletedList.removeView(connectorsMap[view])
+            }
+            binViewList.remove(getViewInstructionByViewInBin(view))
+
+            binding.container.addView(view)
+            if (connectorsMap[view] != null) {
+                binding.container.addView(connectorsMap[view])
+            } else if (viewInstructions.isNotEmpty()) {
+                setupConnector(view)
+            }
+
+            view.bringToFront()
+            viewInstructions.add(instructionView)
+            if (!viewToBlock[view]!!.isEndInstruction()) {
+                generateDragArea(view)
+            }
+        }
+
+        buildConstraints(bindingSheetBin.deletedList, binViewList)
+        buildConstraints(binding.container, viewInstructions)
+
+        prevBlock = viewInstructions.last().view
+    }
+
+    private fun removeLastConnectedView(index: Int, view: View) {
+        if (viewInstructions.indexOf(getViewInstructionByView(view)) != 0)
+            return
+
+        if (index > viewInstructions.lastIndex)
+            return
+
+        binding.container.removeView(connectorsMap[viewInstructions[index].view])
+        connectorsMap.remove(viewInstructions[index].view)
+    }
+
     @SuppressLint("InflateParams")
     private fun removeBlocksFromParent(view: View, isConnected: Boolean = false): List<InstructionView> {
         val tempList = mutableListOf<InstructionView>()
         view.setOnLongClickListener(null)
         tempList.add(getViewInstructionByView(view))
         binding.container.removeView(view)
+
         if (connectorsMap[view] != null) {
             binding.container.removeView(connectorsMap[view])
             connectorsMap.remove(view)
@@ -445,36 +487,10 @@ class CodingActivity : AppCompatActivity(), Observer {
             } while (count > 0)
         }
 
-        if (viewInstructions.indexOf(getViewInstructionByView(view)) == 0 && index <= viewInstructions.lastIndex) {
-            binding.container.removeView(connectorsMap[viewInstructions[index].view])
-            connectorsMap.remove(viewInstructions[index].view)
-        }
+        removeLastConnectedView(index, view)
 
         view.setOnClickListener {
-            for (tempView in tempList) {
-                bindingSheetBin.deletedList.removeView(tempView.view)
-                if (connectorsMap[tempView.view] != null) {
-                    bindingSheetBin.deletedList.removeView(connectorsMap[tempView.view])
-                }
-                binViewList.remove(getViewInstructionByViewInBin(tempView.view))
-
-                binding.container.addView(tempView.view)
-                if (connectorsMap[tempView.view] != null) {
-                    binding.container.addView(connectorsMap[tempView.view])
-                } else if (viewInstructions.isNotEmpty()) {
-                    setupConnector(tempView.view)
-                }
-
-                tempView.view.bringToFront()
-                viewInstructions.add(tempView)
-                if (!viewToBlock[tempView.view]!!.isEndInstruction()) {
-                    generateDragArea(tempView.view)
-                }
-            }
-            buildConstraints(bindingSheetBin.deletedList, binViewList)
-            buildConstraints(binding.container, viewInstructions)
-
-            prevBlock = viewInstructions.last().view
+            onClickBinBlock(tempList)
         }
 
         return tempList
@@ -539,8 +555,8 @@ class CodingActivity : AppCompatActivity(), Observer {
 
         if (indexTo != -1) {
             if (indexFrom == 0 || indexTo == 0) {
-                when {
-                    indexFrom == 0 -> {
+                when (indexFrom) {
+                    0 -> {
                         val connector = connectorsMap[viewInstructions[0].view]
                         connectorsMap[tempViews[0].view] = connector as View
                     }
