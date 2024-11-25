@@ -59,7 +59,6 @@ class CodingActivity : AppCompatActivity(), Observer {
     private lateinit var bindingSheetBin: BottomsheetBinBinding
     private lateinit var bindingSheetConsole: BottomsheetConsoleBinding
 
-    private lateinit var bottomSheetMenu: BottomSheetDialog
     private lateinit var bottomSheetBin: BottomSheetDialog
     private lateinit var bottomSheetConsole: BottomSheetDialog
     private lateinit var instructionHelper: InstructionHelper
@@ -140,11 +139,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
         binding.saveButton.setOnClickListener {
             if (filename is String) {
-                if (Controller.saveProgram(filename, this.filesDir, viewInstructions)) {
-                    Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
-                }
+                saveProgram(filename)
                 return@setOnClickListener
             }
             showSaveDialog()
@@ -198,14 +193,15 @@ class CodingActivity : AppCompatActivity(), Observer {
     private fun getDebuggerView(): View? {
         val view = getViewByLine()
 
-        if (view == null) {
-            runOnUiThread {
-                binding.debugPanel.visibility = View.INVISIBLE
-                binding.mainPanel.visibility = View.VISIBLE
-            }
-            return null
+        if (view != null)
+            return view
+
+        runOnUiThread {
+            binding.debugPanel.visibility = View.INVISIBLE
+            binding.mainPanel.visibility = View.VISIBLE
         }
-        return view
+
+        return null
     }
 
     private fun getViewByLine(): View? {
@@ -817,21 +813,11 @@ class CodingActivity : AppCompatActivity(), Observer {
         newBlock.view.id = View.generateViewId()
 
         setupConnector(newBlock.view)
-        if (full) {
-            binding.container.addView(
-                newBlock.view,
-                getDpMetric(newBlock.blockWidth),
-                getDpMetric(newBlock.blockHeight),
-            )
-        } else {
-            binding.container.addView(
-                newBlock.view,
-                ConstraintLayout.LayoutParams(
-                    getDpMetric(newBlock.blockWidth),
-                    getDpMetric(newBlock.blockHeight),
-                )
-            )
-        }
+        binding.container.addView(
+            newBlock.view,
+            getDpMetric(newBlock.blockWidth),
+            getDpMetric(newBlock.blockHeight),
+        )
 
         setBlockOnDragListener(newBlock.view)
 
@@ -946,12 +932,8 @@ class CodingActivity : AppCompatActivity(), Observer {
 
     private fun buildAlertDialog(label: String?, message: String?): AlertDialog.Builder {
         val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.AlertDialogCustom))
-        if (message != null) {
-            builder.setMessage(message)
-        }
-        if (label != null) {
-            builder.setTitle(label)
-        }
+        builder.setMessage(message)
+        builder.setTitle(label)
         return builder
     }
 
@@ -1002,16 +984,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         alertDialog.show()
 
         submitButton.setOnClickListener {
-            if (Controller.saveProgram(
-                    inputVal.text.toString(),
-                    this.filesDir,
-                    viewInstructions
-                )
-            ) {
-                Toast.makeText(this, "Save successful", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
-            }
+            saveProgram(inputVal.text.toString())
             alertDialog.dismiss()
 
         }
@@ -1096,5 +1069,12 @@ class CodingActivity : AppCompatActivity(), Observer {
                 return vi
         }
         throw NotFoundException("Not found")
+    }
+
+    private fun saveProgram(text: String) {
+        val saveResult = Controller.saveProgram(text, this.filesDir, viewInstructions)
+        Toast.makeText(this,
+            if (saveResult) "Save successful" else "Save failed",
+            Toast.LENGTH_SHORT).show()
     }
 }
