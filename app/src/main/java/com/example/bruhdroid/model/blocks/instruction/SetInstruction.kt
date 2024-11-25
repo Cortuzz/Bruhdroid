@@ -1,6 +1,6 @@
 package com.example.bruhdroid.model.blocks.instruction
 
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 
 class SetInstruction(expression: String = ""):

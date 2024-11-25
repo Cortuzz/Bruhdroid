@@ -1,8 +1,9 @@
-package com.example.bruhdroid.model.blocks
+package com.example.bruhdroid.model.blocks.variable
 
 import com.example.bruhdroid.model.memory.Memory
 import com.example.bruhdroid.exception.RuntimeError
 import com.example.bruhdroid.exception.StackCorruptionError
+import com.example.bruhdroid.model.blocks.IDataPresenter
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 
 class Variable(

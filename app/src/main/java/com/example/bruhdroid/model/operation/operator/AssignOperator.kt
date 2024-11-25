@@ -2,9 +2,8 @@ package com.example.bruhdroid.model.operation.operator
 
 import com.example.bruhdroid.model.blocks.IDataPresenter
 import com.example.bruhdroid.model.memory.Memory
-import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.model.blocks.valuable.Valuable
-import com.example.bruhdroid.model.blocks.Variable
+import com.example.bruhdroid.model.blocks.variable.Variable
 import com.example.bruhdroid.model.blocks.valuable.ListValuable
 
 class AssignOperator(

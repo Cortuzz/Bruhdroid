@@ -2,7 +2,7 @@ package com.example.bruhdroid.model.memory
 
 import com.example.bruhdroid.exception.StackCorruptionError
 import com.example.bruhdroid.model.blocks.valuable.Valuable
-import com.example.bruhdroid.model.blocks.Variable
+import com.example.bruhdroid.model.blocks.variable.Variable
 import com.example.bruhdroid.model.blocks.valuable.ListValuable
 
 class Memory(val prevMemory: Memory?, val scope: String) {

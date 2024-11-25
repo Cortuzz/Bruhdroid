@@ -1,7 +1,5 @@
 package com.example.bruhdroid.model.blocks.valuable
 
-import com.example.bruhdroid.model.blocks.ValuableType
-
 class BooleanValuable(
     varValue: Any,
     listLink: ListValuable? = null

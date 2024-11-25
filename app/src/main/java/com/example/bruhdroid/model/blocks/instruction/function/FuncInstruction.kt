@@ -1,8 +1,7 @@
 package com.example.bruhdroid.model.blocks.instruction.function
 
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.instruction.Instruction
 import com.example.bruhdroid.model.memory.Memory
 
 class FuncInstruction(expression: String = ""):

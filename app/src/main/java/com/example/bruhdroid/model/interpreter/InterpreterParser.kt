@@ -1,11 +1,11 @@
-package com.example.bruhdroid.model
+package com.example.bruhdroid.model.interpreter
 
 import com.example.bruhdroid.model.operation.Operation
 import com.example.bruhdroid.model.operation.OperationBuilderFactory
 import com.example.bruhdroid.model.operation.OperationParseDto
 
 
-class Notation {
+class InterpreterParser {
     companion object {
         private val operatorBuilders = OperationBuilderFactory().getOperatorBuilders()
 

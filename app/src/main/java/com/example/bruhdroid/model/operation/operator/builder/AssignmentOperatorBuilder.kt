@@ -4,7 +4,6 @@ import com.example.bruhdroid.model.blocks.IDataPresenter
 import com.example.bruhdroid.model.operation.operator.Operator
 import com.example.bruhdroid.model.operation.operator.AssignOperator
 import com.example.bruhdroid.model.blocks.valuable.Valuable
-import com.example.bruhdroid.model.blocks.Variable
 
 open class AssignmentOperatorBuilder(
     operator: String,

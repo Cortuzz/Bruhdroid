@@ -1,6 +1,6 @@
 package com.example.bruhdroid.model.blocks.instruction.cycle
 
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 import com.example.bruhdroid.model.memory.Memory
 

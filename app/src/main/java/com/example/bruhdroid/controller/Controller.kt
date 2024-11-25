@@ -1,15 +1,13 @@
 package com.example.bruhdroid.controller
 
 import android.content.res.Configuration
-import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.bruhdroid.R
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.exception.RuntimeError
 import com.example.bruhdroid.exception.UnhandledError
 import com.example.bruhdroid.model.blocks.instruction.*
-import com.example.bruhdroid.view.instruction.InstructionHelper
 import com.example.bruhdroid.view.instruction.InstructionView
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

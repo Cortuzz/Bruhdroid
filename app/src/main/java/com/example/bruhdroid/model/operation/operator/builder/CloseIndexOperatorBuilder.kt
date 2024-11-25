@@ -1,10 +1,6 @@
 package com.example.bruhdroid.model.operation.operator.builder
 
-import com.example.bruhdroid.model.Notation
-import com.example.bruhdroid.model.operation.Operation
-import com.example.bruhdroid.model.operation.OperationBuilderFactory
 import com.example.bruhdroid.model.operation.OperationParseDto
-import com.example.bruhdroid.model.operation.operator.Operator
 
 class CloseIndexOperatorBuilder(
     operator: String,

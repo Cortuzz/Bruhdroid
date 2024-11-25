@@ -1,6 +1,6 @@
 package com.example.bruhdroid.interpreter.instructions
 
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.model.blocks.instruction.cycle.EndWhileInstruction
 import com.example.bruhdroid.model.blocks.instruction.InitInstruction
 import com.example.bruhdroid.model.blocks.instruction.SetInstruction

@@ -1,8 +1,7 @@
 package com.example.bruhdroid.interpreter.memory
 
-import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.blocks.BlockInstruction
-import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.interpreter.Interpreter
+import com.example.bruhdroid.model.blocks.valuable.ValuableType
 import com.example.bruhdroid.model.blocks.instruction.InitInstruction
 import com.example.bruhdroid.model.blocks.instruction.SetInstruction
 import org.junit.Assert.assertEquals

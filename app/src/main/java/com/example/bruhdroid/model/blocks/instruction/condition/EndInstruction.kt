@@ -1,6 +1,6 @@
 package com.example.bruhdroid.model.blocks.instruction.condition
 
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.model.blocks.BlockInstruction
 
 class EndInstruction:

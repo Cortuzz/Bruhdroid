@@ -1,6 +1,5 @@
 package com.example.bruhdroid.model.blocks.valuable
 
-import com.example.bruhdroid.model.blocks.ValuableType
 import com.example.bruhdroid.exception.TypeError
 
 class NullValuable(listLink: ListValuable? = null):

@@ -1,6 +1,6 @@
 package com.example.bruhdroid.refactoring.notation.convertToRpn
 
-import com.example.bruhdroid.model.Notation
+import com.example.bruhdroid.model.interpreter.InterpreterParser
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -18,7 +18,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -34,7 +34,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -49,7 +49,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -65,7 +65,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -81,7 +81,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -96,7 +96,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -113,7 +113,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -128,7 +128,7 @@ class OperationsUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 }

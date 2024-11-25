@@ -1,6 +1,6 @@
 package com.example.bruhdroid.interpreter.instructions
 
-import com.example.bruhdroid.model.Interpreter
+import com.example.bruhdroid.model.interpreter.Interpreter
 import com.example.bruhdroid.model.blocks.instruction.*
 import com.example.bruhdroid.model.blocks.instruction.condition.ElifInstruction
 import com.example.bruhdroid.model.blocks.instruction.condition.ElseInstruction

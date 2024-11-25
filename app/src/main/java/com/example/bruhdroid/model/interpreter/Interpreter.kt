@@ -1,4 +1,4 @@
-package com.example.bruhdroid.model
+package com.example.bruhdroid.model.interpreter
 
 import android.annotation.SuppressLint
 import com.example.bruhdroid.exception.*
@@ -248,7 +248,9 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
     }
 
     fun parseRawBlock(raw: String, initialize: Boolean = false): Valuable {
-        val data = parseMap[raw] ?: Notation.convertInfixToPostfixNotation(Notation.tokenizeString(raw))
+        val data = parseMap[raw] ?: InterpreterParser.convertInfixToPostfixNotation(
+            InterpreterParser.tokenizeString(raw)
+        )
         parseMap[raw] = data
 
         val stack = mutableListOf<IDataPresenter>()

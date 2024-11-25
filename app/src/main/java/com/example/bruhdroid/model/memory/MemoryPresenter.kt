@@ -1,6 +1,6 @@
 package com.example.bruhdroid.model.memory
 
-import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.ValuableType
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 
 class MemoryPresenter {

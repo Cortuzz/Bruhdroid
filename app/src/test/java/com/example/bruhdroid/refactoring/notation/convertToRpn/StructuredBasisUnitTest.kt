@@ -1,6 +1,6 @@
 package com.example.bruhdroid.refactoring.notation.convertToRpn
 
-import com.example.bruhdroid.model.Notation
+import com.example.bruhdroid.model.interpreter.InterpreterParser
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -14,7 +14,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -29,7 +29,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -44,7 +44,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -59,7 +59,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -74,7 +74,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -84,7 +84,7 @@ class StructuredBasisUnitTest {
             ")",
         )
 
-        Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+        InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
     }
 
 
@@ -95,7 +95,7 @@ class StructuredBasisUnitTest {
             "]",
         )
 
-        Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+        InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
     }
 
     @Test
@@ -110,7 +110,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -126,7 +126,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -142,7 +142,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -157,7 +157,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -172,7 +172,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -187,7 +187,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 
@@ -203,7 +203,7 @@ class StructuredBasisUnitTest {
 
         assertEquals(
             expected,
-            Notation.convertInfixToPostfixNotation(input).map { op -> op.operation }
+            InterpreterParser.convertInfixToPostfixNotation(input).map { op -> op.operation }
         )
     }
 }

@@ -1,7 +1,7 @@
 package com.example.bruhdroid.refactoring.memory;
 
 import com.example.bruhdroid.model.memory.Memory
-import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.ValuableType
 import com.example.bruhdroid.model.blocks.valuable.Valuable
 import com.example.bruhdroid.model.blocks.valuable.numeric.IntegerValuable
 import io.mockk.every

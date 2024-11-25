@@ -1,6 +1,6 @@
 package com.example.bruhdroid.model.blocks.valuable.numeric
 
-import com.example.bruhdroid.model.blocks.ValuableType
+import com.example.bruhdroid.model.blocks.valuable.ValuableType
 import com.example.bruhdroid.exception.TypeError
 import com.example.bruhdroid.model.blocks.valuable.ListValuable
 import com.example.bruhdroid.model.blocks.valuable.Valuable
