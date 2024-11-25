@@ -228,55 +228,65 @@ class CodingActivity : AppCompatActivity(), Observer {
         }
     }
 
+    private fun setupConnector(view: View) {
+        val connector = layoutInflater.inflate(R.layout.block_connector, null)
+        connector.id = View.generateViewId()
+        connectorsMap[view] = connector
+        runOnUiThread {
+            binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
+        }
+    }
+
+    private fun setBlockOnDragListener(view: View) {
+        view.setOnDragListener { v, event ->
+            generateDropArea(v, event)
+        }
+    }
+
+    private fun drawBlock(view: View) {
+        if (viewToBlock[view]!!.isEndInstruction()) {
+            binding.container.addView(view)
+            return
+        }
+
+        generateDragArea(view)
+        binding.container.addView(
+            view,
+            ConstraintLayout.LayoutParams(
+                blockWidth.toInt(),
+                blockHeight.toInt()
+            )
+        )
+    }
+
+    private fun parseBlock(instruction: Instruction) {
+        val viewBlock = instructionHelper.getViewByInstruction(instruction)!!
+        val view = viewBlock.updateBlockView(this)
+
+        view.id = View.generateViewId()
+        view.findViewById<EditText>(R.id.expression)?.setText(instruction.expression)
+        viewBlock.generateBreakpoint()
+
+        viewInstructions.add(viewBlock)
+        prevBlock = view
+        viewToBlock[view] = instruction
+
+        if (viewInstructions.size != 1)
+            setupConnector(view)
+
+        setBlockOnDragListener(view)
+
+        runOnUiThread {
+            drawBlock(view)
+        }
+    }
+
     @SuppressLint("InflateParams")
     @OptIn(DelicateCoroutinesApi::class)
     private fun parseBlocks(instructions: Array<*>) {
-        val ctx = this
-
         GlobalScope.launch {
             for (instruction in instructions) {
-                instruction as Instruction
-
-                val viewBlock = instructionHelper.getViewByInstruction(instruction)!!
-                val view = viewBlock.updateBlockView(ctx)
-
-                view.id = View.generateViewId()
-                viewBlock.generateBreakpoint()
-                view.findViewById<EditText>(R.id.expression)?.setText(instruction.expression)
-
-                viewInstructions.add(viewBlock)
-                prevBlock = view
-                viewToBlock[view] = instruction
-
-                if (viewInstructions.size != 1) {
-                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
-                    connector.id = View.generateViewId()
-                    connectorsMap[view] = connector
-                    runOnUiThread {
-                        binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-                    }
-                }
-
-                if (!viewToBlock[view]!!.isEndInstruction()) {
-                    generateDragArea(view)
-                    runOnUiThread {
-                        binding.container.addView(
-                            view,
-                            ConstraintLayout.LayoutParams(
-                                blockWidth.toInt(),
-                                blockHeight.toInt()
-                            )
-                        )
-                    }
-                } else {
-                    runOnUiThread {
-                        binding.container.addView(view)
-                    }
-                }
-
-                view.setOnDragListener { v, event ->
-                    generateDropArea(v, event)
-                }
+                parseBlock(instruction as Instruction)
             }
 
             delay(500)
@@ -452,10 +462,7 @@ class CodingActivity : AppCompatActivity(), Observer {
                 if (connectorsMap[tempView.view] != null) {
                     binding.container.addView(connectorsMap[tempView.view])
                 } else if (viewInstructions.isNotEmpty()) {
-                    val connector = layoutInflater.inflate(R.layout.block_connector, null)
-                    connector.id = View.generateViewId()
-                    binding.container.addView(connector, ConstraintLayout.LayoutParams(5, 300))
-                    connectorsMap[tempView.view] = connector
+                    setupConnector(tempView.view)
                 }
 
                 tempView.view.bringToFront()
@@ -798,10 +805,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         viewToBlock[newBlock.view] = instructionView.instruction
         newBlock.view.id = View.generateViewId()
 
-        val elseConnector = layoutInflater.inflate(R.layout.block_connector, null)
-        connectorsMap[newBlock.view] = elseConnector
-        elseConnector.id = View.generateViewId()
-        binding.container.addView(elseConnector, ConstraintLayout.LayoutParams(5, 300))
+        setupConnector(newBlock.view)
         if (full) {
             binding.container.addView(
                 newBlock.view,
@@ -817,9 +821,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             )
         }
 
-        newBlock.view.setOnDragListener { v, event ->
-            generateDropArea(v, event)
-        }
+        setBlockOnDragListener(newBlock.view)
 
         GlobalScope.launch {
             delay(100)
@@ -893,9 +895,7 @@ class CodingActivity : AppCompatActivity(), Observer {
             endBlock.id = View.generateViewId()
             nestedConnector.id = View.generateViewId()
 
-            endBlock.setOnDragListener { v, event ->
-                generateDropArea(v, event)
-            }
+            setBlockOnDragListener(endBlock)
         }
 
         if (prevView != null) {
@@ -931,9 +931,7 @@ class CodingActivity : AppCompatActivity(), Observer {
         set.clone(binding.container)
 
         generateDragArea(instructionView.view)
-        instructionView.view.setOnDragListener { v, event ->
-            generateDropArea(v, event)
-        }
+        setBlockOnDragListener(instructionView.view)
 
         if (prevView != null) {
             connectorsMap[instructionView.view] = connector
