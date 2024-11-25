@@ -39,11 +39,17 @@ class Notation {
         }
 
         fun tokenizeString(str: String): List<String> {
+            // Обрабатывает все записи вида:
+            // 23.4 (float), 63 (int), vsf43dp (variable), "something" (string)
             val name = "([\\d]+\\.?[\\d]+|\\w[\\w\\d_]*|\".*\")"
+            // Обрабатывает все записи зарезервированных функций: rand(), abs() и так далее
             val reserved = "(rand\\(\\)|abs|exp|floor|ceil|sorted|len)"
+            // Обрабатывает все записи встроенных методов конвертации variable.toInt() и т. д.
             val convert =
                 "(\\.toInt\\(\\)|\\.toFloat\\(\\)|\\.toString\\(\\)|\\.toBool\\(\\)|\\.sort\\(\\)|\\.toList\\(\\))"
+            // Обрабатывает все возможные операторы, которые может использовать пользователь
             val operator = "(\\+=|-=|\\*=|/=|%=|&&|\\|\\||\\+|-|//|\\*|%|/|==|=|!=|>=|<=|<|>|)"
+            // Обрабатывает скобочные символы "(, )" и символы обращения к массиву "[, ]"
             val bracket = "(\\(|\\)|\\[|\\])"
             val exp = Regex("($convert|$reserved|$bracket|$name|$operator)")
 
