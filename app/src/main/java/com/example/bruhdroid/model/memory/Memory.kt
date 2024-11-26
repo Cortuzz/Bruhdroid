@@ -51,7 +51,7 @@ class Memory(val prevMemory: Memory?, val scope: String) {
         return tMemory.prevMemory!!
     }
 
-    fun throwStackError(address: String) {
+    private fun throwStackError(address: String) {
         val corruptedVar = Variable(address, this)
         throw StackCorruptionError(
             "Expected reserved memory for Variable ${address}@" +

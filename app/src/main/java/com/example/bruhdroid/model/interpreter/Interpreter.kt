@@ -211,16 +211,6 @@ class Interpreter(instructions_: List<Instruction>? = null) : Observable() {
         return mapOf("name" to name, "args" to args)
     }
 
-    fun removeFunctionMemory() {
-        while (true) {
-            if (memory.scope.contains("METHOD")) {
-                break
-            }
-            memory = memory.prevMemory!!
-        }
-        memory = memory.prevMemory!!
-    }
-
     fun increaseIoLines() {
         ++ioLines
     }
