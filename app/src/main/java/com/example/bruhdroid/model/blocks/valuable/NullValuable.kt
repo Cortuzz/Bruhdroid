@@ -8,6 +8,10 @@ class NullValuable(listLink: ListValuable? = null):
         return NullValuable(listLink)
     }
 
+    override fun getVisibleValue(): String {
+        return "NULL"
+    }
+
     override operator fun unaryPlus(): Valuable {
         throw TypeError("Unary plus can't be applied to type $type")
     }

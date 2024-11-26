@@ -103,7 +103,7 @@ abstract class NumericValuable(
     }
 
     protected fun checkFloating(val1: Valuable, val2: Valuable): Boolean {
-        if (val1.type == ValuableType.FLOAT || val2.type == ValuableType.FLOAT) {
+        if (val1 is FloatValuable || val2 is FloatValuable) {
             return true
         }
         return false

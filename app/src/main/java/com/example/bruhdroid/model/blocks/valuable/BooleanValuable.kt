@@ -4,6 +4,10 @@ class BooleanValuable(
     varValue: Any,
     listLink: ListValuable? = null
 ): Valuable(varValue, ValuableType.BOOL, listLink) {
+    override fun getVisibleValue(): String {
+        return value.uppercase()
+    }
+
     override fun clone(): Valuable {
         return BooleanValuable(value, listLink)
     }

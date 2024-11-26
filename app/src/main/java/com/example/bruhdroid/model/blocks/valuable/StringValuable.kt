@@ -8,6 +8,10 @@ class StringValuable(
     varValue: Any,
     listLink: ListValuable? = null
 ): Valuable(varValue, ValuableType.STRING, listLink) {
+    override fun getVisibleValue(): String {
+        return "\"$value\""
+    }
+
     override fun clone(): Valuable {
         return StringValuable(value, listLink)
     }
@@ -24,7 +28,7 @@ class StringValuable(
     }
 
     override operator fun plus(operand: Valuable): Valuable {
-        if (operand.type == ValuableType.STRING) {
+        if (operand is StringValuable) {
             return StringValuable(value + operand.value)
         }
 
@@ -32,7 +36,7 @@ class StringValuable(
     }
 
     override operator fun times(operand: Valuable): Valuable {
-        if (operand.type == ValuableType.INT) {
+        if (operand is IntegerValuable) {
             return StringValuable(value.repeat(operand.value.toInt()))
         }
 

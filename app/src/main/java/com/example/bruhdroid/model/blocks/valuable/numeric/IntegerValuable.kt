@@ -20,7 +20,7 @@ class IntegerValuable(
     }
 
     override operator fun times(operand: Valuable): Valuable {
-        if (operand.type == ValuableType.STRING) {
+        if (operand is StringValuable) {
             return StringValuable(operand.value.repeat(value.toInt()))
         }
 

@@ -16,6 +16,12 @@ class ListValuable(initFrom: Valuable, listLink: ListValuable? = null):
         }
     }
 
+    override fun getVisibleValue(): String {
+        val str = mutableListOf<String>()
+        array.forEach { el -> str.add(el.getVisibleValue()) }
+        return str.toString()
+    }
+
     fun update(old: Valuable, new: Valuable) {
         val copied = new.clone()
         copied.listLink = this

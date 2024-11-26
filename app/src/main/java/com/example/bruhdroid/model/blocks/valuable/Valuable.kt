@@ -12,6 +12,10 @@ abstract class Valuable protected constructor(
     var value: String = varValue.toString()
     open var array: MutableList<Valuable> = mutableListOf()
 
+    open fun getVisibleValue(): String {
+        return value
+    }
+
     abstract fun clone(): Valuable
 
     override fun getData(): Valuable {
