@@ -12,13 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bruhdroid">
         <activity
-            android:name=".TemplatesActivity"
+            android:name=".view.activity.TemplatesActivity"
             android:exported="false" />
         <activity
-            android:name=".CodingActivity"
+            android:name=".view.activity.CodingActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".view.activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,140 +1,142 @@
 package com.example.bruhdroid.interpreter.instructions
 
-import com.example.bruhdroid.model.Interpreter
-import com.example.bruhdroid.model.src.Instruction
-import com.example.bruhdroid.model.src.Type
-import com.example.bruhdroid.model.src.blocks.Block
+import com.example.bruhdroid.model.interpreter.Interpreter
+import com.example.bruhdroid.model.blocks.instruction.*
+import com.example.bruhdroid.model.blocks.instruction.condition.ElifInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.ElseInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.EndInstruction
+import com.example.bruhdroid.model.blocks.instruction.condition.IfInstruction
 import org.junit.Assert
 import org.junit.Test
 
 class ConditionUnitTest {
     @Test
     fun trueIf() {
-        val a = Block(Instruction.INIT,"a = 3")
-        val b = Block(Instruction.IF,"a")
-        val c = Block(Instruction.SET,"a = 2")
-        val d = Block(Instruction.END)
+        val a = InitInstruction("a = 3")
+        val b = IfInstruction("a")
+        val c = SetInstruction("a = 2")
+        val d = EndInstruction()
 
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("2", memory["a"]?.value)
+        Assert.assertEquals("2", memory.get("a")?.value)
     }
 
     @Test
     fun falseIf() {
-        val a = Block(Instruction.INIT,"a = 3")
-        val b = Block(Instruction.IF,"a > 5")
-        val c = Block(Instruction.SET,"a = 2")
-        val d = Block(Instruction.END)
+        val a = InitInstruction("a = 3")
+        val b = IfInstruction("a > 5")
+        val c = SetInstruction("a = 2")
+        val d = EndInstruction()
 
         val interpreter = Interpreter(listOf(a, b, c, d))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("3", memory["a"]?.value)
+        Assert.assertEquals("3", memory.get("a")?.value)
     }
 
     @Test
     fun trueIfFalseElif() {
-        val a = Block(Instruction.INIT,"a = 3")
+        val a = InitInstruction("a = 3")
 
-        val b = Block(Instruction.IF,"a < 5")
-        val c = Block(Instruction.SET,"a = 2")
+        val b = IfInstruction("a < 5")
+        val c = SetInstruction("a = 2")
 
-        val d = Block(Instruction.ELIF,"a > 5")
-        val e = Block(Instruction.SET,"a = 1")
+        val d = ElifInstruction("a > 5")
+        val e = SetInstruction("a = 1")
 
-        val f = Block(Instruction.END)
+        val f = EndInstruction()
 
         val interpreter = Interpreter(listOf(a, b, c, d, e, f))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("2", memory["a"]?.value)
+        Assert.assertEquals("2", memory.get("a")?.value)
     }
 
     @Test
     fun falseIfTrueElif() {
-        val a = Block(Instruction.INIT,"a = 3")
+        val a = InitInstruction("a = 3")
 
-        val b = Block(Instruction.IF,"a > 5")
-        val c = Block(Instruction.SET,"a = 2")
+        val b = IfInstruction("a > 5")
+        val c = SetInstruction("a = 2")
 
-        val d = Block(Instruction.ELIF,"a < 5")
-        val e = Block(Instruction.SET,"a = 1")
+        val d = ElifInstruction("a < 5")
+        val e = SetInstruction("a = 1")
 
-        val f = Block(Instruction.END)
+        val f = EndInstruction()
 
         val interpreter = Interpreter(listOf(a, b, c, d, e, f))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("1", memory["a"]?.value)
+        Assert.assertEquals("1", memory.get("a")?.value)
     }
 
     @Test
     fun nestedFalseIfIntoTrueIf() {
-        val a = Block(Instruction.INIT,"a = 3")
+        val a = InitInstruction("a = 3")
 
-        val b = Block(Instruction.IF,"a < 5")
-        val c = Block(Instruction.SET,"a = 2")
+        val b = IfInstruction("a < 5")
+        val c = SetInstruction("a = 2")
 
-        val d = Block(Instruction.IF,"a > 5")
-        val e = Block(Instruction.SET,"a = 1")
+        val d = IfInstruction("a > 5")
+        val e = SetInstruction("a = 1")
 
-        val f = Block(Instruction.END)
-        val g = Block(Instruction.END)
+        val f = EndInstruction()
+        val g = EndInstruction()
 
         val interpreter = Interpreter(listOf(a, b, c, d, e, f, g))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("2", memory["a"]?.value)
+        Assert.assertEquals("2", memory.get("a")?.value)
     }
 
     @Test
     fun nestedTrueIfIntoFalseIf() {
-        val a = Block(Instruction.INIT,"a = 3")
+        val a = InitInstruction("a = 3")
 
-        val b = Block(Instruction.IF,"a > 5")
-        val c = Block(Instruction.SET,"a = 2")
+        val b = IfInstruction("a > 5")
+        val c = SetInstruction("a = 2")
 
-        val d = Block(Instruction.IF,"a < 5")
-        val e = Block(Instruction.SET,"a = 1")
+        val d = IfInstruction("a < 5")
+        val e = SetInstruction("a = 1")
 
-        val f = Block(Instruction.END)
-        val g = Block(Instruction.END)
+        val f = EndInstruction()
+        val g = EndInstruction()
 
         val interpreter = Interpreter(listOf(a, b, c, d, e, f, g))
         interpreter.run()
 
-        val memory = interpreter.memory.stack
+        val memory = interpreter.memory
 
-        Assert.assertEquals("3", memory["a"]?.value)
+        Assert.assertEquals("3", memory.get("a")?.value)
     }
 
     @Test
     fun doubleIf() {
-        val a = Block(Instruction.INIT,"a = 0")
+        val a = InitInstruction("a = 0")
 
-        val bTrue = Block(Instruction.IF,"a < 5")
-        val bFalse = Block(Instruction.IF,"a > 5")
+        val bTrue = IfInstruction("a < 5")
+        val bFalse = IfInstruction("a > 5")
 
-        val c = Block(Instruction.SET,"a = a + 4")
-        val d = Block(Instruction.END)
+        val c = SetInstruction("a = a + 4")
+        val d = EndInstruction()
 
-        val eTrue = Block(Instruction.IF,"a < 5")
-        val eFalse = Block(Instruction.IF,"a > 5")
+        val eTrue = IfInstruction("a < 5")
+        val eFalse = IfInstruction("a > 5")
 
-        val f = Block(Instruction.SET,"a = a + 10")
-        val g = Block(Instruction.END)
+        val f = SetInstruction("a = a + 10")
+        val g = EndInstruction()
 
         val blocks = mapOf(
             listOf(a, bTrue, c, d, eTrue, f, g) to "14",
@@ -145,32 +147,32 @@ class ConditionUnitTest {
         for (block in blocks) {
             val interpreter = Interpreter(block.key)
             interpreter.run()
-            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+            Assert.assertEquals(block.value, interpreter.memory.get("a")?.value)
         }
     }
 
     @Test
     fun nestedIfAndElifIntoIf() {
-        val a = Block(Instruction.INIT,"a = 0")
+        val a = InitInstruction("a = 0")
 
-        val bTrue = Block(Instruction.IF,"a < 5")
-        val bFalse = Block(Instruction.IF,"a > 5")
+        val bTrue = IfInstruction("a < 5")
+        val bFalse = IfInstruction("a > 5")
 
-            val c = Block(Instruction.SET,"a = a + 4")
+            val c = SetInstruction("a = a + 4")
 
-            val dTrue = Block(Instruction.IF,"a < 5")
-            val dFalse = Block(Instruction.IF,"a > 5")
+            val dTrue = IfInstruction("a < 5")
+            val dFalse = IfInstruction("a > 5")
 
-                val e = Block(Instruction.SET,"a = a - 8")
+                val e = SetInstruction("a = a - 8")
 
-            val fTrue = Block(Instruction.ELIF,"a < 5")
-            val fFalse = Block(Instruction.ELIF,"a > 5")
+            val fTrue = ElifInstruction("a < 5")
+            val fFalse = ElifInstruction("a > 5")
 
-                val g = Block(Instruction.SET,"a = a - 2")
+                val g = SetInstruction("a = a - 2")
 
-            val end1 = Block(Instruction.END)
-            val h = Block(Instruction.SET,"a = a + 15")
-        val end2 = Block(Instruction.END)
+            val end1 = EndInstruction()
+            val h = SetInstruction("a = a + 15")
+        val end2 = EndInstruction()
 
         val blocks = mapOf(
             listOf(a, bTrue, c, dTrue, e, fTrue, g, end1, h, end2) to "11",
@@ -187,54 +189,54 @@ class ConditionUnitTest {
         for (block in blocks) {
             val interpreter = Interpreter(block.key)
             interpreter.run()
-            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+            Assert.assertEquals(block.value, interpreter.memory.get("a")?.value)
         }
     }
 
     @Test
     fun nestedIfElifElseIntoIfElse() {
-        val a = Block(Instruction.INIT,"a = 0")
+        val a = InitInstruction("a = 0")
 
-        val bTrue = Block(Instruction.IF,"a < 5")
-        val bFalse = Block(Instruction.IF,"a > 5")
+        val bTrue = IfInstruction("a < 5")
+        val bFalse = IfInstruction("a > 5")
 
-            val c = Block(Instruction.SET,"a = a + 4")
+            val c = SetInstruction("a = a + 4")
 
-            val dTrue = Block(Instruction.IF,"a < 5")
-            val dFalse = Block(Instruction.IF,"a > 5")
+            val dTrue = IfInstruction("a < 5")
+            val dFalse = IfInstruction("a > 5")
 
-                val e = Block(Instruction.SET,"a = a - 8")
+                val e = SetInstruction("a = a - 8")
 
-            val fTrue = Block(Instruction.ELIF,"a < 5")
-            val fFalse = Block(Instruction.ELIF,"a > 5")
+            val fTrue = ElifInstruction("a < 5")
+            val fFalse = ElifInstruction("a > 5")
 
-                val g = Block(Instruction.SET,"a = a - 2")
+                val g = SetInstruction("a = a - 2")
 
-            val else1 = Block(Instruction.ELSE)
-                val h = Block(Instruction.SET,"a = a - 30")
+            val else1 = ElseInstruction()
+                val h = SetInstruction("a = a - 30")
 
-            val end1 = Block(Instruction.END)
+            val end1 = EndInstruction()
 
-        val else2 = Block(Instruction.ELSE)
-            val i = Block(Instruction.SET,"a = a - 7")
+        val else2 = ElseInstruction()
+            val i = SetInstruction("a = a - 7")
 
-            val jTrue = Block(Instruction.IF,"a < 5")
-            val jFalse = Block(Instruction.IF,"a > 5")
+            val jTrue = IfInstruction("a < 5")
+            val jFalse = IfInstruction("a > 5")
 
-                val k = Block(Instruction.SET,"a = a - 3")
+                val k = SetInstruction("a = a - 3")
 
-            val lTrue = Block(Instruction.ELIF,"a < 5")
-            val lFalse = Block(Instruction.ELIF,"a > 5")
+            val lTrue = ElifInstruction("a < 5")
+            val lFalse = ElifInstruction("a > 5")
 
-                val m = Block(Instruction.SET,"a = a - 9")
+                val m = SetInstruction("a = a - 9")
 
-            val else3 = Block(Instruction.ELSE)
-                val n = Block(Instruction.SET,"a = a - 50")
+            val else3 = ElseInstruction()
+                val n = SetInstruction("a = a - 50")
 
-            val end2 = Block(Instruction.END)
+            val end2 = EndInstruction()
 
-            val o = Block(Instruction.SET,"a = a + 15")
-        val end3 = Block(Instruction.END)
+            val o = SetInstruction("a = a + 15")
+        val end3 = EndInstruction()
 
         val blocks = mapOf(
             listOf(a, bTrue, c, dTrue, e, fTrue, g, else1, h, end1, else2, i, jTrue, k, lTrue, m, else3, n, end2, o, end3) to "-4",
@@ -251,7 +253,7 @@ class ConditionUnitTest {
         for (block in blocks) {
             val interpreter = Interpreter(block.key)
             interpreter.run()
-            Assert.assertEquals(block.value, interpreter.memory.stack["a"]?.value)
+            Assert.assertEquals(block.value, interpreter.memory.get("a")?.value)
         }
     }
 }
